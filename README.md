@@ -11,6 +11,7 @@ Foundation Kit
 
 包名        |  描述
 ------------|-----------------------------
+cipher      | 加密解密
 collections | 容器和算法
 datetime    | 日期相关
 dotenv      | .env文件解析
