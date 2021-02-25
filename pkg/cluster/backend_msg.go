@@ -12,10 +12,10 @@ import (
 
 func (s *Backend) handleMessage(pkt *choykit.Packet) error {
 	switch protocol.InternalMsgType(pkt.Command) {
-	case protocol.MSG_SM_KEEP_ALIVE:
+	case protocol.MSG_INTERNAL_KEEP_ALIVE_STATUS:
 		return s.handlePong(pkt)
 
-	case protocol.MSG_INSTANCE_STATE_NOTIFY:
+	case protocol.MSG_INTERNAL_INSTANCE_STATE_NOTIFY:
 		return s.handleInstanceStateNtf(pkt)
 	}
 	return nil
