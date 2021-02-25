@@ -10,12 +10,12 @@ mobile game server foundation kit
 
   包        |  描述
 ------------|------------
+pkg         | 基础定义
 pkg/cluster  | 多进程
 pkg/codec    | 协议编解码
 pkg/log      | 日志API
 pkg/protocol | 协议相关
 pkg/qnet     | 网络传输
-pkg/sched    | 执行器定时器
 pkg/uuid     | 分布式id生成
 pkg/x        | 通用
 
