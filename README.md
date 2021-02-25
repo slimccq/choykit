@@ -1,9 +1,8 @@
 # ChoyKit
 
+mobile game server foundation kit
 
-
-游戏服务器基本组件
-
+一个游戏服务器基础组件
 
 
 ### 各子包说明
@@ -18,6 +17,7 @@ pkg/protocol | 协议相关
 pkg/qnet     | 网络传输
 pkg/sched    | 执行器定时器
 pkg/uuid     | 分布式id生成
+pkg/x        | 通用
 
 
 ### 包结构组织

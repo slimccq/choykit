@@ -3,7 +3,6 @@ module devpkg.work/choykit
 go 1.15
 
 require (
-	devpkg.work/fatchoy v1.0.7
 	github.com/coreos/bbolt v1.3.5 // indirect
 	github.com/coreos/etcd v3.3.25+incompatible // indirect
 	github.com/coreos/go-semver v0.3.0 // indirect
