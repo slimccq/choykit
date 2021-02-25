@@ -1,0 +1,97 @@
+// Copyright © 2018-present ichenq@outlook.com. All Rights Reserved.
+//
+// Any redistribution or reproduction of part or all of the contents in any form
+// is prohibited.
+//
+// You may not, except with our express written permission, distribute or commercially
+// exploit the content. Nor may you transmit it or store it in any other website or
+// other form of electronic retrieval system.
+
+package qnet
+
+import (
+	"context"
+	"net/http"
+	"time"
+
+	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/log"
+	"github.com/gorilla/websocket"
+)
+
+// Websocket server
+type WsServer struct {
+	server   *http.Server
+	upgrader *websocket.Upgrader  //
+	pending  chan *WsConn         //
+	errChan  chan error           //
+	inbound  chan *choykit.Packet // incoming message queue
+	codec    choykit.Codec        // message codec
+	outsize  int                  // outgoing queue size
+}
+
+func NewWebsocketServer(addr, path string, cdec choykit.Codec, inbound chan *choykit.Packet, outsize int) *WsServer {
+	mux := http.NewServeMux()
+	var server = &http.Server{
+		Addr:              addr,
+		Handler:           mux,
+		ReadTimeout:       60 * time.Second,
+		ReadHeaderTimeout: 30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    4096,
+	}
+	ws := &WsServer{
+		server:  server,
+		codec:   cdec,
+		inbound: inbound,
+		outsize: outsize,
+		errChan: make(chan error, 32),
+		pending: make(chan *WsConn, 128),
+		upgrader: &websocket.Upgrader{
+			HandshakeTimeout: 10 * time.Second,
+		},
+	}
+	mux.HandleFunc(path, ws.onRequest)
+	return ws
+}
+
+func (s *WsServer) onRequest(w http.ResponseWriter, r *http.Request) {
+	conn, err := s.upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Errorf("WebSocket upgrade %s, %v", r.RemoteAddr, err)
+		return
+	}
+	wsconn := NewWsConn(0, conn, s.codec.Clone(), s.errChan, s.inbound, s.outsize, nil)
+	log.Infof("websocket connection %s established", wsconn.RemoteAddr())
+	defer wsconn.Close()
+	wsconn.Go(true, false)
+	wsconn.readLoop()
+}
+
+func (s *WsServer) BacklogChan() chan *WsConn {
+	return s.pending
+}
+
+func (s *WsServer) ErrChan() chan error {
+	return s.errChan
+}
+
+func (s *WsServer) Go() {
+	go func() {
+		if err := s.server.ListenAndServe(); err != nil {
+			log.Errorf("ListenAndServe: %v", err)
+		}
+	}()
+}
+
+func (s *WsServer) Shutdown() {
+	s.server.Shutdown(context.Background())
+	close(s.pending)
+	close(s.errChan)
+	s.errChan = nil
+	s.pending = nil
+	s.inbound = nil
+	s.server = nil
+	s.codec = nil
+}

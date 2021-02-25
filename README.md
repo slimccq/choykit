@@ -1,30 +1,33 @@
 # ChoyKit
 
-Foundation Kit 
 
-设计初衷是可以跨多个项目使用的基础工具包
+
+游戏服务器基本组件
 
 
 
 ### 各子包说明
 
 
-包名        |  描述
-------------|-----------------------------
-cipher      | 加密解密
-collections | 容器和算法
-datetime    | 日期相关
-dotenv      | .env文件解析
-fsutil      | 文件相关
-mathext     | 数学扩展包  
-reflectutil | 反射相关
-strutil     | 字符串相关  
+  包        |  描述
+------------|------------
+pkg/cluster  | 多进程
+pkg/codec    | 协议编解码
+pkg/log      | 日志API
+pkg/protocol | 协议相关
+pkg/qnet     | 网络传输
+pkg/sched    | 执行器定时器
+pkg/uuid     | 分布式id生成
 
 
+### 包结构组织
 
-### 编码规范
+参考[goland-standard-project-layout](https://github.com/golang-standards/project-layout)
 
-1. API接口不能使用panic抛出错误；
-2. 包命名要简短并准确，不使用下划线、驼峰，勿使用太笼统的名字（如common, base, misc），[包名规范细节](https://blog.golang.org/package-names)；
-3. 本module的包之间不相互引用；
-4. 不过多依赖第三方外部包；
+  包名   |  用途
+---------|--------
+ cmd      | 应用程序，但是只是通过main函数调用其它包，不包含具体实现
+ pkg      | 开放的业务包和库包
+ internal | 不开放的业务包和库包
+ vendor   | 依赖包
+

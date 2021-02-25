@@ -1,0 +1,30 @@
+// Copyright © 2020-present ichenq@outlook.com All Rights Reserved.
+//
+// Any redistribution or reproduction of part or all of the contents in any form
+// is prohibited.
+//
+// You may not, except with our express written permission, distribute or
+// commercially exploit the content. Nor may you transmit it or store it in any
+// other website or other form of electronic retrieval system.
+
+syntax = "proto3";
+package protocol;
+
+import "gogoproto/gogo.proto";
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all) = false;
+option (gogoproto.goproto_sizecache_all) = false;
+option (gogoproto.goproto_enum_prefix_all) = false;
+option (gogoproto.goproto_registration) = true;
+
+// 节点状态
+enum NodeState {
+  StateDown = 0; // 下线
+  StateUp = 1;   // 上线
+}
+
+// 节点信息
+message NodeInfo {
+  uint32 node = 1;
+  string interface = 2;
+}

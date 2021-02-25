@@ -1,0 +1,120 @@
+// Copyright © 2018-present ichenq@outlook.com. All Rights Reserved.
+//
+// Any redistribution or reproduction of part or all of the contents in any form
+// is prohibited.
+//
+// You may not, except with our express written permission, distribute or commercially
+// exploit the content. Nor may you transmit it or store it in any other website or
+// other form of electronic retrieval system.
+
+// +build !ignore
+
+package qnet
+
+import (
+	"fmt"
+	"net"
+	"testing"
+	"time"
+
+	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/codec"
+	"devpkg.work/choykit/pkg/x/strutil"
+)
+
+const (
+	maxConnection = 100
+	maxPingpong   = 1000
+)
+
+func init() {
+	choykit.StartClock()
+}
+
+func handleConn(conn *net.TCPConn, cdec choykit.Codec) {
+	var count = 0
+	//file, _ := conn.File()
+	tconn := NewTcpConn(0, conn, cdec, nil, nil, 1000, nil)
+	tconn.Go(true, false)
+	defer tconn.Close()
+	for {
+		conn.SetReadDeadline(time.Now().Add(time.Minute))
+		var pkt = choykit.MakePacket()
+		if _, err := cdec.Decode(conn, pkt); err != nil {
+			fmt.Printf("Decode: %v\n", err)
+			break
+		}
+
+		// fmt.Printf("%d srecv: %s\n", file.Fd(), pkt.Body)
+		pkt.Body = fmt.Sprintf("pong %d", pkt.Command)
+		tconn.SendPacket(pkt)
+		//fmt.Printf("message %d OK\n", count)
+		count++
+		if count == maxPingpong {
+			break
+		}
+	}
+	stats := tconn.Stats()
+	fmt.Printf("sent %d packets, %s\n", stats.Get(StatPacketsSent), strutil.PrettyBytes(stats.Get(StatBytesSent)))
+}
+
+func startMyServer(t *testing.T, ln *net.TCPListener, cdec choykit.Codec) {
+	for {
+		conn, err := ln.AcceptTCP()
+		if err != nil {
+			//t.Logf("Listener: Accept %v", err)
+			return
+		}
+		go handleConn(conn, cdec)
+	}
+}
+
+func tconnReadLoop(errchan chan error, inbound chan *choykit.Packet) {
+	for {
+		select {
+		case pkt, ok := <-inbound:
+			if !ok {
+				return
+			}
+			pkt.Command += 1
+			pkt.ReplyAny(pkt.Command, fmt.Sprintf("ping %d", pkt.Command))
+
+		case <-errchan:
+			return
+		}
+	}
+}
+
+func TestExampleTcpConn(t *testing.T) {
+	TConnReadTimeout = 30
+
+	var testTcpAddress = "localhost:10002"
+	var cdec = codec.NewServerCodec()
+
+	ln, err := ListenTCP(testTcpAddress)
+	if err != nil {
+		t.Fatalf("Listen %v", err)
+	}
+	defer ln.Close()
+
+	go startMyServer(t, ln, cdec)
+
+	conn, err := DialTCP(testTcpAddress)
+	if err != nil {
+		t.Fatalf("Dial: %v", err)
+	}
+	//file, _ := conn.File()
+	inbound := make(chan *choykit.Packet, 1000)
+	errchan := make(chan error, 4)
+	tconn := NewTcpConn(0, conn, cdec.Clone(), errchan, inbound, 1000, nil)
+	tconn.SetNodeID(choykit.NodeID(0x12345))
+	tconn.Go(true, true)
+	defer tconn.Close()
+	stats := tconn.Stats()
+	var pkt = choykit.MakePacket()
+	pkt.Command = 1
+	pkt.Body = "ping"
+	tconn.SendPacket(pkt)
+	tconnReadLoop(errchan, inbound)
+	fmt.Printf("recv %d packets, %s\n", stats.Get(StatPacketsRecv), strutil.PrettyBytes(stats.Get(StatBytesRecv)))
+}
