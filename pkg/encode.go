@@ -1,11 +1,6 @@
-// Copyright © 2020-present ichenq@outlook.com All Rights Reserved.
-//
-// Any redistribution or reproduction of part or all of the contents in any form
-// is prohibited.
-//
-// You may not, except with our express written permission, distribute or commercially
-// exploit the content. Nor may you transmit it or store it in any other website or
-// other form of electronic retrieval system.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
 
 package choykit
 
@@ -17,8 +12,8 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/pkg/errors"
 	"github.com/golang/protobuf/proto"
+	"github.com/pkg/errors"
 )
 
 // 编码一个字符串、字节流、protobuf消息对象

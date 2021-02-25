@@ -1,11 +1,6 @@
-// Copyright © 2019-present ichenq@outlook.com. All Rights Reserved.
-//
-// Any redistribution or reproduction of part or all of the contents in any form
-// is prohibited.
-//
-// You may not, except with our express written permission, distribute or commercially
-// exploit the content. Nor may you transmit it or store it in any other website or
-// other form of electronic retrieval system.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
 
 package choykit
 
@@ -33,8 +28,8 @@ var (
 // Runner执行器
 type Executor struct {
 	Scheduler
-	closing     int32               //
-	concurrency int32               // 并发
+	closing     int32       //
+	concurrency int32       // 并发
 	bus         chan Runner // 待执行队列
 	stats       *Stats      // 执行统计
 }

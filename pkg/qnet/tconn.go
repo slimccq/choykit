@@ -17,9 +17,9 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/pkg/errors"
 	"devpkg.work/choykit/pkg"
 	"devpkg.work/choykit/pkg/log"
+	"github.com/pkg/errors"
 )
 
 var (

@@ -13,8 +13,8 @@ import (
 var (
 	etcdAddr = "127.0.0.1:2379"
 	etcdKey  = "/uuid/ctr"
-	ekeys     = make(map[int64]bool)
-	eguard    sync.Mutex
+	ekeys    = make(map[int64]bool)
+	eguard   sync.Mutex
 )
 
 func TestEtcdStoreExample(t *testing.T) {

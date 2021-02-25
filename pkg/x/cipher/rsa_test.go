@@ -1,11 +1,6 @@
-// Copyright © 2020-present ichenq@outlook.com. All Rights Reserved.
-//
-// Any redistribution or reproduction of part or all of the contents in any form
-// is prohibited.
-//
-// You may not, except with our express written permission, distribute or commercially
-// exploit the content. Nor may you transmit it or store it in any other website or
-// other form of electronic retrieval system.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
 
 package cipher
 
@@ -17,7 +12,6 @@ import (
 // Run command below to generate test key files:
 // 	openssl genrsa -out rsa_prikey.pem 1024
 // 	openssl rsa -in rsa_prikey.pem -pubout -out rsa_pubkey.pem
-
 
 func TestRSADecrypt(t *testing.T) {
 	prikey, err := LoadRSAPrivateKey("rsa_prikey.pem")

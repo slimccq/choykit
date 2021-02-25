@@ -1,3 +1,7 @@
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
+
 // This skiplist implementation is almost a translation of the original
 // algorithm described by William Pugh in "Skip Lists: A Probabilistic
 // Alternative to Balanced Trees", modified in three ways:

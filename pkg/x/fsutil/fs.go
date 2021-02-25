@@ -86,7 +86,6 @@ func IsFileExist(filename string) bool {
 	return !os.IsNotExist(err)
 }
 
-
 // 压缩文件 my.log --> my.log.tar.gz
 func ArchiveGzipFile(srcFile string) error {
 	var filename = fmt.Sprintf("%s.tar.gz", srcFile)

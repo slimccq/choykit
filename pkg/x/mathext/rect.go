@@ -1,4 +1,4 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
@@ -25,9 +25,9 @@ func NewRectangle(x, y, w, h int) *Rectangle {
 func (r *Rectangle) GetVertexes() [4]Point2 {
 	return [4]Point2{
 		{r.X, r.Y},
-		{r.X+r.Width, r.Y},
-		{r.X+r.Width, r.Y+r.Height},
-		{r.X, r.Y+r.Height},
+		{r.X + r.Width, r.Y},
+		{r.X + r.Width, r.Y + r.Height},
+		{r.X, r.Y + r.Height},
 	}
 }
 

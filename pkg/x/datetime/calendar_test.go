@@ -1,4 +1,4 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
@@ -76,7 +76,7 @@ func TestEndOfWeek(t *testing.T) {
 		var t2, _ = time.Parse(timeFormat, item.s2)
 		var tm = EndOfWeek(t1)
 		if tm != t2 {
-			t.Fatalf("end week of %s(%s) != %s", item.s1, t2.Format(timeFormat),  tm.Format(timeFormat))
+			t.Fatalf("end week of %s(%s) != %s", item.s1, t2.Format(timeFormat), tm.Format(timeFormat))
 		}
 	}
 }

@@ -1,10 +1,13 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
 package collections
 
 import (
+	"crypto/md5"
+	"encoding/binary"
+	"fmt"
 	"math/bits"
 	"strings"
 )
@@ -93,6 +96,33 @@ func (bs BitSet) String() string {
 	var sb strings.Builder
 	sb.Grow(bs.bitsize)
 	for i := 0; i < bs.bitsize; i++ {
+		if bs.Test(i) {
+			sb.WriteByte('1')
+		} else {
+			sb.WriteByte('0')
+		}
+	}
+	return sb.String()
+}
+
+func (bs BitSet) HashCode() string {
+	h := md5.New()
+	for i := 0; i < len(bs.bits); i++ {
+		var buf [8]byte
+		binary.LittleEndian.PutUint64(buf[:], bs.bits[i])
+		h.Write(buf[:])
+	}
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+func (bs BitSet) FormattedString(width int) string {
+	var sb strings.Builder
+	var n = 0
+	for i := 0; i < bs.bitsize; i++ {
+		if n%width == 0 {
+			sb.WriteByte('\n')
+		}
+		n++
 		if bs.Test(i) {
 			sb.WriteByte('1')
 		} else {

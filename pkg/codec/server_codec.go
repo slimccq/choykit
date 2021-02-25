@@ -1,11 +1,6 @@
-// Copyright © 2019-present ichenq@outlook.com. All Rights Reserved.
-//
-// Any redistribution or reproduction of part or all of the contents in any form
-// is prohibited.
-//
-// You may not, except with our express written permission, distribute or commercially
-// exploit the content. Nor may you transmit it or store it in any other website or
-// other form of electronic retrieval system.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
 
 package codec
 
@@ -23,7 +18,7 @@ import (
 )
 
 const (
-	ServerCodecVersion      = 3               // 协议版本
+	ServerCodecVersion      = 1               // 协议版本
 	ServerCodecHeaderSize   = 24              // 消息头大小
 	MaxAllowedV2PayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
 )

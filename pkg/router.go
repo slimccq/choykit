@@ -1,11 +1,6 @@
-// Copyright © 2020-present ichenq@outlook.com. All Rights Reserved.
-//
-// Any redistribution or reproduction of part or all of the contents in any form
-// is prohibited.
-//
-// You may not, except with our express written permission, distribute or commercially
-// exploit the content. Nor may you transmit it or store it in any other website or
-// other form of electronic retrieval system.
+// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
 
 package choykit
 
@@ -209,7 +204,7 @@ func (r *BasicRoutePolicy) Lookup(router *Router, pkt *Packet) Endpoint {
 func (r *BasicRoutePolicy) Multicast(router *Router, pkt *Packet) bool {
 	var dest = pkt.Node
 	switch {
-	case dest.Service() == protocol.SERVICE_ALL: // 广播所有服务，限定区服
+	case dest.Service() == protocol.ServiceAll: // 广播所有服务，限定区服
 		var from = pkt.Endpoint.NodeID()
 		for _, entry := range router.EntryList() {
 			if dest.Service() == entry.src.Service() && dest.District() == entry.src.District() {

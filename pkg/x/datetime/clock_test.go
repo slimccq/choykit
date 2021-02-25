@@ -1,4 +1,4 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
@@ -13,7 +13,7 @@ func TestClockExample(t *testing.T) {
 	clock := NewClock(DefaultTickInterval)
 	clock.Go()
 	defer clock.Stop()
-	time.Sleep(10*time.Millisecond)
+	time.Sleep(10 * time.Millisecond)
 
 	now := clock.DateTime()
 	t.Logf("now: %v", now)

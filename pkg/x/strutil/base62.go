@@ -1,4 +1,4 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
@@ -41,7 +41,7 @@ func EncodeBase62String(id int64) string {
 // DecodeBase62String convert an base-62 string back to integer
 func DecodeBase62String(s string) int64 {
 	var n int64
-	for i := 0; i < len(s); i++{
+	for i := 0; i < len(s); i++ {
 		n = (n * 62) + b62IndexTable[s[i]]
 	}
 	return n

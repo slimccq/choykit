@@ -1,4 +1,4 @@
-// Copyright © 2020 ichenq@outlook.com All rights reserved.
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
@@ -13,7 +13,7 @@ type LRUEntry struct {
 	Value interface{}
 }
 
-// LRU缓存 
+// LRU缓存
 // https://en.wikipedia.org/wiki/Cache_replacement_policies#Least_recently_used_(LRU)
 type LRUCache struct {
 	list     *list.List
