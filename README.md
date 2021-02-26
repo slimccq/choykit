@@ -1,6 +1,6 @@
 # ChoyKit
 
-mobile game server foundation kit
+A game server foundation kit
 
 一个游戏服务器基础组件
 
@@ -15,7 +15,7 @@ pkg/codec    | 协议编解码
 pkg/log      | 日志API
 pkg/protocol | 协议相关
 pkg/qnet     | 网络传输
-pkg/sched    | 执行器定时器
+pkg/fatchoy  | 基础包
 pkg/uuid     | 分布式id生成
 pkg/x        | 通用
 

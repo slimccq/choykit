@@ -7,7 +7,7 @@ ALL_PB_SRC = $(wildcard $(PB_SRC_DIR:%=%/*.proto))
 ALL_PB_GO_SRC = $(wildcard $(PB_GO_SRC_DIR:%=%/*.pb.go))
 
 GO_MODULE_NAME = devpkg.work/choykit
-GO_PKG_LIST := $(shell go list ./...)
+GO_PKG_LIST := $(shell go list ./pkg/...)
 
 .PHONY: clean all genpb
 
