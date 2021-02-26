@@ -23,7 +23,7 @@ func TestSequenceIDQPSEtcd(t *testing.T) {
 	var m = make(map[int64]bool)
 	var start = time.Now()
 	for i := 0; i < tetLoad; i++ {
-		uid := seq.Next()
+		uid := seq.MustNext()
 		if _, found := m[uid]; found {
 			t.Fatalf("key %d exist", uid)
 		}
@@ -45,7 +45,7 @@ func TestSequenceIDQPSRedis(t *testing.T) {
 	var m = make(map[int64]bool)
 	var start = time.Now()
 	for i := 0; i < tetLoad; i++ {
-		uid := seq.Next()
+		uid := seq.MustNext()
 		if _, found := m[uid]; found {
 			t.Fatalf("key %d exist", uid)
 		}

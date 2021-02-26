@@ -30,9 +30,11 @@ func TestEtcdStoreExample(t *testing.T) {
 		ids = append(ids, id)
 	}
 	var elapsed = time.Now().Sub(start).Seconds()
-	t.Logf("etcd QPS %f", float64(count)/elapsed)
+	t.Logf("QPS %.2f", float64(count)/elapsed)
+	// Output: QPS 1147.06
 }
 
+// N个并发worker，测试生成id的一致性
 func TestEtcdStoreConcurrent(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i < 20; i++ {

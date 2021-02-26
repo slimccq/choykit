@@ -12,10 +12,11 @@ import (
 	"github.com/gomodule/redigo/redis"
 )
 
+// 使用redis INCR命令实现
 type RedisStore struct {
-	addr string     // redis server address
-	key  string     // name of key
-	conn redis.Conn // connection
+	addr string     // redis服务器地址
+	key  string     //
+	conn redis.Conn //
 }
 
 func NewRedisStore(addr, key string) Storage {
@@ -56,19 +57,26 @@ func (s *RedisStore) Next() (int64, error) {
 		if err == nil {
 			return counter, nil
 		}
-		if op, ok := err.(*net.OpError); ok { // try reconnect
-			if op.Op == "write" || op.Op == "read" {
-				var retry = i + 1
-				var timeout = int32(retry*retry/3 + 1)
-				if er := s.createConn(timeout); er != nil {
-					return 0, err
-				}
+		if er, ok := err.(*net.OpError); ok {
+			if e := s.tryReconnect(er, i); e == nil {
 				continue
 			}
 		}
 		return 0, err
 	}
 	return 0, err
+}
+
+func (s *RedisStore) tryReconnect(err *net.OpError, n int) error {
+	if err.Op == "write" || err.Op == "read" {
+		var retry = n + 1
+		var timeout = int32(retry*retry/3 + 1)
+		if er := s.createConn(timeout); er != nil {
+			return er
+		}
+		return nil
+	}
+	return err
 }
 
 func (s *RedisStore) MustNext() int64 {

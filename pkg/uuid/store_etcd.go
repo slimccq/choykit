@@ -18,9 +18,10 @@ import (
 
 var ErrCannotPutEtcd = errors.New("cannot put counter to etcd")
 
+// 使用etcd的key的版本号自增实现
 type EtcdStore struct {
-	addr string
-	key  string
+	addr string // etcd地址
+	key  string //
 }
 
 func NewEtcdStore(addr, key string) Storage {

@@ -32,9 +32,11 @@ func TestRedisStoreExample(t *testing.T) {
 		ids = append(ids, id)
 	}
 	var elapsed = time.Now().Sub(start).Seconds()
-	t.Logf("redis QPS %f", float64(count)/elapsed)
+	t.Logf("QPS %.2f", float64(count)/elapsed)
+	// Output: QPS 9393.92
 }
 
+// N个并发worker，测试生成id的一致性
 func TestRedisStoreConcurrent(t *testing.T) {
 	var wg sync.WaitGroup
 	for i := 0; i < 20; i++ {

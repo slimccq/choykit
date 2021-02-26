@@ -5,18 +5,20 @@
 package uuid
 
 import (
+	"fmt"
 	"log"
 	"sync"
 )
 
 const DefaultSeqStep = 2000
 
+// 发号器
 type SequenceID struct {
 	guard    sync.Mutex
-	store    Storage // storage implementation
-	rangeEnd int64   // range counter
-	step     int64   // scope of range
-	lastID   int64   // last generated ID
+	store    Storage // 存储组件
+	rangeEnd int64   // 当前号段最大值
+	step     int64   // 号段区间范围
+	lastID   int64   // 上次生成的ID
 }
 
 func NewSequenceID(store Storage, step int32) *SequenceID {
@@ -29,7 +31,19 @@ func NewSequenceID(store Storage, step int32) *SequenceID {
 	}
 }
 
-func (s *SequenceID) Init() (err error) {
+func (s *SequenceID) Init() error {
+	if err := s.reload(); err != nil {
+		return err
+	}
+	if s.lastID + 10 >= s.rangeEnd {
+		if err := s.reload(); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *SequenceID) reload() error {
 	ctr, err := s.store.Next()
 	if err != nil {
 		return err
@@ -37,26 +51,32 @@ func (s *SequenceID) Init() (err error) {
 	s.lastID = ctr * s.step
 	s.rangeEnd = (ctr + 1) * s.step
 	if s.rangeEnd < s.lastID {
-		log.Panicf("SeqID gone backwards: %d -> %d", s.lastID, s.rangeEnd)
+		return fmt.Errorf("SeqID gone backwards: %d -> %d", s.lastID, s.rangeEnd)
 	}
 	return nil
 }
 
-func (s *SequenceID) Next() int64 {
+func (s *SequenceID) Next() (int64, error) {
 	s.guard.Lock()
 	defer s.guard.Unlock()
+
 	var next = s.lastID + 1
 	if next <= s.rangeEnd {
 		s.lastID = next
-	} else {
-		var ctr = s.store.MustNext()
-		s.lastID = ctr * s.step
-		s.rangeEnd = (ctr + 1) * s.step
-		if s.rangeEnd < s.lastID {
-			log.Panicf("SeqID gone backwards: %d -> %d", s.lastID, s.rangeEnd)
-		}
-		next = s.lastID + 1
-		s.lastID = next
+		return next, nil
 	}
-	return next
+	if err := s.reload(); err != nil {
+		return 0, err
+	}
+	next = s.lastID + 1
+	s.lastID = next
+	return next, nil
+}
+
+func (s *SequenceID) MustNext() int64 {
+	n, err := s.Next()
+	if err != nil {
+		log.Panicf("%v", err)
+	}
+	return n
 }

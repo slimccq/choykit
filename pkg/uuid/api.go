@@ -35,7 +35,7 @@ func Init(workerId uint16, addr, key string) {
 
 // 生成依赖存储，可用于角色ID
 func NextID() int64 {
-	return seqIDGen.Next()
+	return seqIDGen.MustNext()
 }
 
 // 生成的值与时钟有关，通常值比较大，可用于日志ID
