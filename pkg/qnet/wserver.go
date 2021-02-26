@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"github.com/gorilla/websocket"
 )
@@ -20,12 +20,12 @@ type WsServer struct {
 	upgrader *websocket.Upgrader  //
 	pending  chan *WsConn         //
 	errChan  chan error           //
-	inbound  chan *choykit.Packet // incoming message queue
-	codec    choykit.Codec        // message codec
+	inbound  chan *fatchoy.Packet // incoming message queue
+	codec    fatchoy.Codec        // message codec
 	outsize  int                  // outgoing queue size
 }
 
-func NewWebsocketServer(addr, path string, cdec choykit.Codec, inbound chan *choykit.Packet, outsize int) *WsServer {
+func NewWebsocketServer(addr, path string, cdec fatchoy.Codec, inbound chan *fatchoy.Packet, outsize int) *WsServer {
 	mux := http.NewServeMux()
 	var server = &http.Server{
 		Addr:              addr,

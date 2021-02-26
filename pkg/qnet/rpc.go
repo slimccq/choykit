@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 	"github.com/gogo/protobuf/proto"
@@ -18,7 +18,7 @@ type RpcHandler func(*RpcContext) error
 
 // RPC上下文
 type RpcContext struct {
-	node     choykit.NodeID   // 目标节点
+	node     fatchoy.NodeID   // 目标节点
 	command  int32            // RPC请求消息ID
 	reply    int32            // RPC相应消息ID
 	errno    uint32           // 错误码
@@ -28,7 +28,7 @@ type RpcContext struct {
 	done     chan *RpcContext // Strobes when RPC is completed
 }
 
-func NewRpcContext(node choykit.NodeID, request, reply int32, body interface{}, handler RpcHandler) *RpcContext {
+func NewRpcContext(node fatchoy.NodeID, request, reply int32, body interface{}, handler RpcHandler) *RpcContext {
 	return &RpcContext{
 		node:    node,
 		command: request,
@@ -42,7 +42,7 @@ func (r *RpcContext) Body() interface{} {
 	return r.body
 }
 
-func (r *RpcContext) NodeID() choykit.NodeID {
+func (r *RpcContext) NodeID() fatchoy.NodeID {
 	return r.node
 }
 
@@ -65,7 +65,7 @@ func (r *RpcContext) DecodeMsg(v proto.Message) error {
 	if r.body == nil {
 		return nil
 	}
-	return choykit.DecodeAsMsg(r.body, v)
+	return fatchoy.DecodeAsMsg(r.body, v)
 }
 
 func (r *RpcContext) Done(ec uint32, body interface{}) {
@@ -96,11 +96,11 @@ type RpcFactory struct {
 	registry map[int32]bool          // 注册的响应消息
 	seq      uint16                  // 序列号生成
 	ttl      time.Duration           // 默认超时
-	handler  choykit.PacketHandler   // RPC回调
-	ctx      *choykit.ServiceContext // Context对象
+	handler  fatchoy.PacketHandler   // RPC回调
+	ctx      *fatchoy.ServiceContext // Context对象
 }
 
-func (r *RpcFactory) Init(ctx *choykit.ServiceContext) error {
+func (r *RpcFactory) Init(ctx *fatchoy.ServiceContext) error {
 	r.done = make(chan struct{})
 	r.pending = make(map[uint16]*RpcContext)
 	r.registry = make(map[int32]bool)
@@ -123,7 +123,7 @@ func (r *RpcFactory) Shutdown() {
 }
 
 // 异步RPC
-func (r *RpcFactory) CallAsync(node choykit.NodeID, request, reply int32, body proto.Message, cb RpcHandler) *RpcContext {
+func (r *RpcFactory) CallAsync(node fatchoy.NodeID, request, reply int32, body proto.Message, cb RpcHandler) *RpcContext {
 	if request == reply {
 		log.Panicf("request[%d] should not equal to reply", request)
 	}
@@ -135,7 +135,7 @@ func (r *RpcFactory) CallAsync(node choykit.NodeID, request, reply int32, body p
 }
 
 // 同步RPC
-func (r *RpcFactory) Call(node choykit.NodeID, request, reply int32, body proto.Message) *RpcContext {
+func (r *RpcFactory) Call(node fatchoy.NodeID, request, reply int32, body proto.Message) *RpcContext {
 	if request == reply {
 		log.Panicf("request[%d] should not equal to reply", request)
 	}
@@ -150,8 +150,8 @@ func (r *RpcFactory) Call(node choykit.NodeID, request, reply int32, body proto.
 func (r *RpcFactory) makeCall(ctx *RpcContext) *RpcContext {
 	r.registry[ctx.reply] = true
 	var seq = r.counter()
-	ctx.deadline = choykit.Now().Add(r.ttl)
-	var pkt = choykit.NewPacket(ctx.node, uint32(ctx.command), 0, choykit.PacketFlagRpc, seq, ctx.body)
+	ctx.deadline = fatchoy.Now().Add(r.ttl)
+	var pkt = fatchoy.NewPacket(ctx.node, uint32(ctx.command), 0, fatchoy.PacketFlagRpc, seq, ctx.body)
 	r.ctx.SendMessage(pkt)
 	r.pending[seq] = ctx
 	return ctx
@@ -165,7 +165,7 @@ func (r *RpcFactory) counter() uint16 {
 }
 
 // 从接收消息中过滤RPC响应
-func (r *RpcFactory) filterRpcMessage(pkt *choykit.Packet) bool {
+func (r *RpcFactory) filterRpcMessage(pkt *fatchoy.Packet) bool {
 	r.Lock()
 	var command = int32(pkt.Command)
 	var seq = pkt.Seq

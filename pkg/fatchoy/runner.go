@@ -2,7 +2,7 @@
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
-package choykit
+package fatchoy
 
 // Runner是一个可执行对象接口
 type Runner interface {

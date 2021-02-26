@@ -10,12 +10,12 @@ import (
 	"bytes"
 	"testing"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/x/strutil"
 )
 
-func newTestV2Packet(bodyLen int) *choykit.Packet {
-	var packet = choykit.MakePacket()
+func newTestV2Packet(bodyLen int) *fatchoy.Packet {
+	var packet = fatchoy.MakePacket()
 	packet.Flags = 0x0
 	packet.Node = 0x0501
 	packet.Command = 1234
@@ -27,12 +27,12 @@ func newTestV2Packet(bodyLen int) *choykit.Packet {
 	return packet
 }
 
-func testServerCodec(t *testing.T, c choykit.Codec, size int, msgSent *choykit.Packet) {
+func testServerCodec(t *testing.T, c fatchoy.Codec, size int, msgSent *fatchoy.Packet) {
 	var encoded bytes.Buffer
 	if err := c.Encode(msgSent, &encoded); err != nil {
 		t.Fatalf("Encode with size %d: %v", size, err)
 	}
-	var msgRecv choykit.Packet
+	var msgRecv fatchoy.Packet
 	if _, err := c.Decode(&encoded, &msgRecv); err != nil {
 		t.Fatalf("Decode with size %d: %v", size, err)
 	}
@@ -62,7 +62,7 @@ func BenchmarkV2ProtocolMarshal(b *testing.B) {
 	if err := cdec.Encode(msg, &buf); err != nil {
 		b.Logf("Encode: %v", err)
 	}
-	var msg2 choykit.Packet
+	var msg2 fatchoy.Packet
 	if _, err := cdec.Decode(&buf, &msg2); err != nil {
 		b.Logf("Decode: %v", err)
 	}

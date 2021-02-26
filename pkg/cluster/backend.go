@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 	"devpkg.work/choykit/pkg/qnet"
@@ -23,15 +23,15 @@ type Backend struct {
 	done       chan struct{}        //
 	wg         sync.WaitGroup       //
 	errors     chan error           // 网络错误
-	stats      *choykit.Stats       // 收发数据包统计
+	stats      *fatchoy.Stats       // 收发数据包统计
 	discovery  *EtcdDiscovery       // 服务发现
 	listener   net.Listener         // 侦听器
-	endpoints  *choykit.EndpointMap // 所有连接
+	endpoints  *fatchoy.EndpointMap // 所有连接
 	dependency []uint8              // 依赖的节点类型
 	depNodes   NodeInfoMap          // 当前存在的依赖节点
 }
 
-func (s *Backend) Init(ctx *choykit.ServiceContext) error {
+func (s *Backend) Init(ctx *fatchoy.ServiceContext) error {
 	if err := s.Node.Init(ctx); err != nil {
 		return err
 	}
@@ -40,19 +40,19 @@ func (s *Backend) Init(ctx *choykit.ServiceContext) error {
 	}
 	s.done = make(chan struct{})
 	s.errors = make(chan error, 16)
-	s.stats = choykit.NewStats(qnet.NumStat)
-	s.endpoints = choykit.NewEndpointMap()
+	s.stats = fatchoy.NewStats(qnet.NumStat)
+	s.endpoints = fatchoy.NewEndpointMap()
 
 	opts := s.Context().Options()
 	for _, name := range strings.Split(opts.ServiceDependency, ",") {
-		if srvType := choykit.GetServiceTypeByName(name); srvType > 0 {
+		if srvType := fatchoy.GetServiceTypeByName(name); srvType > 0 {
 			s.dependency = append(s.dependency, srvType)
 		} else {
 			return fmt.Errorf("unrecognized dependency type %s", name)
 		}
 	}
 	s.discovery = NewEtcdDiscovery(opts, s)
-	ctx.Router().AddPolicy(choykit.NewBasicRoutePolicy(s.endpoints))
+	ctx.Router().AddPolicy(fatchoy.NewBasicRoutePolicy(s.endpoints))
 	s.AddMessageHandler(true, s.handleMessage)
 	return nil
 }
@@ -87,7 +87,7 @@ func (s *Backend) Shutdown() {
 	s.stats = nil
 }
 
-func (s *Backend) IsMyDependency(node choykit.NodeID) bool {
+func (s *Backend) IsMyDependency(node fatchoy.NodeID) bool {
 	if s.node == node {
 		return false
 	}
@@ -100,7 +100,7 @@ func (s *Backend) IsMyDependency(node choykit.NodeID) bool {
 }
 
 func (s *Backend) AddDependency(info *protocol.NodeInfo) {
-	node := choykit.NodeID(info.Node)
+	node := fatchoy.NodeID(info.Node)
 	log.Debugf("dependency node alive: %s, %s", node, info.Interface)
 	if !s.IsMyDependency(node) {
 		return
@@ -114,7 +114,7 @@ func (s *Backend) AddDependency(info *protocol.NodeInfo) {
 	}
 }
 
-func (s *Backend) DelDependency(etcdDown bool, node choykit.NodeID) {
+func (s *Backend) DelDependency(etcdDown bool, node fatchoy.NodeID) {
 	log.Debugf("dependency node lost: %v, %v", etcdDown, node)
 	if etcdDown {
 		s.depNodes.Clear()

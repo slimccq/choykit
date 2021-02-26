@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 )
 
 var (
@@ -19,10 +19,10 @@ var (
 
 type Error struct {
 	Err      error
-	Endpoint choykit.Endpoint
+	Endpoint fatchoy.Endpoint
 }
 
-func NewError(err error, endpoint choykit.Endpoint) error {
+func NewError(err error, endpoint fatchoy.Endpoint) error {
 	return &Error{
 		Err:      err,
 		Endpoint: endpoint,

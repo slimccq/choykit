@@ -7,22 +7,22 @@ package cluster
 import (
 	"sync/atomic"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
 	"devpkg.work/choykit/pkg/log"
 )
 
 // 节点
 type Node struct {
-	choykit.Executor
+	fatchoy.Executor
 	closing  int32                   //
-	node     choykit.NodeID          // 节点编号
-	codec    choykit.Codec           // 消息编解码
-	handlers []choykit.PacketHandler // 消息处理函数
-	ctx      *choykit.ServiceContext // context对象
+	node     fatchoy.NodeID          // 节点编号
+	codec    fatchoy.Codec           // 消息编解码
+	handlers []fatchoy.PacketHandler // 消息处理函数
+	ctx      *fatchoy.ServiceContext // context对象
 }
 
-func (s *Node) Init(ctx *choykit.ServiceContext) error {
+func (s *Node) Init(ctx *fatchoy.ServiceContext) error {
 	var env = ctx.Env()
 	if err := s.Executor.Init(env.ExecutorCapacity, env.ExecutorConcurrency); err != nil {
 		return err
@@ -45,11 +45,11 @@ func (s *Node) Shutdown() {
 	s.handlers = nil
 }
 
-func (s *Node) NodeID() choykit.NodeID {
+func (s *Node) NodeID() fatchoy.NodeID {
 	return s.node
 }
 
-func (s *Node) SetNodeID(v choykit.NodeID) {
+func (s *Node) SetNodeID(v fatchoy.NodeID) {
 	s.node = v
 }
 
@@ -57,33 +57,33 @@ func (s *Node) IsClosing() bool {
 	return atomic.LoadInt32(&s.closing) > 0
 }
 
-func (s *Node) Codec() choykit.Codec {
+func (s *Node) Codec() fatchoy.Codec {
 	return s.codec.Clone()
 }
 
-func (s *Node) Environ() *choykit.Environ {
+func (s *Node) Environ() *fatchoy.Environ {
 	return s.ctx.Env()
 }
 
-func (s *Node) Context() *choykit.ServiceContext {
+func (s *Node) Context() *fatchoy.ServiceContext {
 	return s.ctx
 }
 
-func (s *Node) SendPacket(pkt *choykit.Packet) error {
+func (s *Node) SendPacket(pkt *fatchoy.Packet) error {
 	return s.ctx.SendMessage(pkt)
 }
 
 // 添加消息处理函数
-func (s *Node) AddMessageHandler(isPrepend bool, f choykit.PacketHandler) {
+func (s *Node) AddMessageHandler(isPrepend bool, f fatchoy.PacketHandler) {
 	if isPrepend {
-		s.handlers = append([]choykit.PacketHandler{f}, s.handlers...)
+		s.handlers = append([]fatchoy.PacketHandler{f}, s.handlers...)
 	} else {
 		s.handlers = append(s.handlers, f)
 	}
 }
 
 // 执行消息处理
-func (s *Node) Dispatch(pkt *choykit.Packet) error {
+func (s *Node) Dispatch(pkt *fatchoy.Packet) error {
 	var err error
 	for _, f := range s.handlers {
 		if er := f(pkt); er != nil {

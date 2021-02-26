@@ -12,7 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"github.com/gorilla/websocket"
 	"github.com/pkg/errors"
@@ -32,8 +32,8 @@ type WsConn struct {
 	conn *websocket.Conn // websocket conn
 }
 
-func NewWsConn(node choykit.NodeID, conn *websocket.Conn, cdec choykit.Codec, errChan chan error,
-	incoming chan<- *choykit.Packet, outsize int, stats *choykit.Stats) *WsConn {
+func NewWsConn(node fatchoy.NodeID, conn *websocket.Conn, cdec fatchoy.Codec, errChan chan error,
+	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *WsConn {
 	wsconn := &WsConn{
 		conn: conn,
 	}
@@ -55,7 +55,7 @@ func (c *WsConn) Go(writer, reader bool) {
 	}
 }
 
-func (c *WsConn) SendPacket(pkt *choykit.Packet) error {
+func (c *WsConn) SendPacket(pkt *fatchoy.Packet) error {
 	if c.IsClosing() {
 		return ErrConnIsClosing
 	}
@@ -107,15 +107,15 @@ func (c *WsConn) finally(err error) {
 	c.conn = nil
 }
 
-func (c *WsConn) sendPacket(pkt *choykit.Packet, allowBatch bool) error {
-	if (pkt.Flags | choykit.PacketFlagJSONText) > 0 {
+func (c *WsConn) sendPacket(pkt *fatchoy.Packet, allowBatch bool) error {
+	if (pkt.Flags | fatchoy.PacketFlagJSONText) > 0 {
 		return c.sendJSONTextMessage(pkt, allowBatch)
 	} else {
 		return c.sendBinaryMessage(pkt, allowBatch)
 	}
 }
 
-func (c *WsConn) sendJSONTextMessage(pkt *choykit.Packet, allowBatch bool) error {
+func (c *WsConn) sendJSONTextMessage(pkt *fatchoy.Packet, allowBatch bool) error {
 	if !allowBatch {
 		data, err := json.Marshal(pkt)
 		if err != nil {
@@ -159,7 +159,7 @@ func (c *WsConn) sendJSONTextMessage(pkt *choykit.Packet, allowBatch bool) error
 	return nil
 }
 
-func batchAppendMessage(w io.Writer, pkt *choykit.Packet) (int, error) {
+func batchAppendMessage(w io.Writer, pkt *fatchoy.Packet) (int, error) {
 	data, err := json.Marshal(pkt)
 	if err != nil {
 		log.Errorf("WsConn: JSON marshal message %d, %v", pkt.Command, err)
@@ -173,7 +173,7 @@ func batchAppendMessage(w io.Writer, pkt *choykit.Packet) (int, error) {
 	return len(data), nil
 }
 
-func (c *WsConn) sendBinaryMessage(pkt *choykit.Packet, allowBatch bool) error {
+func (c *WsConn) sendBinaryMessage(pkt *fatchoy.Packet, allowBatch bool) error {
 	var count = 1
 	var buf bytes.Buffer
 	if err := c.codec.Encode(pkt, &buf); err != nil {
@@ -219,7 +219,7 @@ func (c *WsConn) writePump() {
 
 func (c *WsConn) readLoop() {
 	for {
-		var pkt = choykit.MakePacket()
+		var pkt = fatchoy.MakePacket()
 		if err := c.ReadPacket(pkt); err != nil {
 			log.Errorf("read message: %v", err)
 			break
@@ -236,8 +236,8 @@ func (c *WsConn) readLoop() {
 	}
 }
 
-func (c *WsConn) ReadPacket(pkt *choykit.Packet) error {
-	c.conn.SetReadDeadline(choykit.Now().Add(WSConnReadTimeout))
+func (c *WsConn) ReadPacket(pkt *fatchoy.Packet) error {
+	c.conn.SetReadDeadline(fatchoy.Now().Add(WSConnReadTimeout))
 	msgType, data, err := c.conn.ReadMessage()
 	if err != nil {
 		return err

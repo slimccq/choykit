@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"testing"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/protocol"
 )
 
@@ -27,7 +27,7 @@ func (s *fakeServiceSink) AddDependency(info *protocol.NodeInfo) {
 	s.nodes.AddNode(info)
 }
 
-func (s *fakeServiceSink) DelDependency(removeAll bool, node choykit.NodeID) {
+func (s *fakeServiceSink) DelDependency(removeAll bool, node fatchoy.NodeID) {
 	if removeAll {
 		s.nodes.Clear()
 		return
@@ -36,7 +36,7 @@ func (s *fakeServiceSink) DelDependency(removeAll bool, node choykit.NodeID) {
 }
 
 func TestDiscoveryEtcd(t *testing.T) {
-	opts := choykit.NewOptions()
+	opts := fatchoy.NewOptions()
 	opts.EtcdAddress = "127.0.0.1:2379"
 	opts.EtcdKeySpace = "/choyd"
 	opts.EtcdLeaseTTL = 5

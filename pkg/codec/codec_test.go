@@ -10,10 +10,10 @@ import (
 	"bytes"
 	"testing"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 )
 
-func isEqualPacket(t *testing.T, a, b *choykit.Packet) bool {
+func isEqualPacket(t *testing.T, a, b *fatchoy.Packet) bool {
 	if a.Command != b.Command ||
 		(a.Seq != b.Seq) ||
 		(a.Flags != b.Flags) ||

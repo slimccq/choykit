@@ -17,7 +17,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"github.com/pkg/errors"
 )
@@ -33,8 +33,8 @@ type TcpConn struct {
 	reader io.Reader // bufio reader
 }
 
-func NewTcpConn(node choykit.NodeID, conn net.Conn, cdec choykit.Codec, errChan chan error,
-	incoming chan<- *choykit.Packet, outsize int, stats *choykit.Stats) *TcpConn {
+func NewTcpConn(node fatchoy.NodeID, conn net.Conn, cdec fatchoy.Codec, errChan chan error,
+	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *TcpConn {
 	tconn := &TcpConn{
 		conn:   conn,
 		reader: bufio.NewReader(conn),
@@ -48,7 +48,7 @@ func (t *TcpConn) RawConn() net.Conn {
 	return t.conn
 }
 
-func (t *TcpConn) OutboundQueue() chan *choykit.Packet {
+func (t *TcpConn) OutboundQueue() chan *fatchoy.Packet {
 	return t.outbound
 }
 
@@ -63,7 +63,7 @@ func (t *TcpConn) Go(writer, reader bool) {
 	}
 }
 
-func (t *TcpConn) SendPacket(pkt *choykit.Packet) error {
+func (t *TcpConn) SendPacket(pkt *fatchoy.Packet) error {
 	if t.IsClosing() {
 		return ErrConnIsClosing
 	}
@@ -187,10 +187,10 @@ func (t *TcpConn) writePump() {
 	}
 }
 
-func (t *TcpConn) readPacket() (*choykit.Packet, error) {
-	deadline := choykit.Now().Add(time.Duration(TConnReadTimeout) * time.Second)
+func (t *TcpConn) readPacket() (*fatchoy.Packet, error) {
+	deadline := fatchoy.Now().Add(time.Duration(TConnReadTimeout) * time.Second)
 	t.conn.SetReadDeadline(deadline)
-	var pkt = choykit.MakePacket()
+	var pkt = fatchoy.MakePacket()
 	nbytes, err := t.codec.Decode(t.reader, pkt)
 	if err != nil {
 		if err != io.EOF {

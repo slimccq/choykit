@@ -2,11 +2,13 @@
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
-package choykit
+package fatchoy
 
 import "testing"
 
-func TestNewPacket(t *testing.T) {
-	pkt := NewPacket(1234, 1001, 2001, 1, 12, "hello")
-	t.Logf("%v", pkt)
+func TestRouter(t *testing.T) {
+	endpoints := NewEndpointMap()
+	router := NewRouter(1234)
+	policy := NewBasicRoutePolicy(endpoints)
+	router.AddPolicy(policy)
 }

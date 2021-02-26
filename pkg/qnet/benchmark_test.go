@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
 )
 
@@ -22,7 +22,7 @@ const (
 )
 
 func startQPSServer(t *testing.T, address string, ctor, done chan struct{}) {
-	var incoming = make(chan *choykit.Packet, totalMessageCount)
+	var incoming = make(chan *fatchoy.Packet, totalMessageCount)
 	var cdec = codec.NewServerCodec()
 	var listener = NewTcpServer(cdec, incoming, totalMessageCount)
 	if err := listener.Listen(address); err != nil {
@@ -35,7 +35,7 @@ func startQPSServer(t *testing.T, address string, ctor, done chan struct{}) {
 	for {
 		select {
 		case endpoint := <-listener.BacklogChan():
-			endpoint.SetNodeID(choykit.NodeID(autoId))
+			endpoint.SetNodeID(fatchoy.NodeID(autoId))
 			endpoint.Go(true, true)
 			autoId++
 
@@ -66,9 +66,9 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 	var cdec = codec.NewServerCodec()
 	var buf bytes.Buffer
 	for i := 0; i < msgCount; i++ {
-		var pkt = choykit.MakePacket()
+		var pkt = fatchoy.MakePacket()
 		pkt.Command = uint32(i)
-		pkt.Node = choykit.NodeID(i)
+		pkt.Node = fatchoy.NodeID(i)
 		pkt.Body = "ping"
 		buf.Reset()
 		if err := cdec.Encode(pkt, &buf); err != nil {
@@ -79,7 +79,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 		}
 	}
 	for i := 0; i < msgCount; i++ {
-		var resp choykit.Packet
+		var resp fatchoy.Packet
 		if _, err := cdec.Decode(conn, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}

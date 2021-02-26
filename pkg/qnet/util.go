@@ -9,7 +9,7 @@ import (
 	"net"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"github.com/gogo/protobuf/proto"
 	"github.com/pkg/errors"
@@ -39,9 +39,9 @@ func ListenTCP(address string) (*net.TCPListener, error) {
 	return net.ListenTCP("tcp", addr)
 }
 
-func ReadProtoMessage(conn net.Conn, cdec choykit.Codec, msgOut proto.Message) (*choykit.Packet, error) {
-	var pkt = choykit.MakePacket()
-	var deadline = choykit.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
+func ReadProtoMessage(conn net.Conn, cdec fatchoy.Codec, msgOut proto.Message) (*fatchoy.Packet, error) {
+	var pkt = fatchoy.MakePacket()
+	var deadline = fatchoy.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
 	conn.SetReadDeadline(deadline)
 	_, err := cdec.Decode(conn, pkt)
 	if err != nil {
@@ -57,7 +57,7 @@ func ReadProtoMessage(conn net.Conn, cdec choykit.Codec, msgOut proto.Message) (
 	return pkt, nil
 }
 
-func SendPacketMessage(conn net.Conn, cdec choykit.Codec, pkt *choykit.Packet) error {
+func SendPacketMessage(conn net.Conn, cdec fatchoy.Codec, pkt *fatchoy.Packet) error {
 	var buf bytes.Buffer
 	if err := cdec.Encode(pkt, &buf); err != nil {
 		log.Errorf("encode message %d: %v", pkt.Command, err)
@@ -70,9 +70,9 @@ func SendPacketMessage(conn net.Conn, cdec choykit.Codec, pkt *choykit.Packet) e
 	return nil
 }
 
-func SendProtoMessage(conn net.Conn, cdec choykit.Codec, command int32, msgIn proto.Message) error {
+func SendProtoMessage(conn net.Conn, cdec fatchoy.Codec, command int32, msgIn proto.Message) error {
 	var buf bytes.Buffer
-	var pkt = choykit.MakePacket()
+	var pkt = fatchoy.MakePacket()
 	pkt.Command = uint32(command)
 	pkt.Body = msgIn
 	if err := cdec.Encode(pkt, &buf); err != nil {
@@ -87,7 +87,7 @@ func SendProtoMessage(conn net.Conn, cdec choykit.Codec, command int32, msgIn pr
 }
 
 // send request message and wait for response message
-func RequestMessage(conn net.Conn, cdec choykit.Codec, reqCommand int32, msgReq, msgResp proto.Message) error {
+func RequestMessage(conn net.Conn, cdec fatchoy.Codec, reqCommand int32, msgReq, msgResp proto.Message) error {
 	if err := SendProtoMessage(conn, cdec, reqCommand, msgReq); err != nil {
 		return err
 	}

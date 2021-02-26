@@ -8,7 +8,7 @@ import (
 	"math"
 	"sync"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/protocol"
 )
 
@@ -35,7 +35,7 @@ func (m *NodeInfoMap) GetNodesBy(srvType uint8, district uint16) []*protocol.Nod
 	m.RLock()
 	var result []*protocol.NodeInfo
 	for _, v := range m.nodes[srvType] {
-		if choykit.NodeID(v.Node).District() == district {
+		if fatchoy.NodeID(v.Node).District() == district {
 			result = append(result, v)
 		}
 	}
@@ -46,7 +46,7 @@ func (m *NodeInfoMap) GetNodesBy(srvType uint8, district uint16) []*protocol.Nod
 // 添加一个节点
 func (m *NodeInfoMap) AddNode(info *protocol.NodeInfo) {
 	m.Lock()
-	node := choykit.NodeID(info.Node)
+	node := fatchoy.NodeID(info.Node)
 	slice := m.nodes[node.Service()]
 	for i, v := range slice {
 		if v.Node == info.Node {
@@ -75,7 +75,7 @@ func (m *NodeInfoMap) DeleteService(srvType uint8) {
 }
 
 // 删除一个节点
-func (m *NodeInfoMap) DeleteNode(node choykit.NodeID) {
+func (m *NodeInfoMap) DeleteNode(node fatchoy.NodeID) {
 	m.Lock()
 	slice := m.nodes[node.Service()]
 	for i, v := range slice {

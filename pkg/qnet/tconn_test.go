@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
 	"devpkg.work/choykit/pkg/x/strutil"
 )
@@ -23,10 +23,10 @@ const (
 )
 
 func init() {
-	choykit.StartClock()
+	fatchoy.StartClock()
 }
 
-func handleConn(conn *net.TCPConn, cdec choykit.Codec) {
+func handleConn(conn *net.TCPConn, cdec fatchoy.Codec) {
 	var count = 0
 	//file, _ := conn.File()
 	tconn := NewTcpConn(0, conn, cdec, nil, nil, 1000, nil)
@@ -34,7 +34,7 @@ func handleConn(conn *net.TCPConn, cdec choykit.Codec) {
 	defer tconn.Close()
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Minute))
-		var pkt = choykit.MakePacket()
+		var pkt = fatchoy.MakePacket()
 		if _, err := cdec.Decode(conn, pkt); err != nil {
 			fmt.Printf("Decode: %v\n", err)
 			break
@@ -53,7 +53,7 @@ func handleConn(conn *net.TCPConn, cdec choykit.Codec) {
 	fmt.Printf("sent %d packets, %s\n", stats.Get(StatPacketsSent), strutil.PrettyBytes(stats.Get(StatBytesSent)))
 }
 
-func startMyServer(t *testing.T, ln *net.TCPListener, cdec choykit.Codec) {
+func startMyServer(t *testing.T, ln *net.TCPListener, cdec fatchoy.Codec) {
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
@@ -64,7 +64,7 @@ func startMyServer(t *testing.T, ln *net.TCPListener, cdec choykit.Codec) {
 	}
 }
 
-func tconnReadLoop(errchan chan error, inbound chan *choykit.Packet) {
+func tconnReadLoop(errchan chan error, inbound chan *fatchoy.Packet) {
 	for {
 		select {
 		case pkt, ok := <-inbound:
@@ -99,14 +99,14 @@ func TestExampleTcpConn(t *testing.T) {
 		t.Fatalf("Dial: %v", err)
 	}
 	//file, _ := conn.File()
-	inbound := make(chan *choykit.Packet, 1000)
+	inbound := make(chan *fatchoy.Packet, 1000)
 	errchan := make(chan error, 4)
 	tconn := NewTcpConn(0, conn, cdec.Clone(), errchan, inbound, 1000, nil)
-	tconn.SetNodeID(choykit.NodeID(0x12345))
+	tconn.SetNodeID(fatchoy.NodeID(0x12345))
 	tconn.Go(true, true)
 	defer tconn.Close()
 	stats := tconn.Stats()
-	var pkt = choykit.MakePacket()
+	var pkt = fatchoy.MakePacket()
 	pkt.Command = 1
 	pkt.Body = "ping"
 	tconn.SendPacket(pkt)

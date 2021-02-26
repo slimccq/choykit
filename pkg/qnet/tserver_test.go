@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
 )
 
@@ -25,7 +25,7 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 	}
 
 	var cdec = codec.NewServerCodec()
-	var pkt = choykit.MakePacket()
+	var pkt = fatchoy.MakePacket()
 	for i := 1; i <= msgCount; i++ {
 		pkt.Command = uint32(i)
 		pkt.Seq = uint16(i)
@@ -37,7 +37,7 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 		if _, err := conn.Write(buf.Bytes()); err != nil {
 			t.Fatalf("Write: %v", err)
 		}
-		var resp choykit.Packet
+		var resp fatchoy.Packet
 		if _, err := cdec.Decode(conn, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}
@@ -55,7 +55,7 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 
 func startMyListener(t *testing.T, address string, sig, done chan struct{}) {
 	var cdec = codec.NewServerCodec()
-	var incoming = make(chan *choykit.Packet, 100)
+	var incoming = make(chan *fatchoy.Packet, 100)
 	var server = NewTcpServer(cdec, incoming, 60)
 	if err := server.Listen(address); err != nil {
 		t.Fatalf("BindTCP: %s %v", address, err)
@@ -75,7 +75,7 @@ func startMyListener(t *testing.T, address string, sig, done chan struct{}) {
 			// var addr = endpoint.RemoteAddr()
 			// fmt.Printf("endpoint %v connected\n", addr)
 			autoId++
-			endpoint.SetNodeID(choykit.NodeID(autoId))
+			endpoint.SetNodeID(fatchoy.NodeID(autoId))
 			endpoint.Go(true, true)
 
 		case err := <-server.ErrorChan():

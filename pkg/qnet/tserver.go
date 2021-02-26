@@ -8,33 +8,33 @@ import (
 	"net"
 	"sync"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 )
 
 type TcpServer struct {
 	done    chan struct{}
 	wg      sync.WaitGroup
-	backlog chan choykit.Endpoint // queue of incoming connections
+	backlog chan fatchoy.Endpoint // queue of incoming connections
 	errors  chan error            // error queue
 	lns     []net.Listener        // listener list
-	cdec    choykit.Codec         // message encoding/decoding
-	inbound chan *choykit.Packet  // incoming message buffer queue
+	cdec    fatchoy.Codec         // message encoding/decoding
+	inbound chan *fatchoy.Packet  // incoming message buffer queue
 	outsize int                   // size of outbound message queue
 }
 
-func NewTcpServer(cdec choykit.Codec, inbound chan *choykit.Packet, outsize int) *TcpServer {
+func NewTcpServer(cdec fatchoy.Codec, inbound chan *fatchoy.Packet, outsize int) *TcpServer {
 	return &TcpServer{
 		inbound: inbound,
 		cdec:    cdec,
 		outsize: outsize,
 		done:    make(chan struct{}),
-		backlog: make(chan choykit.Endpoint, 128),
+		backlog: make(chan fatchoy.Endpoint, 128),
 		errors:  make(chan error, 16),
 	}
 }
 
-func (s *TcpServer) BacklogChan() chan choykit.Endpoint {
+func (s *TcpServer) BacklogChan() chan fatchoy.Endpoint {
 	return s.backlog
 }
 

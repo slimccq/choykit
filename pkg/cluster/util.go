@@ -10,11 +10,11 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 )
 
 // 注册签名
-func SignAccessToken(node choykit.NodeID, gameId, key string) string {
+func SignAccessToken(node fatchoy.NodeID, gameId, key string) string {
 	var buf bytes.Buffer
 	buf.WriteString(node.String())
 	buf.WriteString(gameId)

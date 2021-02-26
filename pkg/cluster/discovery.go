@@ -15,7 +15,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 	"github.com/pkg/errors"
@@ -30,7 +30,7 @@ const (
 type ServiceSinker interface {
 	NodeInfo() *protocol.NodeInfo
 	AddDependency(*protocol.NodeInfo)
-	DelDependency(bool, choykit.NodeID)
+	DelDependency(bool, fatchoy.NodeID)
 }
 
 type EtcdDiscovery struct {
@@ -46,7 +46,7 @@ type EtcdDiscovery struct {
 	sink      ServiceSinker    //
 }
 
-func NewEtcdDiscovery(opts *choykit.Options, sink ServiceSinker) *EtcdDiscovery {
+func NewEtcdDiscovery(opts *fatchoy.Options, sink ServiceSinker) *EtcdDiscovery {
 	d := &EtcdDiscovery{
 		endpoints: strings.Split(opts.EtcdAddress, ","),
 		keySpace:  fmt.Sprintf("%s/service", opts.EtcdKeySpace),
@@ -116,7 +116,7 @@ func (d *EtcdDiscovery) register() (<-chan *clientv3.LeaseKeepAliveResponse, err
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*TimeoutSecond)
 	defer cancel()
 	info := d.sink.NodeInfo()
-	key := fmt.Sprintf("%s/%s", d.keySpace, choykit.NodeID(info.Node).String())
+	key := fmt.Sprintf("%s/%s", d.keySpace, fatchoy.NodeID(info.Node).String())
 	resp, err := d.client.Get(ctx, key)
 	if err != nil {
 		return nil, err
@@ -240,7 +240,7 @@ func (d *EtcdDiscovery) delDependency(key, value []byte) {
 		log.Errorf("cannot parse node id of key: %s, %v", key, err)
 		return
 	}
-	d.sink.DelDependency(false, choykit.NodeID(n))
+	d.sink.DelDependency(false, fatchoy.NodeID(n))
 }
 
 func (d *EtcdDiscovery) Close() {

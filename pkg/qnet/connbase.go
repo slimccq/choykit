@@ -9,28 +9,28 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 )
 
 type ConnBase struct {
 	done     chan struct{}           // done signal
 	wg       sync.WaitGroup          // wait group
 	closing  int32                   // closing flag
-	node     choykit.NodeID          // node id
+	node     fatchoy.NodeID          // node id
 	addr     string                  // remote address
 	userdata interface{}             // user data
-	ctx      *choykit.ServiceContext // current service context object
-	codec    choykit.Codec           // message encoding/decoding
-	inbound  chan<- *choykit.Packet  // inbound message queue
-	outbound chan *choykit.Packet    // outbound message queue
-	stats    *choykit.Stats          // message stats
+	ctx      *fatchoy.ServiceContext // current service context object
+	codec    fatchoy.Codec           // message encoding/decoding
+	inbound  chan<- *fatchoy.Packet  // inbound message queue
+	outbound chan *fatchoy.Packet    // outbound message queue
+	stats    *fatchoy.Stats          // message stats
 	errChan  chan error              // error signal
 }
 
-func (c *ConnBase) init(node choykit.NodeID, cdec choykit.Codec, inbound chan<- *choykit.Packet, outsize int,
-	errChan chan error, stats *choykit.Stats) {
+func (c *ConnBase) init(node fatchoy.NodeID, cdec fatchoy.Codec, inbound chan<- *fatchoy.Packet, outsize int,
+	errChan chan error, stats *fatchoy.Stats) {
 	if stats == nil {
-		stats = choykit.NewStats(NumStat)
+		stats = fatchoy.NewStats(NumStat)
 	}
 	c.node = node
 	c.codec = cdec
@@ -38,14 +38,14 @@ func (c *ConnBase) init(node choykit.NodeID, cdec choykit.Codec, inbound chan<- 
 	c.inbound = inbound
 	c.errChan = errChan
 	c.done = make(chan struct{})
-	c.outbound = make(chan *choykit.Packet, outsize)
+	c.outbound = make(chan *fatchoy.Packet, outsize)
 }
 
-func (c *ConnBase) NodeID() choykit.NodeID {
+func (c *ConnBase) NodeID() fatchoy.NodeID {
 	return c.node
 }
 
-func (c *ConnBase) SetNodeID(node choykit.NodeID) {
+func (c *ConnBase) SetNodeID(node fatchoy.NodeID) {
 	c.node = node
 }
 
@@ -57,7 +57,7 @@ func (c *ConnBase) RemoteAddr() string {
 	return c.addr
 }
 
-func (c *ConnBase) Stats() *choykit.Stats {
+func (c *ConnBase) Stats() *fatchoy.Stats {
 	return c.stats
 }
 
@@ -65,15 +65,15 @@ func (c *ConnBase) IsClosing() bool {
 	return atomic.LoadInt32(&c.closing) == 1
 }
 
-func (c *ConnBase) Codec() choykit.Codec {
+func (c *ConnBase) Codec() fatchoy.Codec {
 	return c.codec
 }
 
-func (c *ConnBase) Context() *choykit.ServiceContext {
+func (c *ConnBase) Context() *fatchoy.ServiceContext {
 	return c.ctx
 }
 
-func (c *ConnBase) SetContext(v *choykit.ServiceContext) {
+func (c *ConnBase) SetContext(v *fatchoy.ServiceContext) {
 	c.ctx = v
 }
 
@@ -90,7 +90,7 @@ type FakeConn struct {
 	ConnBase
 }
 
-func NewFakeConn(node choykit.NodeID, addr string) choykit.Endpoint {
+func NewFakeConn(node fatchoy.NodeID, addr string) fatchoy.Endpoint {
 	return &FakeConn{
 		ConnBase: ConnBase{
 			node: node,
@@ -103,7 +103,7 @@ func (c *FakeConn) RawConn() net.Conn {
 	return nil
 }
 
-func (c *FakeConn) SendPacket(*choykit.Packet) error {
+func (c *FakeConn) SendPacket(*fatchoy.Packet) error {
 	return nil
 }
 

@@ -4,7 +4,7 @@
 
 // +build !ignore
 
-package choykit
+package fatchoy
 
 import (
 	"testing"

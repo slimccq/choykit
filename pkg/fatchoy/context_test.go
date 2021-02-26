@@ -2,13 +2,13 @@
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
-package choykit
+package fatchoy
 
 import "testing"
 
-func TestRouter(t *testing.T) {
-	endpoints := NewEndpointMap()
-	router := NewRouter(1234)
-	policy := NewBasicRoutePolicy(endpoints)
-	router.AddPolicy(policy)
+func TestServiceContext(t *testing.T) {
+	env := LoadEnviron()
+	opt := NewOptions()
+	ctx := NewServiceContext(opt, env)
+	ctx.Go()
 }

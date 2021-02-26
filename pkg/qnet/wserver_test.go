@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
 	"github.com/gorilla/websocket"
 )
@@ -27,8 +27,8 @@ func startClient(t *testing.T, addr, path string) {
 	}
 	defer c.Close()
 
-	var pkt choykit.Packet
-	pkt.Flags |= choykit.PacketFlagJSONText
+	var pkt fatchoy.Packet
+	pkt.Flags |= fatchoy.PacketFlagJSONText
 	pkt.Command = 1234
 	pkt.Seq = 100
 	pkt.Referer = 222
@@ -61,7 +61,7 @@ func startClient(t *testing.T, addr, path string) {
 func TestWebsocketServer(t *testing.T) {
 	var addr = "127.0.0.1:10007"
 	var path = "/example"
-	var incoming = make(chan *choykit.Packet, 1000)
+	var incoming = make(chan *fatchoy.Packet, 1000)
 	var cdec = codec.NewServerCodec()
 	server := NewWebsocketServer(addr, path, cdec, incoming, 600)
 	server.Go()

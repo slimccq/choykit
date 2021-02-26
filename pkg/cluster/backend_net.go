@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 	"devpkg.work/choykit/pkg/qnet"
@@ -60,14 +60,14 @@ func (s *Backend) serveAccept() {
 }
 
 // 处理节点注册
-func (s *Backend) handleNodeAccept(conn net.Conn, cdec choykit.Codec) {
+func (s *Backend) handleNodeAccept(conn net.Conn, cdec fatchoy.Codec) {
 	var req protocol.RegisterReq
 	pkt1, err := qnet.ReadProtoMessage(conn, cdec, &req)
 	if err != nil {
 		log.Errorf("read registration message: %v", err)
 		return
 	}
-	pkt2 := choykit.MakePacket()
+	pkt2 := fatchoy.MakePacket()
 	pkt2.Node = s.NodeID()
 	pkt2.Command = uint32(protocol.MSG_INTERNAL_REGISTER_STATUS)
 	pkt2.Seq = pkt1.Seq
@@ -81,7 +81,7 @@ func (s *Backend) handleNodeAccept(conn net.Conn, cdec choykit.Codec) {
 		return
 	}
 	var ctx = s.Context()
-	var node = choykit.NodeID(req.Node)
+	var node = fatchoy.NodeID(req.Node)
 	var endpoint = qnet.NewTcpConn(node, conn, cdec, nil, nil,
 		ctx.Env().EndpointOutboundQueueSize, s.stats)
 	s.endpoints.Add(node, endpoint)
@@ -115,7 +115,7 @@ func (s *Backend) serveNetErr() {
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // 连接到其它node
-func (s *Backend) establishTo(node choykit.NodeID, addr string) error {
+func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 	if endpoint := s.endpoints.Get(node); endpoint != nil {
 		log.Warnf("node %v already established", node)
 		return nil
@@ -135,7 +135,7 @@ func (s *Backend) establishTo(node choykit.NodeID, addr string) error {
 }
 
 // 注册自己
-func (s *Backend) register(endpoint choykit.Endpoint) error {
+func (s *Backend) register(endpoint fatchoy.Endpoint) error {
 	var env = s.Environ()
 	var opts = s.Context().Options()
 	var token = SignAccessToken(s.node, env.GameID, env.AccessKey)
@@ -151,7 +151,7 @@ func (s *Backend) register(endpoint choykit.Endpoint) error {
 		return err
 	}
 
-	var node = choykit.NodeID(resp.Node)
+	var node = fatchoy.NodeID(resp.Node)
 	endpoint.SetNodeID(node)
 	endpoint.Go(true, true)
 	s.endpoints.Add(node, endpoint)
@@ -164,11 +164,11 @@ func (s *Backend) register(endpoint choykit.Endpoint) error {
 }
 
 // 发送心跳包
-func (s *Backend) sendPing(now time.Time, endpoint choykit.Endpoint) {
+func (s *Backend) sendPing(now time.Time, endpoint fatchoy.Endpoint) {
 	var msg = &protocol.KeepAliveReq{
 		Time: now.Unix(),
 	}
-	pkt := choykit.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_INTERNAL_KEEP_ALIVE),
+	pkt := fatchoy.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_INTERNAL_KEEP_ALIVE),
 		0, 0, 0, msg)
 	if err := endpoint.SendPacket(pkt); err != nil {
 		log.Errorf("Send message %d: %v", pkt.Command, err)
@@ -176,7 +176,7 @@ func (s *Backend) sendPing(now time.Time, endpoint choykit.Endpoint) {
 }
 
 // 持续心跳
-func (s *Backend) servePing(endpoint choykit.Endpoint) {
+func (s *Backend) servePing(endpoint fatchoy.Endpoint) {
 	defer s.wg.Done()
 	defer log.Debugf("pinger of %v stop serving", endpoint.NodeID())
 	log.Debugf("start serve pinger for %v", endpoint.NodeID())

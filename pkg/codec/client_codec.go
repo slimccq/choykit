@@ -11,7 +11,7 @@ import (
 	"hash/crc32"
 	"io"
 
-	"devpkg.work/choykit/pkg"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 	"github.com/pkg/errors"
@@ -50,7 +50,7 @@ func (c *clientCodec) Version() uint8 {
 	return ClientCodecVersion
 }
 
-func (c *clientCodec) Clone() choykit.Codec {
+func (c *clientCodec) Clone() fatchoy.Codec {
 	return &clientCodec{
 		encHash: crc32.NewIEEE(),
 		decHash: crc32.NewIEEE(),
@@ -66,7 +66,7 @@ func (c *clientCodec) SetEncryptKey(key, iv []byte) {
 	// TODO:
 }
 
-func (c *clientCodec) encodeHeader(pkt *choykit.Packet, length uint16, buffer *bytes.Buffer) {
+func (c *clientCodec) encodeHeader(pkt *fatchoy.Packet, length uint16, buffer *bytes.Buffer) {
 	var tmpbuf [ClientCodecHeaderSize]byte
 	binary.LittleEndian.PutUint16(tmpbuf[0:], length)
 	binary.LittleEndian.PutUint16(tmpbuf[2:], pkt.Flags)
@@ -78,12 +78,12 @@ func (c *clientCodec) encodeHeader(pkt *choykit.Packet, length uint16, buffer *b
 }
 
 // 编码消息
-func (c *clientCodec) Encode(pkt *choykit.Packet, buf *bytes.Buffer) error {
+func (c *clientCodec) Encode(pkt *fatchoy.Packet, buf *bytes.Buffer) error {
 	payload, err := pkt.Encode()
 	if err != nil {
 		return err
 	}
-	if (pkt.Flags & choykit.PacketFlagCompress) != 0 {
+	if (pkt.Flags & fatchoy.PacketFlagCompress) != 0 {
 		if data, err := CompressBytes(ZLIB, DefaultCompression, payload); err != nil {
 			log.Errorf("compress message %d: %v", pkt.Command, err)
 			return err
@@ -92,9 +92,9 @@ func (c *clientCodec) Encode(pkt *choykit.Packet, buf *bytes.Buffer) error {
 		}
 	}
 	if n := len(payload); n > MaxAllowedV1SendBytes {
-		pkt.Flags |= choykit.PacketFlagError
+		pkt.Flags |= fatchoy.PacketFlagError
 		var data [10]byte
-		payload = choykit.EncodeNumber(protocol.ErrDataCodecFailure, data[:])
+		payload = fatchoy.EncodeNumber(protocol.ErrDataCodecFailure, data[:])
 		log.Errorf("message payload %v too large %d/%d", pkt.Command, n, MaxAllowedV1SendBytes)
 	}
 
@@ -111,7 +111,7 @@ func (c *clientCodec) Encode(pkt *choykit.Packet, buf *bytes.Buffer) error {
 	return nil
 }
 
-func (c *clientCodec) decodeHeader(rd io.Reader, pkt *choykit.Packet, length *int, checksum *uint32) error {
+func (c *clientCodec) decodeHeader(rd io.Reader, pkt *fatchoy.Packet, length *int, checksum *uint32) error {
 	var buf = c.headBuf[:]
 	if _, err := io.ReadFull(rd, buf); err != nil {
 		return err
@@ -125,7 +125,7 @@ func (c *clientCodec) decodeHeader(rd io.Reader, pkt *choykit.Packet, length *in
 }
 
 // 解码消息
-func (c *clientCodec) Decode(rd io.Reader, pkt *choykit.Packet) (int, error) {
+func (c *clientCodec) Decode(rd io.Reader, pkt *fatchoy.Packet) (int, error) {
 	var bodyLen int
 	var checksum uint32
 	if err := c.decodeHeader(rd, pkt, &bodyLen, &checksum); err != nil {
@@ -161,7 +161,7 @@ func (c *clientCodec) Decode(rd io.Reader, pkt *choykit.Packet) (int, error) {
 		return 0, errors.Errorf("message %v checksum mismatch: %x != %x", pkt.Command, checksum, crc)
 	}
 
-	if (pkt.Flags & choykit.PacketFlagCompress) != 0 {
+	if (pkt.Flags & fatchoy.PacketFlagCompress) != 0 {
 		if data, err := UnCompressBytes(ZLIB, payload); err != nil {
 			log.Errorf("uncompress message %d: %v", pkt.Command, err)
 			return 0, err
@@ -169,8 +169,8 @@ func (c *clientCodec) Decode(rd io.Reader, pkt *choykit.Packet) (int, error) {
 			payload = data
 		}
 	}
-	if (pkt.Flags & choykit.PacketFlagError) != 0 {
-		if ec, err := choykit.DecodeU32(payload); err != nil {
+	if (pkt.Flags & fatchoy.PacketFlagError) != 0 {
+		if ec, err := fatchoy.DecodeU32(payload); err != nil {
 			return bytesRead, err
 		} else {
 			pkt.Body = ec
