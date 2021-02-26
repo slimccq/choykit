@@ -15,7 +15,7 @@ pkg/codec    | 协议编解码
 pkg/log      | 日志API
 pkg/protocol | 协议相关
 pkg/qnet     | 网络传输
-pkg/fatchoy  | 基础包
+pkg/fatchoy  | 基础定义包
 pkg/uuid     | 分布式id生成
 pkg/x        | 通用
 
