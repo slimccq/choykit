@@ -7,19 +7,19 @@ package protocol;
 
 import "gogoproto/gogo.proto";
 option (gogoproto.goproto_unrecognized_all) = false;
-option (gogoproto.goproto_unkeyed_all) = false;
-option (gogoproto.goproto_sizecache_all) = false;
-option (gogoproto.goproto_enum_prefix_all) = false;
-option (gogoproto.goproto_registration) = true;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+option (gogoproto.goproto_enum_prefix_all)  = false;
+option (gogoproto.goproto_registration)     = true;
 
 // 节点状态
 enum NodeState {
   StateDown = 0; // 下线
-  StateUp = 1;   // 上线
+  StateUp   = 1; // 上线
 }
 
 // 节点信息
 message NodeInfo {
-  uint32 node = 1;
+  uint32 node      = 1;
   string interface = 2;
 }

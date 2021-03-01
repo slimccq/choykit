@@ -7,15 +7,15 @@ package protocol;
 
 import "gogoproto/gogo.proto";
 option (gogoproto.goproto_unrecognized_all) = false;
-option (gogoproto.goproto_unkeyed_all) = false;
-option (gogoproto.goproto_sizecache_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
 
 import "internal_struct.proto";
 
 // 注册节点
 message RegisterReq {
-  string access_token = 1;    // 认证token
-  uint32 node = 2;            // 节点编号
+  string access_token    = 1; // 认证token
+  uint32 node            = 2; // 节点编号
   bool is_cross_district = 4; // 是否跨区服
 }
 
@@ -25,7 +25,7 @@ message RegisterAck {
 
 // 节点状态变化通知
 message InstanceStateNtf {
-  NodeState state = 1;
+  NodeState state       = 1;
   repeated uint32 peers = 2;
 }
 
@@ -40,7 +40,7 @@ message KeepAliveAck { int64 time = 1; }
 // 订阅消息处理
 message SubscribeReq {
   int32 msg_start = 1;
-  int32 msg_end = 2;
+  int32 msg_end   = 2;
 }
 
 message SubscribeAck {}

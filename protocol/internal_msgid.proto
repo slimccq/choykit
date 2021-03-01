@@ -10,14 +10,14 @@ option (gogoproto.goproto_enum_prefix_all) = false;
 
 // 内部通信协议 [100 - 1000)
 enum InternalMsgType {
-  MSG_INTERNAL_RESERVED = 0;
-  MSG_INTERNAL_KEEP_ALIVE = 101;            // 心跳连接
-  MSG_INTERNAL_KEEP_ALIVE_STATUS = 102;     //
+  MSG_INTERNAL_RESERVED              = 0;
+  MSG_INTERNAL_KEEP_ALIVE            = 101; // 心跳连接
+  MSG_INTERNAL_KEEP_ALIVE_STATUS     = 102; //
   MSG_INTERNAL_INSTANCE_STATE_NOTIFY = 103; // 服务状态通知
-  MSG_INTERNAL_REGISTER = 104;              // 向srv注册自己
-  MSG_INTERNAL_REGISTER_STATUS = 105;       //
-  MSG_INTERNAL_INTRODUCE = 106;             //
-  MSG_INTERNAL_INTRODUCE_STATUS = 107;      //
-  MSG_INTERNAL_SUBSCRIBE = 123;             // 订阅消息处理
-  MSG_INTERNAL_SUBSCRIBE_STATUS = 124;      //
+  MSG_INTERNAL_REGISTER              = 104; // 向srv注册自己
+  MSG_INTERNAL_REGISTER_STATUS       = 105; //
+  MSG_INTERNAL_INTRODUCE             = 106; //
+  MSG_INTERNAL_INTRODUCE_STATUS      = 107; //
+  MSG_INTERNAL_SUBSCRIBE             = 123; // 订阅消息处理
+  MSG_INTERNAL_SUBSCRIBE_STATUS      = 124; //
 }
