@@ -9,15 +9,12 @@ import (
 )
 
 type MessageEncryptor interface {
-	Encrypt(src []byte, dst []byte) error
-	Decrypt(src []byte, dst []byte) error
+	Encrypt(src []byte) ([]byte, error)
+	Decrypt(src []byte) ([]byte, error)
 }
 
-// 消息编码器
-type MessageCodec interface {
-	Clone() MessageCodec
-
-	// 消息编解码
-	Decode(r io.Reader, pkt *Packet, encrypt MessageEncryptor) (int, error)
-	Encode(pkt *Packet, w io.Writer, decrypt MessageEncryptor) error
+// 消息编解码
+type ProtocolCodec interface {
+	Marshal(w io.Writer, pkt *Packet) error
+	Unmarshal(r io.Reader, pkt *Packet) (int, error)
 }

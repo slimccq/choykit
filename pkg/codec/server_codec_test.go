@@ -16,24 +16,23 @@ import (
 
 func newTestV2Packet(bodyLen int) *fatchoy.Packet {
 	var packet = fatchoy.MakePacket()
-	packet.Flags = 0x0
+	packet.Flag = 0x02
 	packet.Node = 0x0501
 	packet.Command = 1234
 	packet.Seq = 2012
-	packet.Referer = 12345678
 	if bodyLen > 0 {
 		packet.Body = strutil.RandBytes(bodyLen)
 	}
 	return packet
 }
 
-func testServerCodec(t *testing.T, c fatchoy.Codec, size int, msgSent *fatchoy.Packet) {
+func testServerCodec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgSent *fatchoy.Packet) {
 	var encoded bytes.Buffer
-	if err := c.Encode(msgSent, &encoded); err != nil {
+	if err := c.Marshal(&encoded, msgSent); err != nil {
 		t.Fatalf("Encode with size %d: %v", size, err)
 	}
 	var msgRecv fatchoy.Packet
-	if _, err := c.Decode(&encoded, &msgRecv); err != nil {
+	if _, err := c.Unmarshal(&encoded, &msgRecv); err != nil {
 		t.Fatalf("Decode with size %d: %v", size, err)
 	}
 	if !isEqualPacket(t, msgSent, &msgRecv) {
@@ -42,7 +41,7 @@ func testServerCodec(t *testing.T, c fatchoy.Codec, size int, msgSent *fatchoy.P
 }
 
 func TestV2CodecSimpleEncode(t *testing.T) {
-	var cdec = NewServerCodec()
+	var cdec = NewServerProtocolCodec()
 	var sizeList = []int{0, 404, 1012, 2014, 4018, 8012, 40487, 1024 * 31, MaxAllowedV2PayloadSize - 100} //
 	for _, n := range sizeList {
 		var pkt = newTestV2Packet(n)
@@ -52,18 +51,18 @@ func TestV2CodecSimpleEncode(t *testing.T) {
 
 func BenchmarkV2ProtocolMarshal(b *testing.B) {
 	b.StopTimer()
-	var cdec = NewServerCodec()
+	var cdec = NewServerProtocolCodec()
 	var size = 4096
 	b.Logf("benchmark with message size %d\n", size)
 	var msg = newTestV2Packet(int(size))
 	b.StartTimer()
 
 	var buf bytes.Buffer
-	if err := cdec.Encode(msg, &buf); err != nil {
+	if err := cdec.Marshal(&buf, msg); err != nil {
 		b.Logf("Encode: %v", err)
 	}
 	var msg2 fatchoy.Packet
-	if _, err := cdec.Decode(&buf, &msg2); err != nil {
+	if _, err := cdec.Unmarshal(&buf, &msg2); err != nil {
 		b.Logf("Decode: %v", err)
 	}
 }

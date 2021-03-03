@@ -5,9 +5,7 @@
 package codec
 
 import (
-	"bytes"
 	"encoding/binary"
-	"hash"
 	"hash/crc32"
 	"io"
 
@@ -31,152 +29,83 @@ const (
 // bytes |  2  |  2   |  2  |  4  |  4  |
 //       --------------------------------
 
-type clientCodec struct {
-	enableSeqChk bool                        // 是否开启序列号检查
-	lastSeq      uint16                      // 序列号
-	encHash      hash.Hash32                 // 解码crc
-	decHash      hash.Hash32                 // 编码crc
-	headBuf      [ClientCodecHeaderSize]byte // 收包buffer
+type clientProtocolCodec struct {
 }
 
-func NewClientCodec() *clientCodec {
-	return &clientCodec{
-		encHash: crc32.NewIEEE(),
-		decHash: crc32.NewIEEE(),
-	}
+var ClientProtocolCodec = NewClientProtocolCodec()
+
+func NewClientProtocolCodec() fatchoy.ProtocolCodec {
+	return &clientProtocolCodec{}
 }
 
-func (c *clientCodec) Version() uint8 {
-	return ClientCodecVersion
-}
-
-func (c *clientCodec) Clone() fatchoy.Codec {
-	return &clientCodec{
-		encHash: crc32.NewIEEE(),
-		decHash: crc32.NewIEEE(),
-	}
-}
-
-func (c *clientCodec) SetSeqNo(seq uint16) {
-	c.enableSeqChk = true
-	c.lastSeq = seq
-}
-
-func (c *clientCodec) SetEncryptKey(key, iv []byte) {
-	// TODO:
-}
-
-func (c *clientCodec) encodeHeader(pkt *fatchoy.Packet, length uint16, buffer *bytes.Buffer) {
-	var tmpbuf [ClientCodecHeaderSize]byte
-	binary.LittleEndian.PutUint16(tmpbuf[0:], length)
-	binary.LittleEndian.PutUint16(tmpbuf[2:], pkt.Flags)
-	binary.LittleEndian.PutUint16(tmpbuf[4:], pkt.Seq)
-	binary.LittleEndian.PutUint32(tmpbuf[6:], pkt.Command)
-	c.encHash.Write(tmpbuf[:ClientCodecHeaderSize-4])
-	binary.LittleEndian.PutUint32(tmpbuf[10:], c.encHash.Sum32())
-	buffer.Write(tmpbuf[0:])
-}
-
-// 编码消息
-func (c *clientCodec) Encode(pkt *fatchoy.Packet, buf *bytes.Buffer) error {
-	payload, err := pkt.Encode()
+// 把消息内容写入w，对消息的压缩和加密请在上层处理
+func (c *clientProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
+	payload, err := pkt.EncodeBody()
 	if err != nil {
 		return err
 	}
-	if (pkt.Flags & fatchoy.PacketFlagCompress) != 0 {
-		if data, err := CompressBytes(ZLIB, DefaultCompression, payload); err != nil {
-			log.Errorf("compress message %d: %v", pkt.Command, err)
-			return err
-		} else {
-			payload = data
-		}
-	}
 	if n := len(payload); n > MaxAllowedV1SendBytes {
-		pkt.Flags |= fatchoy.PacketFlagError
+		pkt.Flag |= fatchoy.PacketFlagError
 		var data [10]byte
 		payload = fatchoy.EncodeNumber(protocol.ErrDataCodecFailure, data[:])
 		log.Errorf("message payload %v too large %d/%d", pkt.Command, n, MaxAllowedV1SendBytes)
 	}
 
-	c.encHash.Reset()
-	n := len(payload)
+	hash := crc32.NewIEEE()
+	n := uint16(len(payload))
+	var headbuf [ClientCodecHeaderSize]byte
+	binary.LittleEndian.PutUint16(headbuf[0:], n)
+	binary.LittleEndian.PutUint16(headbuf[2:], pkt.Flag)
+	binary.LittleEndian.PutUint16(headbuf[4:], pkt.Seq)
+	binary.LittleEndian.PutUint32(headbuf[6:], pkt.Command)
+	hash.Write(headbuf[:ClientCodecHeaderSize-4])
 	if n > 0 {
-		c.encHash.Write(payload)
+		hash.Write(payload)
 	}
-	buf.Grow(ClientCodecHeaderSize + n)
-	c.encodeHeader(pkt, uint16(n), buf)
+	binary.LittleEndian.PutUint32(headbuf[ClientCodecHeaderSize-4:], hash.Sum32())
+	w.Write(headbuf[0:])
 	if n > 0 {
-		buf.Write(payload)
+		w.Write(payload)
 	}
 	return nil
 }
 
-func (c *clientCodec) decodeHeader(rd io.Reader, pkt *fatchoy.Packet, length *int, checksum *uint32) error {
-	var buf = c.headBuf[:]
-	if _, err := io.ReadFull(rd, buf); err != nil {
-		return err
-	}
-	*length = int(binary.LittleEndian.Uint16(c.headBuf[0:]))
-	pkt.Flags = binary.LittleEndian.Uint16(buf[2:])
-	pkt.Seq = binary.LittleEndian.Uint16(buf[4:])
-	pkt.Command = binary.LittleEndian.Uint32(buf[6:])
-	*checksum = binary.LittleEndian.Uint32(c.headBuf[10:])
-	return nil
-}
-
-// 解码消息
-func (c *clientCodec) Decode(rd io.Reader, pkt *fatchoy.Packet) (int, error) {
-	var bodyLen int
-	var checksum uint32
-	if err := c.decodeHeader(rd, pkt, &bodyLen, &checksum); err != nil {
+// 从r中读取消息内容，只检查包体大小和校验码，压缩和解密请在之后处理
+func (c *clientProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, error) {
+	var headbuf [ClientCodecHeaderSize]byte
+	if _, err := io.ReadFull(r, headbuf[:]); err != nil {
 		return 0, err
 	}
+	bodyLen := int(binary.LittleEndian.Uint16(headbuf[0:]))
+	pkt.Flag = binary.LittleEndian.Uint16(headbuf[2:])
+	pkt.Seq = binary.LittleEndian.Uint16(headbuf[4:])
+	pkt.Command = binary.LittleEndian.Uint32(headbuf[6:])
+	checksum := binary.LittleEndian.Uint32(headbuf[10:])
+
 	if bodyLen > MaxAllowedV1RecvBytes {
 		return 0, errors.Errorf("packet %d payload size overflow %d/%d",
-			bodyLen, bodyLen, MaxAllowedV1RecvBytes)
+			pkt.Command, bodyLen, MaxAllowedV1RecvBytes)
 	}
-	if c.enableSeqChk {
-		if pkt.Seq != c.lastSeq {
-			return 0, errors.Errorf("packet %v seq mismatch %d != %d", pkt.Command, pkt.Seq, c.lastSeq)
-		}
-		c.lastSeq++
-	}
+
 	var bytesRead = ClientCodecHeaderSize
 	if bodyLen == 0 {
-		if crc := crc32.ChecksumIEEE(c.headBuf[:ClientCodecHeaderSize-4]); crc != checksum {
+		if crc := crc32.ChecksumIEEE(headbuf[:ClientCodecHeaderSize-4]); crc != checksum {
 			return 0, errors.Errorf("message %v header checksum mismatch %x != %x",
 				pkt.Command, checksum, crc)
 		}
 		return bytesRead, nil
 	}
 	var payload = make([]byte, bodyLen)
-	if _, err := io.ReadFull(rd, payload); err != nil {
+	if _, err := io.ReadFull(r, payload); err != nil {
 		return 0, err
 	}
 	bytesRead += bodyLen
-	c.decHash.Reset()
-	c.decHash.Write(payload)
-	c.decHash.Write(c.headBuf[:ClientCodecHeaderSize-4])
-	if crc := c.decHash.Sum32(); checksum != crc {
+	hash := crc32.NewIEEE()
+	hash.Write(headbuf[:ClientCodecHeaderSize-4])
+	hash.Write(payload)
+	if crc := hash.Sum32(); checksum != crc {
 		return 0, errors.Errorf("message %v checksum mismatch: %x != %x", pkt.Command, checksum, crc)
 	}
-
-	if (pkt.Flags & fatchoy.PacketFlagCompress) != 0 {
-		if data, err := UnCompressBytes(ZLIB, payload); err != nil {
-			log.Errorf("uncompress message %d: %v", pkt.Command, err)
-			return 0, err
-		} else {
-			payload = data
-		}
-	}
-	if (pkt.Flags & fatchoy.PacketFlagError) != 0 {
-		if ec, err := fatchoy.DecodeU32(payload); err != nil {
-			return bytesRead, err
-		} else {
-			pkt.Body = ec
-		}
-	} else {
-		pkt.Body = payload
-	}
+	pkt.Body = payload
 	return bytesRead, nil
 }

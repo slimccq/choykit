@@ -32,7 +32,7 @@ type Endpoint interface {
 
 	RawConn() net.Conn
 	Stats() *Stats
-	Codec() MessageCodec
+	Codec() ProtocolCodec
 
 	Go(write, read bool)
 

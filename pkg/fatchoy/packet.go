@@ -17,8 +17,8 @@ const (
 	PacketFlagRefer    = 0x0200
 	PacketFlagRpc      = 0x0400
 	PacketFlagJSONText = 0x0800
-	PacketFlagCompress = 0x0001
-	PacketFlagEncrypt  = 0x0002
+	PacketFlagCompressed = 0x0001
+	PacketFlagEncrypted  = 0x0002
 
 	PacketFlagBitsMask = 0xFF00 // 低8位的标志用于传输处理，完成传输后需要清除，不能再返回给ack
 )
@@ -88,7 +88,7 @@ func (m *Packet) SetErrno(ec uint32) {
 	m.Body = uint32(ec)
 }
 
-func (m *Packet) Encode() ([]byte, error) {
+func (m *Packet) EncodeBody() ([]byte, error) {
 	if m.Body == nil {
 		return nil, nil
 	}
@@ -100,7 +100,7 @@ func (m *Packet) Encode() ([]byte, error) {
 }
 
 // 解码为string
-func (m *Packet) DecodeAsString() string {
+func (m *Packet) DecodeBodyAsString() string {
 	s := DecodeAsString(m.Body)
 	m.Body = nil
 	return s

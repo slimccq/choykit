@@ -16,7 +16,7 @@ import (
 
 func newTestV1Packet(bodyLen int) *fatchoy.Packet {
 	var packet = fatchoy.MakePacket()
-	packet.Flags = 0x0
+	packet.Flag = 0x0
 	packet.Command = 2134
 	packet.Seq = 2002
 	if bodyLen > 0 {
@@ -25,13 +25,13 @@ func newTestV1Packet(bodyLen int) *fatchoy.Packet {
 	return packet
 }
 
-func testV1Codec(t *testing.T, c fatchoy.Codec, size int, msgToSend *fatchoy.Packet) {
+func testV1Codec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgToSend *fatchoy.Packet) {
 	var encoded bytes.Buffer
-	if err := c.Encode(msgToSend, &encoded); err != nil {
+	if err := c.Marshal(&encoded, msgToSend); err != nil {
 		t.Fatalf("Encode failure: size %d, %v", size, err)
 	}
 	var msgToRecv fatchoy.Packet
-	if _, err := c.Decode(&encoded, &msgToRecv); err != nil {
+	if _, err := c.Unmarshal(&encoded, &msgToRecv); err != nil {
 		t.Fatalf("Decode failure: size: %d, %v", size, err)
 	}
 	if !isEqualPacket(t, msgToSend, &msgToRecv) {
@@ -39,8 +39,8 @@ func testV1Codec(t *testing.T, c fatchoy.Codec, size int, msgToSend *fatchoy.Pac
 	}
 }
 
-func TestV1CodecSimpleEncode(t *testing.T) {
-	var cdec = NewClientCodec()
+func TestV1CodecEncode(t *testing.T) {
+	var cdec = NewClientProtocolCodec()
 	var sizeList = []int{0 /*101, 202, 303, 404, 505, 606, 1012, 2014, 4018, */, 8012, MaxAllowedV1RecvBytes - 100} //
 	for _, n := range sizeList {
 		var pkt = newTestV1Packet(n)
@@ -50,17 +50,17 @@ func TestV1CodecSimpleEncode(t *testing.T) {
 
 func BenchmarkV1ProtocolMarshal(b *testing.B) {
 	b.StopTimer()
-	var cdec = NewClientCodec()
+	var cdec = NewClientProtocolCodec()
 	var size = 1000
 	b.Logf("benchmark with message size %d\n", size)
 	var msg = newTestV1Packet(int(size))
 	b.StartTimer()
 	var buf bytes.Buffer
-	if err := cdec.Encode(msg, &buf); err != nil {
+	if err := cdec.Marshal(&buf, msg); err != nil {
 		b.Logf("Encode: %v", err)
 	}
 	var msg2 fatchoy.Packet
-	if _, err := cdec.Decode(&buf, &msg2); err != nil {
+	if _, err := cdec.Unmarshal(&buf, &msg2); err != nil {
 		b.Logf("Decode: %v", err)
 	}
 }
