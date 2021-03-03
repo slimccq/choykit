@@ -6,8 +6,14 @@ package cipher
 
 import (
 	"bytes"
+	"math/rand"
 	"testing"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // Run command below to generate test key files:
 // 	openssl genrsa -out rsa_prikey.pem 1024
@@ -36,4 +42,22 @@ func TestRSADecrypt(t *testing.T) {
 		t.Fatalf("data not equal after encryption/decription")
 	}
 	t.Logf("RSA encryption OK")
+}
+
+func randBytes(length int) []byte {
+	if length <= 0 {
+		return nil
+	}
+	result := make([]byte, length)
+	for i := 0; i < length; i++ {
+		ch := uint8(rand.Int31() % 0xFF)
+		result[i] = ch
+	}
+	return result
+}
+
+func cloneBytes(data []byte) []byte {
+	newdata := make([]byte, len(data))
+	copy(newdata, data)
+	return newdata
 }
