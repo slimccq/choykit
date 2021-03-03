@@ -6,7 +6,13 @@ package fatchoy
 
 import "testing"
 
-func TestNewPacket(t *testing.T) {
-	pkt := NewPacket(1234, 1001,  1, 12, "hello")
-	t.Logf("%v", pkt)
+func TestPacketQueue(t *testing.T) {
+	q := NewPacketQueue()
+	for i := 0; i < 1000; i++ {
+		pkt := MakePacket()
+		q.Push(pkt)
+	}
+	for i := 0; i < 1000; i++ {
+		q.Pop()
+	}
 }

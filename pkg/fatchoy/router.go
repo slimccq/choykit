@@ -207,7 +207,7 @@ func (r *BasicRoutePolicy) Multicast(router *Router, pkt *Packet) bool {
 	case dest.Service() == protocol.ServiceAll: // 广播所有服务，限定区服
 		var from = pkt.Endpoint.NodeID()
 		for _, entry := range router.EntryList() {
-			if dest.Service() == entry.src.Service() && dest.District() == entry.src.District() {
+			if dest.Service() == entry.src.Service()  {
 				if endpoint := r.endpoints.Get(entry.dest); endpoint != nil {
 					var copy = pkt.Clone()
 					copy.Node = from
@@ -221,7 +221,7 @@ func (r *BasicRoutePolicy) Multicast(router *Router, pkt *Packet) bool {
 	case dest.Instance() == protocol.InstanceAll: // 广播服务下的所有实例，限定区服
 		var from = pkt.Endpoint.NodeID()
 		for _, entry := range router.EntryList() {
-			if dest.Instance() == entry.dest.Instance() && dest.District() == entry.src.District() {
+			if dest.Instance() == entry.dest.Instance() {
 				if endpoint := r.endpoints.Get(entry.dest); endpoint != nil {
 					var copy = pkt.Clone()
 					copy.Node = from

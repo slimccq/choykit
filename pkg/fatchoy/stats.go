@@ -5,11 +5,11 @@
 package fatchoy
 
 import (
-	"sync"
+	"sync/atomic"
 )
 
+// 一组计数器
 type Stats struct {
-	mu  sync.RWMutex
 	arr []int64
 }
 
@@ -17,41 +17,34 @@ func NewStats(n int) *Stats {
 	return &Stats{arr: make([]int64, n)}
 }
 
-func (s *Stats) Get(field int) (v int64) {
-	s.mu.RLock()
-	if field >= 0 && field < len(s.arr) {
-		v = s.arr[field]
+func (s *Stats) Get(i int) int64 {
+	if i >= 0 && i < len(s.arr) {
+		return atomic.LoadInt64(&s.arr[i])
 	}
-	s.mu.RUnlock()
-	return v
+	return 0
 }
 
-func (s *Stats) Set(field int, v int64) {
-	s.mu.Lock()
-	if field >= 0 && field < len(s.arr) {
-		s.arr[field] = v
+func (s *Stats) Set(i int, v int64) {
+	if i >= 0 && i < len(s.arr) {
+		atomic.StoreInt64(&s.arr[i], v)
 	}
-	s.mu.Unlock()
 }
 
-func (s *Stats) Add(field int, delta int64) (v int64) {
-	s.mu.Lock()
-	if field >= 0 && field < len(s.arr) {
-		s.arr[field] += delta
-		v = s.arr[field]
+func (s *Stats) Add(i int, delta int64) int64 {
+	if i >= 0 && i < len(s.arr) {
+		return atomic.AddInt64(&s.arr[i], delta)
 	}
-	s.mu.Unlock()
-	return v
+	return 0
 }
 
-func (s *Stats) Values() []int64 {
-	v := make([]int64, len(s.arr))
-	s.mu.RLock()
-	copy(v, s.arr)
-	s.mu.RUnlock()
-	return v
+func (s *Stats) Copy() []int64 {
+	arr := make([]int64, len(s.arr))
+	for i := 0; i < len(arr); i++ {
+		arr[i] = atomic.LoadInt64(&s.arr[i])
+	}
+	return arr
 }
 
 func (s *Stats) Clone() *Stats {
-	return &Stats{arr: s.Values()}
+	return &Stats{arr: s.Copy()}
 }

@@ -24,10 +24,8 @@ type Options struct {
 	WorkingDir        string `short:"W" long:"workdir" description:"runtime working directory"`
 	ResourceDir       string `short:"R" long:"resdir" description:"resource directory"`
 	ServiceType       string `short:"S" long:"service-type" description:"name of service type"`
-	ServiceIndex      int    `short:"N" long:"service-index" description:"instance index of this service"`
-	ServiceDistrict   int    `short:"D" long:"service-district" description:"district of this service"`
+	ServiceIndex      int16  `short:"N" long:"service-index" description:"instance index of this service"`
 	ServiceDependency string `short:"P" long:"dependency" description:"service dependency list"`
-	IsCrossDistrict   bool   `short:"X" long:"cross-district" description:"serve all districts"`
 	Interface         string `short:"I" long:"interface" description:"service interface address"`
 	LogLevel          string `short:"L" long:"loglevel" description:"debug,info,warn,error,fatal,panic"`
 	EtcdAddress       string `short:"F" long:"etcd-addr" description:"etcd host address"`

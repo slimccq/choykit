@@ -10,20 +10,19 @@ import (
 	"devpkg.work/choykit/pkg/x/collections"
 )
 
-// A memory-bound packet queue
+// 一个无边界限制的Packet队列
 type PacketQueue struct {
 	mu  sync.Mutex        // mutex object
 	rep collections.Queue // queue representation
 	C   chan struct{}     // notify channel
 }
 
-func NewMessageQueue() *PacketQueue {
+func NewPacketQueue() *PacketQueue {
 	q := &PacketQueue{}
 	q.Reset()
 	return q
 }
 
-// initializes or clears
 func (q *PacketQueue) Reset() {
 	q.mu.Lock()
 	q.C = make(chan struct{}, 1)
@@ -47,6 +46,7 @@ func (q *PacketQueue) Len() int {
 	return n
 }
 
+// 压入队列
 func (q *PacketQueue) Push(v *Packet) {
 	q.mu.Lock()
 	q.rep.Push(v)
@@ -54,6 +54,7 @@ func (q *PacketQueue) Push(v *Packet) {
 	q.Notify()
 }
 
+// 取出队列头部元素
 func (q *PacketQueue) Peek() *Packet {
 	q.mu.Lock()
 	if v, ok := q.rep.Front(); !ok {
@@ -66,6 +67,7 @@ func (q *PacketQueue) Peek() *Packet {
 	}
 }
 
+// 弹出队列
 func (q *PacketQueue) Pop() *Packet {
 	q.mu.Lock()
 	if v, ok := q.rep.Pop(); !ok {

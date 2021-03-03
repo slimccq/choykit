@@ -6,6 +6,7 @@ package fatchoy
 
 import (
 	"errors"
+	"os"
 	"sync/atomic"
 
 	"devpkg.work/choykit/pkg/log"
@@ -22,15 +23,14 @@ const (
 
 var (
 	ErrExecutorClosed = errors.New("executor is closed")
-	ErrExecutorBusy   = errors.New("executor is busy")
 )
 
 // Runner执行器
 type Executor struct {
 	Scheduler
 	closing     int32       //
-	concurrency int32       // 并发
-	bus         chan Runner // 待执行队列
+	concurrency int32       // 并发数
+	bus         chan Runner // 待执行runner队列
 	stats       *Stats      // 执行统计
 }
 
@@ -48,15 +48,20 @@ func (e *Executor) Stats() *Stats {
 
 func (e *Executor) Go() {
 	e.Scheduler.Go()
+	e.start()
+}
+
+func (e *Executor) start() {
 	if e.concurrency <= 1 {
 		e.wg.Add(1)
-		go e.serveOne()
+		go e.serveAllInOne()
 		return
 	}
 	// 多线程模式
 	e.wg.Add(1)
-	go e.serveTimer() // 所有的timer由同一个goroutine执行
-	for i := 1; i < int(e.concurrency); i++ {
+	// 所有的timer由同一个goroutine执行
+	go e.serveTimer()
+	for i := 1; i <= int(e.concurrency); i++ {
 		e.wg.Add(1)
 		go e.serveRunner(i)
 	}
@@ -90,36 +95,43 @@ func (e *Executor) Busyness() float32 {
 	return float32(len(e.bus)) / float32(cap(e.bus))
 }
 
+// 超过1/2的runner在等待的时候打印警告
 func (e *Executor) showPending() {
-	if n := len(e.bus); n > cap(e.bus)/2 {
-		log.Warnf("more than half runner(%d/%d) are pending!", n, len(e.bus)/2)
+	half := cap(e.bus) / 2
+	if n := len(e.bus); n > half {
+		log.Warnf("more than half runners(%d/%d) are pending!!!", n, half)
 	}
 }
 
-// 执行剩下的runner
-func (e *Executor) finally() {
-	for r := range e.bus {
-		e.run(r)
+func (e *Executor) catch(r Runner) {
+	if v := recover(); v != nil {
+		e.stats.Add(StatError, 1)
+		Backtrace(v, os.Stderr)
 	}
 }
 
 func (e *Executor) run(r Runner) {
-	defer Catch()
+	defer e.catch(r)
+	e.stats.Add(StatExec, 1)
 	if err := r.Run(); err != nil {
 		e.stats.Add(StatError, 1)
 		log.Errorf("execute runner (%T): %v", r, err)
 	}
 }
 
-func (e *Executor) serveOne() {
-	defer e.wg.Done()
-	defer log.Debugf("executor stop serving with #%d runner left", len(e.bus))
-	log.Debugf("executor start serving with capacity %d", cap(e.bus))
+func (e *Executor) serveAllInOne() {
+	defer func() {
+		e.wg.Done()
+		e.stats.Add(StatDropped, int64(len(e.bus)))
+		log.Debugf("executor stop serving, #%d runner left", len(e.bus))
+	}()
+	log.Debugf("executor start serving, capacity %d", cap(e.bus))
 	for {
 		var runner Runner
 		select {
 		case r, ok := <-e.bus:
 			if !ok { // runner channel is closed
+
 				return
 			}
 			runner = r
@@ -132,22 +144,21 @@ func (e *Executor) serveOne() {
 			e.stats.Add(StatTimer, 1)
 
 		case <-e.done:
-			e.finally()
-			log.Debugf("executor stop serving")
 			return
 		}
 
 		e.showPending()
 		e.run(runner)
-		e.stats.Add(StatExec, 1)
 	}
 }
 
-func (e *Executor) serveRunner(i int) {
-	defer e.wg.Done()
-	defer log.Debugf("executor stop serving runner")
-	log.Debugf("executor start serving runner")
-	defer e.finally()
+func (e *Executor) serveRunner(idx int) {
+	defer func() {
+		e.wg.Done()
+		log.Debugf("executor #%d stop serving, #%d runner left", idx, len(e.bus))
+	}()
+
+	log.Debugf("executor #%d start serving runner", idx)
 	for {
 		select {
 		case r, ok := <-e.bus:
@@ -165,8 +176,12 @@ func (e *Executor) serveRunner(i int) {
 }
 
 func (e *Executor) serveTimer() {
-	defer e.wg.Done()
-	defer log.Debugf("executor stop serving timer")
+	defer func() {
+		e.wg.Done()
+		e.stats.Add(StatDropped, int64(len(e.bus)))
+		log.Debugf("executor stop serving timer")
+	}()
+
 	log.Debugf("executor start serving timer")
 	for {
 		select {
@@ -177,7 +192,6 @@ func (e *Executor) serveTimer() {
 			e.showPending()
 			e.stats.Add(StatTimer, 1)
 			e.run(timer.R)
-			e.stats.Add(StatExec, 1)
 
 		case <-e.done:
 			return

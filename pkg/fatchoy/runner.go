@@ -4,7 +4,7 @@
 
 package fatchoy
 
-// Runner是一个可执行对象接口
+// Runner是一个可执行对象
 type Runner interface {
 	Run() error
 }
@@ -23,6 +23,7 @@ func NewRunner(f func() error) Runner {
 	}
 }
 
+// 会捕获panic的runner
 type CapturedRunnable struct {
 	F func() error
 }

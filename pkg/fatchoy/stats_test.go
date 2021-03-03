@@ -29,7 +29,7 @@ func TestStatsSet(t *testing.T) {
 	}
 }
 
-func TestStatsSetMuti(t *testing.T) {
+func TestStatsConcurrentSet(t *testing.T) {
 	count := 1000
 	var wg sync.WaitGroup
 	s := NewStats(count)
@@ -59,7 +59,7 @@ func TestStatsSetMuti(t *testing.T) {
 	wg.Wait()
 }
 
-func TestStatsAdd(t *testing.T) {
+func TestStatsConcurrentAdd(t *testing.T) {
 	count := 100000
 	var wg sync.WaitGroup
 	s := NewStats(count)
@@ -71,7 +71,7 @@ func TestStatsAdd(t *testing.T) {
 		}
 	}()
 	wg.Wait()
-	slice := s.Values()
+	slice := s.Copy()
 	for i := 0; i < count; i++ {
 		if v := slice[i]; v != int64(i*10+1) {
 			t.Fatalf("index: %v, expect %v, but got %v", i, i*10+1, v)

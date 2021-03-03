@@ -12,11 +12,13 @@ import (
 
 var std *datetime.Clock // default clock
 
+// 开启时钟
 func StartClock() {
 	std = datetime.NewClock(0)
 	std.Go()
 }
 
+// 关闭时钟
 func StopClock() {
 	if std != nil {
 		std.Stop()

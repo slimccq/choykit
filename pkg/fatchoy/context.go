@@ -20,12 +20,12 @@ type ServiceContext struct {
 	guard      sync.Mutex     // guard finalizers
 	finalizers []func()       // finalizers
 	service    Service        // service对象
-	env        *Environ       // service的运行环境
+	env        *Environ       // 环境变量
 	opt        *Options       // 命令行参数
 	router     *Router        // 路由对象
-	inbound    chan *Packet   // 收到待处理的消息
-	outbound   chan *Packet   // 待发送的消息
-	filter     PacketFilter   // Message filter
+	inbound    chan *Packet   // 收取消息队列
+	outbound   chan *Packet   // 发送消息队列
+	filter     PacketFilter   // 消息过滤器(rpc使用)
 }
 
 func NewServiceContext(opt *Options, env *Environ) *ServiceContext {

@@ -20,9 +20,9 @@ func Catch() {
 	}
 }
 
-func Backtrace(message interface{}, fp *os.File) {
-	if fp == nil {
-		fp = os.Stderr
+func Backtrace(message interface{}, f *os.File) {
+	if f == nil {
+		f = os.Stderr
 	}
 	var buf bytes.Buffer
 	var now = time.Now()
@@ -35,5 +35,5 @@ func Backtrace(message interface{}, fp *os.File) {
 		fmt.Fprintf(&buf, "% 3d. %s() %s:%d\n", i, runtime.FuncForPC(pc).Name(), file, line)
 	}
 	fmt.Fprintf(&buf, "%v\n", message)
-	buf.WriteTo(fp)
+	buf.WriteTo(f)
 }

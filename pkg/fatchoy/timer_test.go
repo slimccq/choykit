@@ -53,8 +53,8 @@ func TestTimerHeap(t *testing.T) {
 		var delay = rand.Int() % 1000
 		var expire = now.Add(time.Millisecond * time.Duration(delay))
 		item := &TimerNode{
-			Priority: expire.UnixNano(),
-			delay:    int32(delay),
+			ExpireTs: expire.UnixNano(),
+			interval: int32(delay),
 			id:       i,
 		}
 		pq.Push(item)
@@ -67,8 +67,8 @@ func TestTimerHeap(t *testing.T) {
 		var delay = rand.Int() % 1000
 		var expire = now.Add(time.Millisecond + time.Duration(delay))
 		item := &TimerNode{
-			Priority: expire.UnixNano(),
-			delay:    int32(delay),
+			ExpireTs: expire.UnixNano(),
+			interval: int32(delay),
 			id:       i,
 		}
 		heap.Push(&pq, item)

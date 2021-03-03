@@ -34,10 +34,9 @@ var (
 
 // 应用层消息
 type Packet struct {
-	Command  uint32          `json:"cmd"`            // 消息ID
-	Seq      uint16          `json:"seq"`            // 消息序列号
-	Flags    uint16          `json:"flg,omitempty"`  // 消息标记位
-	Referer  uint32          `json:"ref,omitempty"`  // 引用的client session
+	Command  uint32          `json:"cmd"`            // 指令ID
+	Seq      uint16          `json:"seq"`            // 序列号
+	Flag     uint16          `json:"flg,omitempty"`  // 标记位
 	Node     NodeID          `json:"node,omitempty"` // 目标节点
 	Body     interface{}     `json:"body,omitempty"` // 消息内容，integer/bytes/string/pb.Message
 	Endpoint MessageEndpoint `json:"-"`              // 关联的endpoint
@@ -47,13 +46,12 @@ func MakePacket() *Packet {
 	return &Packet{}
 }
 
-func NewPacket(node NodeID, command, refer uint32, flags, seq uint16, body interface{}) *Packet {
+func NewPacket(node NodeID, command uint32, flag, seq uint16, body interface{}) *Packet {
 	var pkt = &Packet{}
 	pkt.Node = node
 	pkt.Command = command
-	pkt.Flags = flags
+	pkt.Flag = flag
 	pkt.Seq = seq
-	pkt.Referer = refer
 	pkt.Body = body
 	return pkt
 }
@@ -61,8 +59,7 @@ func NewPacket(node NodeID, command, refer uint32, flags, seq uint16, body inter
 func (m *Packet) Reset() {
 	m.Command = 0
 	m.Seq = 0
-	m.Flags = 0
-	m.Referer = 0
+	m.Flag = 0
 	m.Node = 0
 	m.Body = nil
 	m.Endpoint = nil
@@ -72,23 +69,22 @@ func (m *Packet) Clone() *Packet {
 	var pkt = &Packet{}
 	pkt.Node = m.Node
 	pkt.Command = m.Command
-	pkt.Flags = m.Flags
+	pkt.Flag = m.Flag
 	pkt.Seq = m.Seq
-	pkt.Referer = m.Referer
 	pkt.Body = m.Body
 	pkt.Endpoint = m.Endpoint
 	return pkt
 }
 
 func (m *Packet) Errno() uint32 {
-	if (m.Flags & PacketFlagError) != 0 {
+	if (m.Flag & PacketFlagError) != 0 {
 		return m.Body.(uint32)
 	}
 	return 0
 }
 
 func (m *Packet) SetErrno(ec uint32) {
-	m.Flags |= PacketFlagError
+	m.Flag |= PacketFlagError
 	m.Body = uint32(ec)
 }
 
@@ -137,19 +133,18 @@ func (m *Packet) Reply(ack proto.Message) error {
 }
 
 func (m *Packet) ReplyAny(command uint32, data interface{}) error {
-	var flags = m.Flags & PacketFlagBitsMask
-	var pkt = NewPacket(m.Endpoint.NodeID(), command, 0, flags, m.Seq, data)
+	var flags = m.Flag & PacketFlagBitsMask
+	var pkt = NewPacket(m.Endpoint.NodeID(), command, flags, m.Seq, data)
 	return m.Endpoint.SendPacket(pkt)
 }
 
 // Refuse with errno
 func (m *Packet) Refuse(command int32, errno uint32) error {
-	var flags = m.Flags & PacketFlagBitsMask
-	var pkt = NewPacket(m.Endpoint.NodeID(), uint32(command), 0, flags|PacketFlagError, m.Seq, uint32(errno))
+	var flags = m.Flag & PacketFlagBitsMask
+	var pkt = NewPacket(m.Endpoint.NodeID(), uint32(command), flags|PacketFlagError, m.Seq, uint32(errno))
 	return m.Endpoint.SendPacket(pkt)
 }
 
 func (m Packet) String() string {
-	return fmt.Sprintf("%v c:%d seq:%d r:%d 0x%x %T", m.Node, m.Command, m.Seq, m.Referer,
-		m.Flags, m.Body)
+	return fmt.Sprintf("%v c:%d seq:%d 0x%x %T", m.Node, m.Command, m.Seq, m.Flag, m.Body)
 }

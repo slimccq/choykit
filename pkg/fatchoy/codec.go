@@ -5,19 +5,19 @@
 package fatchoy
 
 import (
-	"bytes"
 	"io"
 )
 
-// 消息编码器
-type Codec interface {
-	Version() uint8
-	Clone() Codec
+type MessageEncryptor interface {
+	Encrypt(src []byte, dst []byte) error
+	Decrypt(src []byte, dst []byte) error
+}
 
-	SetSeqNo(seq uint16)
-	SetEncryptKey(key, iv []byte)
+// 消息编码器
+type MessageCodec interface {
+	Clone() MessageCodec
 
 	// 消息编解码
-	Decode(rd io.Reader, pkt *Packet) (int, error)
-	Encode(pkt *Packet, buf *bytes.Buffer) error
+	Decode(r io.Reader, pkt *Packet, encrypt MessageEncryptor) (int, error)
+	Encode(pkt *Packet, w io.Writer, decrypt MessageEncryptor) error
 }
