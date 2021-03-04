@@ -17,15 +17,15 @@ import (
 // Websocket server
 type WsServer struct {
 	server   *http.Server
-	upgrader *websocket.Upgrader  //
-	pending  chan *WsConn         //
-	errChan  chan error           //
-	inbound  chan *fatchoy.Packet // incoming message queue
-	codec    fatchoy.Codec        // message codec
-	outsize  int                  // outgoing queue size
+	upgrader *websocket.Upgrader   //
+	pending  chan *WsConn          //
+	errChan  chan error            //
+	inbound  chan *fatchoy.Packet  // incoming message queue
+	encoder  fatchoy.ProtocolCodec // message codec
+	outsize  int                   // outgoing queue size
 }
 
-func NewWebsocketServer(addr, path string, cdec fatchoy.Codec, inbound chan *fatchoy.Packet, outsize int) *WsServer {
+func NewWebsocketServer(addr, path string, encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int) *WsServer {
 	mux := http.NewServeMux()
 	var server = &http.Server{
 		Addr:              addr,
@@ -38,7 +38,7 @@ func NewWebsocketServer(addr, path string, cdec fatchoy.Codec, inbound chan *fat
 	}
 	ws := &WsServer{
 		server:  server,
-		codec:   cdec,
+		encoder: encoder,
 		inbound: inbound,
 		outsize: outsize,
 		errChan: make(chan error, 32),
@@ -57,7 +57,7 @@ func (s *WsServer) onRequest(w http.ResponseWriter, r *http.Request) {
 		log.Errorf("WebSocket upgrade %s, %v", r.RemoteAddr, err)
 		return
 	}
-	wsconn := NewWsConn(0, conn, s.codec.Clone(), s.errChan, s.inbound, s.outsize, nil)
+	wsconn := NewWsConn(0, conn, s.encoder, s.errChan, s.inbound, s.outsize, nil)
 	log.Infof("websocket connection %s established", wsconn.RemoteAddr())
 	defer wsconn.Close()
 	wsconn.Go(true, false)
@@ -88,5 +88,5 @@ func (s *WsServer) Shutdown() {
 	s.pending = nil
 	s.inbound = nil
 	s.server = nil
-	s.codec = nil
+	s.encoder = nil
 }

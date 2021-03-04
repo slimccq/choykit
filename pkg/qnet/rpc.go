@@ -151,7 +151,7 @@ func (r *RpcFactory) makeCall(ctx *RpcContext) *RpcContext {
 	r.registry[ctx.reply] = true
 	var seq = r.counter()
 	ctx.deadline = fatchoy.Now().Add(r.ttl)
-	var pkt = fatchoy.NewPacket(ctx.node, uint32(ctx.command), 0, fatchoy.PacketFlagRpc, seq, ctx.body)
+	var pkt = fatchoy.NewPacket(ctx.node, uint32(ctx.command), fatchoy.PacketFlagRpc, seq, ctx.body)
 	r.ctx.SendMessage(pkt)
 	r.pending[seq] = ctx
 	return ctx

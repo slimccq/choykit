@@ -28,10 +28,9 @@ func startClient(t *testing.T, addr, path string) {
 	defer c.Close()
 
 	var pkt fatchoy.Packet
-	pkt.Flags |= fatchoy.PacketFlagJSONText
+	pkt.Flag |= fatchoy.PacketFlagJSONText
 	pkt.Command = 1234
 	pkt.Seq = 100
-	pkt.Referer = 222
 	pkt.Body = "ping"
 
 	data, err := json.Marshal(pkt)
@@ -62,8 +61,8 @@ func TestWebsocketServer(t *testing.T) {
 	var addr = "127.0.0.1:10007"
 	var path = "/example"
 	var incoming = make(chan *fatchoy.Packet, 1000)
-	var cdec = codec.NewServerCodec()
-	server := NewWebsocketServer(addr, path, cdec, incoming, 600)
+	var encoder = codec.NewServerProtocolCodec()
+	server := NewWebsocketServer(addr, path, encoder, incoming, 600)
 	server.Go()
 
 	go startClient(t, addr, path)
@@ -88,7 +87,7 @@ func TestWebsocketServer(t *testing.T) {
 				return
 			}
 			msgcnt++
-			text := pkt.DecodeAsString()
+			text := pkt.DecodeBodyAsString()
 			nbytes += len(text)
 			pkt.ReplyAny(pkt.Command, "pong")
 			// fmt.Printf("recv client message: %v\n", text))

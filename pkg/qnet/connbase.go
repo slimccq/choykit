@@ -5,7 +5,6 @@
 package qnet
 
 import (
-	"net"
 	"sync"
 	"sync/atomic"
 
@@ -20,20 +19,20 @@ type ConnBase struct {
 	addr     string                  // remote address
 	userdata interface{}             // user data
 	ctx      *fatchoy.ServiceContext // current service context object
-	codec    fatchoy.Codec           // message encoding/decoding
+	encoder  fatchoy.ProtocolCodec   // message encoding/decoding
 	inbound  chan<- *fatchoy.Packet  // inbound message queue
 	outbound chan *fatchoy.Packet    // outbound message queue
 	stats    *fatchoy.Stats          // message stats
 	errChan  chan error              // error signal
 }
 
-func (c *ConnBase) init(node fatchoy.NodeID, cdec fatchoy.Codec, inbound chan<- *fatchoy.Packet, outsize int,
+func (c *ConnBase) init(node fatchoy.NodeID, encoder fatchoy.ProtocolCodec, inbound chan<- *fatchoy.Packet, outsize int,
 	errChan chan error, stats *fatchoy.Stats) {
 	if stats == nil {
 		stats = fatchoy.NewStats(NumStat)
 	}
 	c.node = node
-	c.codec = cdec
+	c.encoder = encoder
 	c.stats = stats
 	c.inbound = inbound
 	c.errChan = errChan
@@ -65,8 +64,8 @@ func (c *ConnBase) IsClosing() bool {
 	return atomic.LoadInt32(&c.closing) == 1
 }
 
-func (c *ConnBase) Codec() fatchoy.Codec {
-	return c.codec
+func (c *ConnBase) Encoder() fatchoy.ProtocolCodec {
+	return c.encoder
 }
 
 func (c *ConnBase) Context() *fatchoy.ServiceContext {
@@ -85,34 +84,3 @@ func (c *ConnBase) UserData() interface{} {
 	return c.userdata
 }
 
-// a fake endpoint
-type FakeConn struct {
-	ConnBase
-}
-
-func NewFakeConn(node fatchoy.NodeID, addr string) fatchoy.Endpoint {
-	return &FakeConn{
-		ConnBase: ConnBase{
-			node: node,
-			addr: addr,
-		},
-	}
-}
-
-func (c *FakeConn) RawConn() net.Conn {
-	return nil
-}
-
-func (c *FakeConn) SendPacket(*fatchoy.Packet) error {
-	return nil
-}
-
-func (c *FakeConn) Go(bool, bool) {
-}
-
-func (c *FakeConn) Close() error {
-	return nil
-}
-
-func (c *FakeConn) ForceClose(error) {
-}

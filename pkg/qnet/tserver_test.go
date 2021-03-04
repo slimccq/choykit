@@ -24,27 +24,27 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 		t.Fatalf("Dial %s: %v", address, err)
 	}
 
-	var cdec = codec.NewServerCodec()
+	var encoder = codec.NewServerProtocolCodec()
 	var pkt = fatchoy.MakePacket()
 	for i := 1; i <= msgCount; i++ {
 		pkt.Command = uint32(i)
 		pkt.Seq = uint16(i)
 		pkt.Body = "ping"
 		var buf bytes.Buffer
-		if err := cdec.Encode(pkt, &buf); err != nil {
+		if err := encoder.Marshal(&buf, pkt); err != nil {
 			t.Fatalf("Encode: %v", err)
 		}
 		if _, err := conn.Write(buf.Bytes()); err != nil {
 			t.Fatalf("Write: %v", err)
 		}
 		var resp fatchoy.Packet
-		if _, err := cdec.Decode(conn, &resp); err != nil {
+		if _, err := encoder.Unmarshal(conn, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}
 		if resp.Seq != pkt.Seq {
 			t.Fatalf("session mismatch, %d != %d", resp.Seq, pkt.Seq)
 		}
-		payload, _ := resp.Encode()
+		payload, _ := resp.EncodeBody()
 		if v := string(payload); v != "pong" {
 			t.Fatalf("invalid response message: %s", v)
 		}
@@ -54,9 +54,9 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 }
 
 func startMyListener(t *testing.T, address string, sig, done chan struct{}) {
-	var cdec = codec.NewServerCodec()
+	var encoder = codec.NewServerProtocolCodec()
 	var incoming = make(chan *fatchoy.Packet, 100)
-	var server = NewTcpServer(cdec, incoming, 60)
+	var server = NewTcpServer(encoder, incoming, 60)
 	if err := server.Listen(address); err != nil {
 		t.Fatalf("BindTCP: %s %v", address, err)
 	}

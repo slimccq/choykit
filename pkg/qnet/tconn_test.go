@@ -26,16 +26,16 @@ func init() {
 	fatchoy.StartClock()
 }
 
-func handleConn(conn *net.TCPConn, cdec fatchoy.Codec) {
+func handleConn(conn *net.TCPConn, encoder fatchoy.ProtocolCodec) {
 	var count = 0
 	//file, _ := conn.File()
-	tconn := NewTcpConn(0, conn, cdec, nil, nil, 1000, nil)
+	tconn := NewTcpConn(0, conn, encoder, nil, nil, 1000, nil)
 	tconn.Go(true, false)
 	defer tconn.Close()
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Minute))
 		var pkt = fatchoy.MakePacket()
-		if _, err := cdec.Decode(conn, pkt); err != nil {
+		if _, err := encoder.Unmarshal(conn, pkt); err != nil {
 			fmt.Printf("Decode: %v\n", err)
 			break
 		}
@@ -53,14 +53,14 @@ func handleConn(conn *net.TCPConn, cdec fatchoy.Codec) {
 	fmt.Printf("sent %d packets, %s\n", stats.Get(StatPacketsSent), strutil.PrettyBytes(stats.Get(StatBytesSent)))
 }
 
-func startMyServer(t *testing.T, ln *net.TCPListener, cdec fatchoy.Codec) {
+func startMyServer(t *testing.T, ln *net.TCPListener, encoder fatchoy.ProtocolCodec) {
 	for {
 		conn, err := ln.AcceptTCP()
 		if err != nil {
 			//t.Logf("Listener: Accept %v", err)
 			return
 		}
-		go handleConn(conn, cdec)
+		go handleConn(conn, encoder)
 	}
 }
 
@@ -84,7 +84,6 @@ func TestExampleTcpConn(t *testing.T) {
 	TConnReadTimeout = 30
 
 	var testTcpAddress = "localhost:10002"
-	var cdec = codec.NewServerCodec()
 
 	ln, err := ListenTCP(testTcpAddress)
 	if err != nil {
@@ -92,7 +91,7 @@ func TestExampleTcpConn(t *testing.T) {
 	}
 	defer ln.Close()
 
-	go startMyServer(t, ln, cdec)
+	go startMyServer(t, ln, codec.ServerProtocolCodec)
 
 	conn, err := DialTCP(testTcpAddress)
 	if err != nil {
@@ -101,7 +100,7 @@ func TestExampleTcpConn(t *testing.T) {
 	//file, _ := conn.File()
 	inbound := make(chan *fatchoy.Packet, 1000)
 	errchan := make(chan error, 4)
-	tconn := NewTcpConn(0, conn, cdec.Clone(), errchan, inbound, 1000, nil)
+	tconn := NewTcpConn(0, conn, codec.ServerProtocolCodec, errchan, inbound, 1000, nil)
 	tconn.SetNodeID(fatchoy.NodeID(0x12345))
 	tconn.Go(true, true)
 	defer tconn.Close()

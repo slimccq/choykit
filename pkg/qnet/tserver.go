@@ -18,15 +18,15 @@ type TcpServer struct {
 	backlog chan fatchoy.Endpoint // queue of incoming connections
 	errors  chan error            // error queue
 	lns     []net.Listener        // listener list
-	cdec    fatchoy.Codec         // message encoding/decoding
+	encoder    fatchoy.ProtocolCodec         // message encoding/decoding
 	inbound chan *fatchoy.Packet  // incoming message buffer queue
 	outsize int                   // size of outbound message queue
 }
 
-func NewTcpServer(cdec fatchoy.Codec, inbound chan *fatchoy.Packet, outsize int) *TcpServer {
+func NewTcpServer(encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int) *TcpServer {
 	return &TcpServer{
 		inbound: inbound,
-		cdec:    cdec,
+		encoder:    encoder,
 		outsize: outsize,
 		done:    make(chan struct{}),
 		backlog: make(chan fatchoy.Endpoint, 128),
@@ -85,7 +85,7 @@ func (s *TcpServer) serve(ln *net.TCPListener) {
 }
 
 func (s *TcpServer) accept(conn *net.TCPConn) {
-	var endpoint = NewTcpConn(0, conn, s.cdec.Clone(), s.errors, s.inbound, s.outsize, nil)
+	var endpoint = NewTcpConn(0, conn, s.encoder, s.errors, s.inbound, s.outsize, nil)
 	s.backlog <- endpoint // this may block current goroutine
 }
 

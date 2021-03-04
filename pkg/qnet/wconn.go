@@ -32,12 +32,12 @@ type WsConn struct {
 	conn *websocket.Conn // websocket conn
 }
 
-func NewWsConn(node fatchoy.NodeID, conn *websocket.Conn, cdec fatchoy.Codec, errChan chan error,
+func NewWsConn(node fatchoy.NodeID, conn *websocket.Conn, encoder fatchoy.ProtocolCodec, errChan chan error,
 	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *WsConn {
 	wsconn := &WsConn{
 		conn: conn,
 	}
-	wsconn.ConnBase.init(node, cdec, incoming, outsize, errChan, stats)
+	wsconn.ConnBase.init(node, encoder, incoming, outsize, errChan, stats)
 	wsconn.addr = conn.RemoteAddr().String()
 	conn.SetReadLimit(WSCONN_MAX_PAYLOAD)
 	conn.SetPingHandler(wsconn.handlePing)
@@ -103,12 +103,12 @@ func (c *WsConn) finally(err error) {
 	close(c.outbound)
 	c.outbound = nil
 	c.inbound = nil
-	c.codec = nil
+	c.encoder = nil
 	c.conn = nil
 }
 
 func (c *WsConn) sendPacket(pkt *fatchoy.Packet, allowBatch bool) error {
-	if (pkt.Flags | fatchoy.PacketFlagJSONText) > 0 {
+	if (pkt.Flag | fatchoy.PacketFlagJSONText) > 0 {
 		return c.sendJSONTextMessage(pkt, allowBatch)
 	} else {
 		return c.sendBinaryMessage(pkt, allowBatch)
@@ -175,19 +175,19 @@ func batchAppendMessage(w io.Writer, pkt *fatchoy.Packet) (int, error) {
 
 func (c *WsConn) sendBinaryMessage(pkt *fatchoy.Packet, allowBatch bool) error {
 	var count = 1
-	var buf bytes.Buffer
-	if err := c.codec.Encode(pkt, &buf); err != nil {
-		log.Errorf("WsConn: encode message %d, %v", pkt.Command, err)
-		return err
-	}
 	if allowBatch {
-		for n := len(c.outbound); n > 0; n-- {
-			pkt := <-c.outbound
-			if err := c.codec.Encode(pkt, &buf); err != nil {
+		count = len(c.outbound) // 发送队列里的所有消息
+	}
+	var buf bytes.Buffer
+	for i := 0; i < count; i++ {
+		select {
+		case pkt := <-c.outbound:
+			if err := c.encoder.Marshal(&buf, pkt); err != nil {
 				log.Errorf("WsConn: encode message %d, %v", pkt.Command, err)
-				break
+				return err
 			}
-			count++
+		default:
+			break
 		}
 	}
 	if err := c.conn.WriteMessage(websocket.BinaryMessage, buf.Bytes()); err != nil {
@@ -252,7 +252,7 @@ func (c *WsConn) ReadPacket(pkt *fatchoy.Packet) error {
 		return json.Unmarshal(data, pkt)
 
 	case websocket.BinaryMessage:
-		_, err = c.codec.Decode(bytes.NewReader(data), pkt)
+		_, err = c.encoder.Unmarshal(bytes.NewReader(data), pkt)
 		return err
 
 	case websocket.PingMessage, websocket.PongMessage:

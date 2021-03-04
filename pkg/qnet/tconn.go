@@ -23,7 +23,7 @@ import (
 )
 
 var (
-	TConnReadTimeout = 60
+	TConnReadTimeout = 100
 )
 
 // TCP connection
@@ -33,13 +33,13 @@ type TcpConn struct {
 	reader io.Reader // bufio reader
 }
 
-func NewTcpConn(node fatchoy.NodeID, conn net.Conn, cdec fatchoy.Codec, errChan chan error,
+func NewTcpConn(node fatchoy.NodeID, conn net.Conn, encoder fatchoy.ProtocolCodec, errChan chan error,
 	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *TcpConn {
 	tconn := &TcpConn{
 		conn:   conn,
 		reader: bufio.NewReader(conn),
 	}
-	tconn.ConnBase.init(node, cdec, incoming, outsize, errChan, stats)
+	tconn.ConnBase.init(node, encoder, incoming, outsize, errChan, stats)
 	tconn.addr = conn.RemoteAddr().String()
 	return tconn
 }
@@ -84,7 +84,7 @@ func (t *TcpConn) Close() error {
 	if tconn, ok := t.conn.(*net.TCPConn); ok {
 		tconn.CloseRead()
 	}
-	t.finally(ErrConnForceClose)
+	t.finally(ErrConnForceClose) // 阻塞等待投递剩余的消息
 	return nil
 }
 
@@ -96,7 +96,7 @@ func (t *TcpConn) ForceClose(err error) {
 	if tconn, ok := t.conn.(*net.TCPConn); ok {
 		tconn.CloseRead()
 	}
-	go t.finally(err)
+	go t.finally(err) // 不阻塞等待
 }
 
 func (t *TcpConn) finally(err error) {
@@ -107,6 +107,7 @@ func (t *TcpConn) finally(err error) {
 	} else {
 		t.conn.Close()
 	}
+	// 把error投递给监听的channel
 	if t.errChan != nil {
 		select {
 		case t.errChan <- NewError(err, t):
@@ -117,51 +118,45 @@ func (t *TcpConn) finally(err error) {
 	t.outbound = nil
 	t.inbound = nil
 	t.errChan = nil
-	t.codec = nil
+	t.encoder = nil
 	t.conn = nil
 	t.reader = nil
 }
 
 func (t *TcpConn) flush() {
-	select {
-	case pkt, ok := <-t.outbound:
-		if !ok {
-			return
-		}
-		var buf bytes.Buffer
-		if err := t.codec.Encode(pkt, &buf); err != nil {
-			log.Errorf("TcpConn: encode message %d: %v", pkt.Command, err)
-			break
-		}
-		cnt := 0
-		remain := len(t.outbound) // 后续并发写入sendqueue的packet将不会被投递
-		for i := 0; i < remain; i++ {
-			pkt = <-t.outbound
-			cnt++
-			if err := t.codec.Encode(pkt, &buf); err != nil {
-				log.Errorf("TcpConn: encode batch %d messages %d: %v", cnt, pkt.Command, err)
+	var buf bytes.Buffer
+	n := len(t.outbound)
+	for i := 0; i < n; i++ {
+		select {
+		case pkt, ok := <-t.outbound:
+			if !ok {
 				break
 			}
+			if err := t.encoder.Marshal(&buf, pkt); err != nil {
+				log.Errorf("TcpConn: encode message %d: %v", pkt.Command, err)
+				return
+			}
+		default:
+			break
 		}
-		nbytes, err := buf.WriteTo(t.conn)
-		if err != nil {
-			log.Errorf("TcpConn: node %v write message: %v", t.node, err)
-		} else {
-			t.stats.Add(StatPacketsSent, int64(cnt))
-			t.stats.Add(StatBytesSent, nbytes)
-		}
-		return
-
-	default:
+	}
+	nbytes, err := t.conn.Write(buf.Bytes())
+	if err != nil {
+		log.Errorf("TcpConn: node %v write message: %v", t.node, err)
 		return
 	}
+	t.stats.Add(StatPacketsSent, int64(n))
+	t.stats.Add(StatBytesSent, int64(nbytes))
 }
 
 func (t *TcpConn) writePump() {
-	defer t.wg.Done()
-	defer t.flush()
-	defer log.Debugf("TcpConn: node %v writer stopped", t.node)
-	log.Debugf("TcpConn: node %v writer started at %v", t.node, t.addr)
+	defer func() {
+		t.flush()
+		t.wg.Done()
+		log.Debugf("TcpConn: node %v writer stopped", t.node)
+	}()
+
+	log.Debugf("TcpConn: node %v(%v) writer started", t.node, t.addr)
 	for {
 		select {
 		case pkt, ok := <-t.outbound:
@@ -170,7 +165,7 @@ func (t *TcpConn) writePump() {
 			}
 			var buf bytes.Buffer
 			var err error
-			if err = t.codec.Encode(pkt, &buf); err != nil {
+			if err = t.encoder.Marshal(&buf, pkt); err != nil {
 				log.Errorf("encode message %v: %v", pkt.Command, err)
 				continue
 			}
@@ -191,7 +186,7 @@ func (t *TcpConn) readPacket() (*fatchoy.Packet, error) {
 	deadline := fatchoy.Now().Add(time.Duration(TConnReadTimeout) * time.Second)
 	t.conn.SetReadDeadline(deadline)
 	var pkt = fatchoy.MakePacket()
-	nbytes, err := t.codec.Decode(t.reader, pkt)
+	nbytes, err := t.encoder.Unmarshal(t.reader, pkt)
 	if err != nil {
 		if err != io.EOF {
 			log.Errorf("read message from node %v: %v", t.node, err)
@@ -204,7 +199,7 @@ func (t *TcpConn) readPacket() (*fatchoy.Packet, error) {
 	return pkt, nil
 }
 
-func (t *TcpConn) checkIfExit() bool {
+func (t *TcpConn) testShouldExit() bool {
 	select {
 	case <-t.done:
 		return true
@@ -216,7 +211,7 @@ func (t *TcpConn) checkIfExit() bool {
 func (t *TcpConn) readPump() {
 	defer t.wg.Done()
 	defer log.Debugf("TcpConn: node %v reader stopped", t.node)
-	log.Debugf("TcpConn: node %v reader started at %v", t.node, t.addr)
+	log.Debugf("TcpConn: node %v(%v) reader started", t.node, t.addr)
 	for {
 		pkt, err := t.readPacket()
 		if err != nil {
@@ -226,7 +221,7 @@ func (t *TcpConn) readPump() {
 		t.inbound <- pkt // 如果channel满了，这里会阻塞
 
 		// test if we should exit
-		if t.checkIfExit() {
+		if t.testShouldExit() {
 			return
 		}
 	}

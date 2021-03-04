@@ -12,8 +12,8 @@ import (
 	"testing"
 	"time"
 
-	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
+	"devpkg.work/choykit/pkg/fatchoy"
 )
 
 const (
@@ -23,8 +23,8 @@ const (
 
 func startQPSServer(t *testing.T, address string, ctor, done chan struct{}) {
 	var incoming = make(chan *fatchoy.Packet, totalMessageCount)
-	var cdec = codec.NewServerCodec()
-	var listener = NewTcpServer(cdec, incoming, totalMessageCount)
+	var encoder = codec.NewServerProtocolCodec()
+	var listener = NewTcpServer(encoder, incoming, totalMessageCount)
 	if err := listener.Listen(address); err != nil {
 		t.Fatalf("BindTCP: %s %v", address, err)
 	}
@@ -63,7 +63,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 		t.Fatalf("Dial %s: %v", address, err)
 	}
 
-	var cdec = codec.NewServerCodec()
+	var encoder = codec.NewServerProtocolCodec()
 	var buf bytes.Buffer
 	for i := 0; i < msgCount; i++ {
 		var pkt = fatchoy.MakePacket()
@@ -71,7 +71,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 		pkt.Node = fatchoy.NodeID(i)
 		pkt.Body = "ping"
 		buf.Reset()
-		if err := cdec.Encode(pkt, &buf); err != nil {
+		if err := encoder.Marshal(&buf, pkt); err != nil {
 			t.Fatalf("Encode: %v", err)
 		}
 		if _, err := conn.Write(buf.Bytes()); err != nil {
@@ -80,7 +80,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 	}
 	for i := 0; i < msgCount; i++ {
 		var resp fatchoy.Packet
-		if _, err := cdec.Decode(conn, &resp); err != nil {
+		if _, err := encoder.Unmarshal(conn, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}
 		respChan <- 1

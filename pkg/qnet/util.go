@@ -6,6 +6,7 @@ package qnet
 
 import (
 	"bytes"
+	"devpkg.work/choykit/pkg/codec"
 	"net"
 	"time"
 
@@ -16,7 +17,7 @@ import (
 )
 
 var (
-	RequestReadTimeout = 15
+	RequestReadTimeout = 60
 )
 
 func DialTCP(address string) (*net.TCPConn, error) {
@@ -39,27 +40,36 @@ func ListenTCP(address string) (*net.TCPListener, error) {
 	return net.ListenTCP("tcp", addr)
 }
 
-func ReadProtoMessage(conn net.Conn, cdec fatchoy.Codec, msgOut proto.Message) (*fatchoy.Packet, error) {
-	var pkt = fatchoy.MakePacket()
+// recv一条protobuf消息
+func ReadProtoMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fatchoy.MessageEncryptor,
+	pkt *fatchoy.Packet, pbMsg proto.Message) error {
 	var deadline = fatchoy.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
 	conn.SetReadDeadline(deadline)
-	_, err := cdec.Decode(conn, pkt)
+	_, err := decoder.Unmarshal(conn, pkt)
 	if err != nil {
 		log.Errorf("decode message %d: %v", pkt.Command, err)
-		return nil, err
+		return err
+	}
+	if err = codec.DecodePacket(pkt, decrypt); err != nil {
+		return err
 	}
 	if ec := pkt.Errno(); ec > 0 {
-		return nil, errors.Errorf("message %d encountered error: %d", pkt.Command, ec)
+		return errors.Errorf("message %d encountered error: %d", pkt.Command, ec)
 	}
-	if err := pkt.DecodeMsg(msgOut); err != nil {
-		return pkt, err
+	if err := pkt.DecodeMsg(pbMsg); err != nil {
+		return err
 	}
-	return pkt, nil
+	return nil
 }
 
-func SendPacketMessage(conn net.Conn, cdec fatchoy.Codec, pkt *fatchoy.Packet) error {
+// send一个packet
+func SendPacketMessage(conn net.Conn, encoder fatchoy.ProtocolEncoder, encrypt fatchoy.MessageEncryptor,
+	pkt *fatchoy.Packet) error {
+	if err := codec.EncodePacket(pkt, 0, encrypt); err != nil {
+		return err
+	}
 	var buf bytes.Buffer
-	if err := cdec.Encode(pkt, &buf); err != nil {
+	if err := encoder.Marshal(&buf, pkt); err != nil {
 		log.Errorf("encode message %d: %v", pkt.Command, err)
 		return err
 	}
@@ -70,12 +80,17 @@ func SendPacketMessage(conn net.Conn, cdec fatchoy.Codec, pkt *fatchoy.Packet) e
 	return nil
 }
 
-func SendProtoMessage(conn net.Conn, cdec fatchoy.Codec, command int32, msgIn proto.Message) error {
+// send一条protobuf消息
+func SendProtoMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt fatchoy.MessageEncryptor,
+	command int32, outMsg proto.Message) error {
 	var buf bytes.Buffer
 	var pkt = fatchoy.MakePacket()
 	pkt.Command = uint32(command)
-	pkt.Body = msgIn
-	if err := cdec.Encode(pkt, &buf); err != nil {
+	pkt.Body = outMsg
+	if err := codec.EncodePacket(pkt, 0, encrypt); err != nil {
+		return err
+	}
+	if err := encoder.Marshal(&buf, pkt); err != nil {
 		log.Errorf("encode message %d: %v", command, err)
 		return err
 	}
@@ -86,12 +101,14 @@ func SendProtoMessage(conn net.Conn, cdec fatchoy.Codec, command int32, msgIn pr
 	return nil
 }
 
-// send request message and wait for response message
-func RequestMessage(conn net.Conn, cdec fatchoy.Codec, reqCommand int32, msgReq, msgResp proto.Message) error {
-	if err := SendProtoMessage(conn, cdec, reqCommand, msgReq); err != nil {
+// send并且立即等待recv
+func RequestMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt fatchoy.MessageEncryptor,
+	reqCommand int32, msgReq, msgResp proto.Message) error {
+	if err := SendProtoMessage(conn, encoder, encrypt, reqCommand, msgReq); err != nil {
 		return err
 	}
-	if _, err := ReadProtoMessage(conn, cdec, msgResp); err != nil {
+	var pkt = fatchoy.MakePacket()
+	if err := ReadProtoMessage(conn, encoder, encrypt, pkt, msgResp); err != nil {
 		return err
 	}
 	return nil
