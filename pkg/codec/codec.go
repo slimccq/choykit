@@ -9,8 +9,8 @@ import (
 	"devpkg.work/choykit/pkg/log"
 )
 
-// 压缩和加密
-func EncodePacket(pkt *fatchoy.Packet, thresshold int, encrypt fatchoy.MessageEncryptor) error {
+// 根据pkt的Flag标志位，对body进行压缩和加密
+func EncodePacket(pkt *fatchoy.Packet, threshold int, encrypt fatchoy.MessageEncryptor) error {
 	payload, err := pkt.EncodeBody()
 	if err != nil {
 		return err
@@ -18,7 +18,7 @@ func EncodePacket(pkt *fatchoy.Packet, thresshold int, encrypt fatchoy.MessageEn
 	if payload == nil {
 		return nil
 	}
-	if n := len(payload); n > thresshold {
+	if n := len(payload); threshold > 0 && n > threshold {
 		if data, err := CompressBytes(payload); err != nil {
 			log.Errorf("compress packet %d with %d bytes: %v", pkt.Command, n, err)
 			return err
@@ -40,7 +40,7 @@ func EncodePacket(pkt *fatchoy.Packet, thresshold int, encrypt fatchoy.MessageEn
 	return nil
 }
 
-// 解密和解压缩
+// 根据pkt的Flag标志位，对body进行解密和解压缩
 func DecodePacket(pkt *fatchoy.Packet, decrypt fatchoy.MessageEncryptor) error {
 	payload, err := pkt.EncodeBody()
 	if err != nil {
@@ -60,7 +60,7 @@ func DecodePacket(pkt *fatchoy.Packet, decrypt fatchoy.MessageEncryptor) error {
 
 	if (pkt.Flag & fatchoy.PacketFlagCompressed) != 0 {
 		if uncompressed, err := UncompressBytes(payload); err != nil {
-			log.Errorf("uncompressed packet %d %d bytes: %v", pkt.Command, len(payload), err)
+			log.Errorf("uncompress packet %d %d bytes: %v", pkt.Command, len(payload), err)
 			return err
 		} else {
 			payload = uncompressed

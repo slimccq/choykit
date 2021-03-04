@@ -13,14 +13,11 @@ import (
 )
 
 const (
-	PacketFlagError    = 0x0100
-	PacketFlagRefer    = 0x0200
-	PacketFlagRpc      = 0x0400
-	PacketFlagJSONText = 0x0800
+	PacketFlagError      = 0x0100
+	PacketFlagRpc        = 0x0400
+	PacketFlagJSONText   = 0x0800
 	PacketFlagCompressed = 0x0001
 	PacketFlagEncrypted  = 0x0002
-
-	PacketFlagBitsMask = 0xFF00 // 低8位的标志用于传输处理，完成传输后需要清除，不能再返回给ack
 )
 
 type PacketHandler func(*Packet) error
@@ -133,15 +130,13 @@ func (m *Packet) Reply(ack proto.Message) error {
 }
 
 func (m *Packet) ReplyAny(command uint32, data interface{}) error {
-	var flags = m.Flag & PacketFlagBitsMask
-	var pkt = NewPacket(m.Endpoint.NodeID(), command, flags, m.Seq, data)
+	var pkt = NewPacket(m.Endpoint.NodeID(), command, m.Flag, m.Seq, data)
 	return m.Endpoint.SendPacket(pkt)
 }
 
-// Refuse with errno
+// 返回一个错误码消息
 func (m *Packet) Refuse(command int32, errno uint32) error {
-	var flags = m.Flag & PacketFlagBitsMask
-	var pkt = NewPacket(m.Endpoint.NodeID(), uint32(command), flags|PacketFlagError, m.Seq, uint32(errno))
+	var pkt = NewPacket(m.Endpoint.NodeID(), uint32(command), m.Flag|PacketFlagError, m.Seq, uint32(errno))
 	return m.Endpoint.SendPacket(pkt)
 }
 
