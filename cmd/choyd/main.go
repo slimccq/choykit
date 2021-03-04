@@ -11,6 +11,8 @@ import (
 	"os"
 	"time"
 
+	_ "devpkg.work/choykit/pkg/bootstrap/gateway"
+
 	"devpkg.work/choykit/pkg/bootstrap"
 	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
@@ -25,11 +27,11 @@ func main() {
 	var opts = parseOptions()
 	var program bootstrap.Program
 	if err := program.Init(opts); err != nil {
-		log.ServerErrorLog("init bootstrap: %v", err)
+		log.ServerErrorLog("init bootstrap: %v\n", err)
 		os.Exit(1)
 	}
 	if err := program.Run(); err != nil {
-		log.ServerErrorLog("run service: %v", err)
+		log.ServerErrorLog("run service: %v\n", err)
 		os.Exit(1)
 	}
 }
