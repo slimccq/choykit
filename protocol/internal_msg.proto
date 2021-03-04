@@ -43,3 +43,17 @@ message SubscribeReq {
 }
 
 message SubscribeAck {}
+
+// 转发消息
+message ForwardMsg {
+  uint32 node    = 1; //
+  uint32 msg_id  = 3; // 转发消息ID
+  bytes msg_data = 4; // 转发消息内容
+}
+
+// 组播消息
+message MulticastMsg {
+  repeated uint32 nodes = 1; // 指定节点ID
+  uint32 msg_id         = 2; // 转发消息ID
+  bytes msg_data        = 3; // 转发消息内容
+}

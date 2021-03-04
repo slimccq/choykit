@@ -1,0 +1,35 @@
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
+
+syntax = "proto3";
+package protocol;
+
+import "gogoproto/gogo.proto";
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+
+// 心跳
+message ClientPingReq { int64 time = 1; }
+
+message ClientPongAck { int64 time = 2; }
+
+// 通知客户端掉线
+message ClientDisconnectNtf { uint32 reason = 2; }
+
+//握手
+message ClientHandShakeReq {
+  uint32 method = 1;
+  bytes key     = 2;
+  bytes salt    = 3;
+  uint64 iv     = 4;
+}
+
+message ClientHandShakeAck {
+  uint32 method = 1;
+  bytes key     = 2;
+  bytes salt    = 3;
+  uint64 iv     = 4;
+  uint32 seq    = 5;
+}

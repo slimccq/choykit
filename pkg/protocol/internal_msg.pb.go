@@ -359,6 +359,128 @@ func (m *SubscribeAck) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_SubscribeAck proto.InternalMessageInfo
 
+// 转发消息
+type ForwardMsg struct {
+	Node    uint32 `protobuf:"varint,1,opt,name=node,proto3" json:"node,omitempty"`
+	MsgId   uint32 `protobuf:"varint,3,opt,name=msg_id,json=msgId,proto3" json:"msg_id,omitempty"`
+	MsgData []byte `protobuf:"bytes,4,opt,name=msg_data,json=msgData,proto3" json:"msg_data,omitempty"`
+}
+
+func (m *ForwardMsg) Reset()         { *m = ForwardMsg{} }
+func (m *ForwardMsg) String() string { return proto.CompactTextString(m) }
+func (*ForwardMsg) ProtoMessage()    {}
+func (*ForwardMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7eb37f6b80b23116, []int{7}
+}
+func (m *ForwardMsg) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *ForwardMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_ForwardMsg.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *ForwardMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ForwardMsg.Merge(m, src)
+}
+func (m *ForwardMsg) XXX_Size() int {
+	return m.Size()
+}
+func (m *ForwardMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_ForwardMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ForwardMsg proto.InternalMessageInfo
+
+func (m *ForwardMsg) GetNode() uint32 {
+	if m != nil {
+		return m.Node
+	}
+	return 0
+}
+
+func (m *ForwardMsg) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *ForwardMsg) GetMsgData() []byte {
+	if m != nil {
+		return m.MsgData
+	}
+	return nil
+}
+
+// 组播消息
+type MulticastMsg struct {
+	Nodes   []uint32 `protobuf:"varint,1,rep,packed,name=nodes,proto3" json:"nodes,omitempty"`
+	MsgId   uint32   `protobuf:"varint,2,opt,name=msg_id,json=msgId,proto3" json:"msg_id,omitempty"`
+	MsgData []byte   `protobuf:"bytes,3,opt,name=msg_data,json=msgData,proto3" json:"msg_data,omitempty"`
+}
+
+func (m *MulticastMsg) Reset()         { *m = MulticastMsg{} }
+func (m *MulticastMsg) String() string { return proto.CompactTextString(m) }
+func (*MulticastMsg) ProtoMessage()    {}
+func (*MulticastMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_7eb37f6b80b23116, []int{8}
+}
+func (m *MulticastMsg) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *MulticastMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_MulticastMsg.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *MulticastMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_MulticastMsg.Merge(m, src)
+}
+func (m *MulticastMsg) XXX_Size() int {
+	return m.Size()
+}
+func (m *MulticastMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_MulticastMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_MulticastMsg proto.InternalMessageInfo
+
+func (m *MulticastMsg) GetNodes() []uint32 {
+	if m != nil {
+		return m.Nodes
+	}
+	return nil
+}
+
+func (m *MulticastMsg) GetMsgId() uint32 {
+	if m != nil {
+		return m.MsgId
+	}
+	return 0
+}
+
+func (m *MulticastMsg) GetMsgData() []byte {
+	if m != nil {
+		return m.MsgData
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*RegisterReq)(nil), "protocol.RegisterReq")
 	proto.RegisterType((*RegisterAck)(nil), "protocol.RegisterAck")
@@ -367,33 +489,41 @@ func init() {
 	proto.RegisterType((*KeepAliveAck)(nil), "protocol.KeepAliveAck")
 	proto.RegisterType((*SubscribeReq)(nil), "protocol.SubscribeReq")
 	proto.RegisterType((*SubscribeAck)(nil), "protocol.SubscribeAck")
+	proto.RegisterType((*ForwardMsg)(nil), "protocol.ForwardMsg")
+	proto.RegisterType((*MulticastMsg)(nil), "protocol.MulticastMsg")
 }
 
 func init() { proto.RegisterFile("internal_msg.proto", fileDescriptor_7eb37f6b80b23116) }
 
 var fileDescriptor_7eb37f6b80b23116 = []byte{
-	// 336 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x50, 0x4d, 0x4f, 0xc2, 0x40,
-	0x14, 0x6c, 0x81, 0x22, 0x2c, 0x1f, 0x31, 0x2b, 0x46, 0x82, 0xa6, 0x81, 0x9e, 0xf0, 0x82, 0x89,
-	0x26, 0xde, 0x31, 0x78, 0x30, 0x26, 0x1c, 0xb6, 0xde, 0x49, 0xd9, 0x3e, 0x37, 0x0d, 0xed, 0x2e,
-	0xee, 0x2e, 0xfe, 0x0e, 0x8f, 0xfe, 0x24, 0x8f, 0x1c, 0x3d, 0x1a, 0xfa, 0x47, 0xcc, 0xee, 0xfa,
-	0x41, 0x8c, 0xa7, 0xce, 0x9b, 0x37, 0x33, 0x6f, 0xba, 0x08, 0x67, 0x5c, 0x83, 0xe4, 0x49, 0xbe,
-	0x28, 0x14, 0x9b, 0xac, 0xa5, 0xd0, 0x02, 0x37, 0xec, 0x87, 0x8a, 0x7c, 0xd0, 0x63, 0x82, 0x09,
-	0x3b, 0x5d, 0x18, 0xe4, 0xf6, 0x83, 0xe3, 0x1f, 0x8f, 0xd2, 0x72, 0x43, 0xb5, 0xa3, 0xa3, 0x19,
-	0x6a, 0x11, 0x60, 0x99, 0xd2, 0x20, 0x09, 0x3c, 0xe1, 0x11, 0x6a, 0x27, 0x94, 0x82, 0x52, 0x0b,
-	0x2d, 0x56, 0xc0, 0xfb, 0xfe, 0xd0, 0x1f, 0x37, 0x49, 0xcb, 0x71, 0x0f, 0x86, 0xc2, 0x18, 0xd5,
-	0xb8, 0x48, 0xa1, 0x5f, 0x19, 0xfa, 0xe3, 0x0e, 0xb1, 0x38, 0x1a, 0xfd, 0xa6, 0x4c, 0xe9, 0xea,
-	0x5f, 0x49, 0x8c, 0x0e, 0xef, 0xb8, 0xd2, 0x09, 0xa7, 0x10, 0xeb, 0x44, 0xc3, 0x5c, 0x3f, 0xe2,
-	0x73, 0x14, 0x28, 0x83, 0xed, 0x99, 0xee, 0xe5, 0xd1, 0xe4, 0xfb, 0x1f, 0x26, 0x73, 0x91, 0x3a,
-	0x19, 0x71, 0x0a, 0xdc, 0x43, 0xc1, 0x1a, 0x40, 0xaa, 0x7e, 0x65, 0x58, 0x1d, 0x77, 0x88, 0x1b,
-	0xa2, 0x6b, 0xd4, 0xbe, 0x07, 0x58, 0x4f, 0xf3, 0xec, 0x19, 0x4c, 0x7d, 0x8c, 0x6a, 0x3a, 0x2b,
-	0x5c, 0x5e, 0x95, 0x58, 0x6c, 0xb8, 0x5c, 0x24, 0xa9, 0x2d, 0x53, 0x25, 0x16, 0x47, 0xd1, 0x9e,
-	0xef, 0xab, 0xf0, 0x5f, 0x5f, 0x34, 0x43, 0xed, 0x78, 0xb3, 0x54, 0x54, 0x66, 0x4b, 0x9b, 0x7d,
-	0x8a, 0x9a, 0x85, 0x62, 0x0b, 0xa5, 0x13, 0xa9, 0xad, 0x30, 0x20, 0x8d, 0x42, 0xb1, 0xd8, 0xcc,
-	0xf8, 0x04, 0x1d, 0x98, 0x25, 0x70, 0x77, 0x27, 0x20, 0xf5, 0x42, 0xb1, 0x5b, 0x9e, 0x46, 0xdd,
-	0xbd, 0x94, 0x29, 0x5d, 0xdd, 0x9c, 0xbd, 0xed, 0x42, 0x7f, 0xbb, 0x0b, 0xfd, 0x8f, 0x5d, 0xe8,
-	0xbf, 0x94, 0xa1, 0xf7, 0x5a, 0x86, 0xde, 0xb6, 0x0c, 0xbd, 0xf7, 0x32, 0xf4, 0x96, 0x75, 0xfb,
-	0x00, 0x57, 0x9f, 0x01, 0x00, 0x00, 0xff, 0xff, 0xf3, 0x91, 0x87, 0x58, 0xe1, 0x01, 0x00, 0x00,
+	// 419 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x74, 0x91, 0xc1, 0x6e, 0x13, 0x31,
+	0x10, 0x86, 0xe3, 0x6c, 0xb6, 0xb4, 0xd3, 0x6d, 0x85, 0x4c, 0x2a, 0x96, 0x82, 0x56, 0xa9, 0x4f,
+	0xe1, 0x12, 0x24, 0x90, 0xb8, 0x07, 0x05, 0xa4, 0x0a, 0xb5, 0x07, 0x07, 0x71, 0x5d, 0x39, 0x5e,
+	0x63, 0xad, 0xb2, 0xbb, 0x0e, 0xf6, 0x04, 0x5e, 0x83, 0x23, 0x8f, 0xc4, 0xb1, 0x47, 0x8e, 0x28,
+	0xfb, 0x22, 0xc8, 0x36, 0xb4, 0x01, 0xc1, 0x69, 0xff, 0xf9, 0x67, 0xe6, 0x9b, 0xd9, 0x31, 0xd0,
+	0xba, 0x43, 0x65, 0x3b, 0xd1, 0x94, 0xad, 0xd3, 0xb3, 0x8d, 0x35, 0x68, 0xe8, 0x61, 0xf8, 0x48,
+	0xd3, 0x9c, 0x8f, 0xb5, 0xd1, 0x26, 0x44, 0xcf, 0xbc, 0x8a, 0xf9, 0xf3, 0xb3, 0xdb, 0x1e, 0x87,
+	0x76, 0x2b, 0x31, 0xda, 0x6c, 0x01, 0xc7, 0x5c, 0xe9, 0xda, 0xa1, 0xb2, 0x5c, 0x7d, 0xa4, 0x17,
+	0x90, 0x09, 0x29, 0x95, 0x73, 0x25, 0x9a, 0xb5, 0xea, 0x72, 0x32, 0x21, 0xd3, 0x23, 0x7e, 0x1c,
+	0xbd, 0x77, 0xde, 0xa2, 0x14, 0x46, 0x9d, 0xa9, 0x54, 0x3e, 0x9c, 0x90, 0xe9, 0x09, 0x0f, 0x9a,
+	0x5d, 0xdc, 0x51, 0xe6, 0x72, 0xfd, 0xcf, 0x92, 0x25, 0xdc, 0xbf, 0xec, 0x1c, 0x8a, 0x4e, 0xaa,
+	0x25, 0x0a, 0x54, 0xd7, 0xf8, 0x81, 0x3e, 0x85, 0xd4, 0x79, 0x1d, 0xc6, 0x9c, 0x3e, 0x7f, 0x30,
+	0xfb, 0xfd, 0x0f, 0xb3, 0x6b, 0x53, 0xc5, 0x32, 0x1e, 0x2b, 0xe8, 0x18, 0xd2, 0x8d, 0x52, 0xd6,
+	0xe5, 0xc3, 0x49, 0x32, 0x3d, 0xe1, 0x31, 0x60, 0x2f, 0x21, 0x7b, 0xab, 0xd4, 0x66, 0xde, 0xd4,
+	0x9f, 0x94, 0x5f, 0x9f, 0xc2, 0x08, 0xeb, 0x36, 0xf2, 0x12, 0x1e, 0xb4, 0xf7, 0x1a, 0x23, 0xaa,
+	0xb0, 0x4c, 0xc2, 0x83, 0x66, 0x6c, 0xaf, 0xef, 0xd7, 0xc2, 0x7f, 0xf7, 0xb1, 0x05, 0x64, 0xcb,
+	0xed, 0xca, 0x49, 0x5b, 0xaf, 0x02, 0xfb, 0x31, 0x1c, 0xb5, 0x4e, 0x97, 0x0e, 0x85, 0xc5, 0x50,
+	0x98, 0xf2, 0xc3, 0xd6, 0xe9, 0xa5, 0x8f, 0xe9, 0x43, 0xb8, 0xe7, 0x93, 0xaa, 0x8b, 0x73, 0x52,
+	0x7e, 0xd0, 0x3a, 0xfd, 0xba, 0xab, 0xd8, 0xe9, 0x1e, 0x65, 0x2e, 0xd7, 0x8c, 0x03, 0xbc, 0x31,
+	0xf6, 0xb3, 0xb0, 0xd5, 0x95, 0xd3, 0xb7, 0x87, 0x22, 0x77, 0x87, 0xa2, 0x67, 0xe0, 0x7b, 0xcb,
+	0xba, 0xca, 0x93, 0xe0, 0xa6, 0xad, 0xd3, 0x97, 0x15, 0x7d, 0x04, 0x7e, 0x5a, 0x59, 0x09, 0x14,
+	0xf9, 0x68, 0x42, 0xa6, 0x19, 0xf7, 0x13, 0x17, 0x02, 0x05, 0x7b, 0x0f, 0xd9, 0xd5, 0xb6, 0xc1,
+	0x5a, 0x0a, 0x87, 0x9e, 0x3a, 0x86, 0xd4, 0x93, 0x5c, 0x4e, 0xe2, 0xad, 0x42, 0xb0, 0xc7, 0x1d,
+	0xfe, 0x8f, 0x9b, 0xfc, 0xc1, 0x7d, 0xf5, 0xe4, 0xdb, 0xae, 0x20, 0x37, 0xbb, 0x82, 0xfc, 0xd8,
+	0x15, 0xe4, 0x4b, 0x5f, 0x0c, 0xbe, 0xf6, 0xc5, 0xe0, 0xa6, 0x2f, 0x06, 0xdf, 0xfb, 0x62, 0xb0,
+	0x3a, 0x08, 0x8f, 0xf5, 0xe2, 0x67, 0x00, 0x00, 0x00, 0xff, 0xff, 0x93, 0x96, 0x44, 0xe1, 0x8d,
+	0x02, 0x00, 0x00,
 }
 
 func (m *RegisterReq) Marshal() (dAtA []byte, err error) {
@@ -622,6 +752,99 @@ func (m *SubscribeAck) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
+func (m *ForwardMsg) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *ForwardMsg) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *ForwardMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.MsgData) > 0 {
+		i -= len(m.MsgData)
+		copy(dAtA[i:], m.MsgData)
+		i = encodeVarintInternalMsg(dAtA, i, uint64(len(m.MsgData)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if m.MsgId != 0 {
+		i = encodeVarintInternalMsg(dAtA, i, uint64(m.MsgId))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Node != 0 {
+		i = encodeVarintInternalMsg(dAtA, i, uint64(m.Node))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *MulticastMsg) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *MulticastMsg) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *MulticastMsg) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.MsgData) > 0 {
+		i -= len(m.MsgData)
+		copy(dAtA[i:], m.MsgData)
+		i = encodeVarintInternalMsg(dAtA, i, uint64(len(m.MsgData)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.MsgId != 0 {
+		i = encodeVarintInternalMsg(dAtA, i, uint64(m.MsgId))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Nodes) > 0 {
+		dAtA4 := make([]byte, len(m.Nodes)*10)
+		var j3 int
+		for _, num := range m.Nodes {
+			for num >= 1<<7 {
+				dAtA4[j3] = uint8(uint64(num)&0x7f | 0x80)
+				num >>= 7
+				j3++
+			}
+			dAtA4[j3] = uint8(num)
+			j3++
+		}
+		i -= j3
+		copy(dAtA[i:], dAtA4[:j3])
+		i = encodeVarintInternalMsg(dAtA, i, uint64(j3))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
 func encodeVarintInternalMsg(dAtA []byte, offset int, v uint64) int {
 	offset -= sovInternalMsg(v)
 	base := offset
@@ -728,6 +951,48 @@ func (m *SubscribeAck) Size() (n int) {
 	}
 	var l int
 	_ = l
+	return n
+}
+
+func (m *ForwardMsg) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Node != 0 {
+		n += 1 + sovInternalMsg(uint64(m.Node))
+	}
+	if m.MsgId != 0 {
+		n += 1 + sovInternalMsg(uint64(m.MsgId))
+	}
+	l = len(m.MsgData)
+	if l > 0 {
+		n += 1 + l + sovInternalMsg(uint64(l))
+	}
+	return n
+}
+
+func (m *MulticastMsg) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if len(m.Nodes) > 0 {
+		l = 0
+		for _, e := range m.Nodes {
+			l += sovInternalMsg(uint64(e))
+		}
+		n += 1 + sovInternalMsg(uint64(l)) + l
+	}
+	if m.MsgId != 0 {
+		n += 1 + sovInternalMsg(uint64(m.MsgId))
+	}
+	l = len(m.MsgData)
+	if l > 0 {
+		n += 1 + l + sovInternalMsg(uint64(l))
+	}
 	return n
 }
 
@@ -1344,6 +1609,313 @@ func (m *SubscribeAck) Unmarshal(dAtA []byte) error {
 			return fmt.Errorf("proto: SubscribeAck: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
+		default:
+			iNdEx = preIndex
+			skippy, err := skipInternalMsg(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *ForwardMsg) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowInternalMsg
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: ForwardMsg: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: ForwardMsg: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Node", wireType)
+			}
+			m.Node = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Node |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MsgId", wireType)
+			}
+			m.MsgId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MsgId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MsgData", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MsgData = append(m.MsgData[:0], dAtA[iNdEx:postIndex]...)
+			if m.MsgData == nil {
+				m.MsgData = []byte{}
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipInternalMsg(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if skippy < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if (iNdEx + skippy) < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *MulticastMsg) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowInternalMsg
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: MulticastMsg: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: MulticastMsg: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType == 0 {
+				var v uint32
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowInternalMsg
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					v |= uint32(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				m.Nodes = append(m.Nodes, v)
+			} else if wireType == 2 {
+				var packedLen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowInternalMsg
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					packedLen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if packedLen < 0 {
+					return ErrInvalidLengthInternalMsg
+				}
+				postIndex := iNdEx + packedLen
+				if postIndex < 0 {
+					return ErrInvalidLengthInternalMsg
+				}
+				if postIndex > l {
+					return io.ErrUnexpectedEOF
+				}
+				var elementCount int
+				var count int
+				for _, integer := range dAtA[iNdEx:postIndex] {
+					if integer < 128 {
+						count++
+					}
+				}
+				elementCount = count
+				if elementCount != 0 && len(m.Nodes) == 0 {
+					m.Nodes = make([]uint32, 0, elementCount)
+				}
+				for iNdEx < postIndex {
+					var v uint32
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowInternalMsg
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						v |= uint32(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					m.Nodes = append(m.Nodes, v)
+				}
+			} else {
+				return fmt.Errorf("proto: wrong wireType = %d for field Nodes", wireType)
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MsgId", wireType)
+			}
+			m.MsgId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.MsgId |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field MsgData", wireType)
+			}
+			var byteLen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalMsg
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				byteLen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if byteLen < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			postIndex := iNdEx + byteLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalMsg
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.MsgData = append(m.MsgData[:0], dAtA[iNdEx:postIndex]...)
+			if m.MsgData == nil {
+				m.MsgData = []byte{}
+			}
+			iNdEx = postIndex
 		default:
 			iNdEx = preIndex
 			skippy, err := skipInternalMsg(dAtA[iNdEx:])

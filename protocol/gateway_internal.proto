@@ -1,0 +1,33 @@
+// Copyright © 2020-present ichenq@outlook.com All rights reserved.
+// Distributed under the terms and conditions of the BSD License.
+// See accompanying files LICENSE.
+
+syntax = "proto3";
+package protocol;
+
+import "gogoproto/gogo.proto";
+option (gogoproto.goproto_unrecognized_all) = false;
+option (gogoproto.goproto_unkeyed_all)      = false;
+option (gogoproto.goproto_sizecache_all)    = false;
+
+// 踢client下线
+message KickClientReq {
+  repeated uint32 sessions = 1;
+  uint32 reason            = 2;
+}
+
+message KickClientAck { uint32 count = 1; }
+
+// client掉线通知
+message ClientLostNtf {
+  uint32 session = 1; // session id
+  int64 user_id  = 2; //
+}
+
+// 转发client消息
+message ForwardClientMsg {
+  int64 user_id  = 1; // client的userid
+  uint32 session = 2; // client的session
+  uint32 msg_id  = 3; // 转发消息ID
+  bytes msg_data = 4; // 转发消息内容
+}

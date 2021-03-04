@@ -14,8 +14,24 @@ const (
 
 // 与errno.proto一致
 const (
+	ErrBadRequest            = 101 // 错误的请求
+	ErrInvalidArgument       = 102 // 参数错误
+	ErrOperationNotSupported = 103 // 不支持当前操作
+	ErrOperationTooOften     = 104 // 操作过于频繁
+	ErrRequestTimeout        = 105 // 请求超时
 	ErrDataCodecFailure      = 106 // 数据编码错误
+	ErrProtocolIncompatible  = 107 // 协议不兼容
 	ErrRpcTimeout            = 108 // RPC超时
 	ErrDuplicateRegistration = 201 // 服务重复注册
 	ErrRegistrationDenied    = 202 // 服务注册被拒绝
+	ErrServerInternalError   = 203 // 服务器内部错误
+	ErrServerMaintenance     = 204 // 服务器维护中
+	ErrServiceNotAvailable   = 205 // 服务不可用
+	ErrServiceBusy           = 206 // 服务正忙
+	ErrDBException           = 207 // 数据库异常
+	ErrSessionNotFound       = 208 // 未找到会话
+)
+
+const (
+	SERVICE_GATEWAY = 0x01
 )
