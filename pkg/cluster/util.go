@@ -9,6 +9,8 @@ import (
 	"crypto/hmac"
 	"crypto/sha256"
 	"encoding/hex"
+	"fmt"
+	"strings"
 
 	"devpkg.work/choykit/pkg/fatchoy"
 )
@@ -21,4 +23,16 @@ func SignAccessToken(node fatchoy.NodeID, gameId, key string) string {
 	h := hmac.New(sha256.New, []byte(key))
 	h.Write(buf.Bytes())
 	return hex.EncodeToString(h.Sum(nil))
+}
+
+func DependencyServiceTypes(serviceDependency string) ([]uint8, error) {
+	var services []uint8
+	for _, name := range strings.Split(serviceDependency, ",") {
+		if srvType := fatchoy.GetServiceTypeByName(name); srvType > 0 {
+			services = append(services, srvType)
+		} else {
+			return nil, fmt.Errorf("unrecognized dependency type %s", name)
+		}
+	}
+	return services, nil
 }

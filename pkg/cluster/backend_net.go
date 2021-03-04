@@ -25,11 +25,11 @@ func (s *Backend) startListen() error {
 	addrs := strings.Split(opts.Interface, ",")
 	switch len(addrs) {
 	case 0:
-		return nil
+		return nil // 没有监听地址，服务不需要互联
 	case 1:
 		addr = addrs[0]
 	default:
-		addr = addrs[len(addrs)-1] // 最后一个地址
+		addr = addrs[len(addrs)-1] // 如果有多个地址，则选择最后一个地址
 	}
 	ln, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -55,15 +55,15 @@ func (s *Backend) serveAccept() {
 			return
 		}
 		log.Infof("backend %v connected", conn.RemoteAddr())
-		go s.handleNodeAccept(conn, s.codec.Clone())
+		go s.handleNodeAccept(conn)
 	}
 }
 
 // 处理节点注册
-func (s *Backend) handleNodeAccept(conn net.Conn, cdec fatchoy.Codec) {
+func (s *Backend) handleNodeAccept(conn net.Conn) {
 	var req protocol.RegisterReq
-	pkt1, err := qnet.ReadProtoMessage(conn, cdec, &req)
-	if err != nil {
+	var pkt1 = fatchoy.MakePacket()
+	if err := qnet.ReadProtoMessage(conn, s.encoder, nil, pkt1, &req); err != nil {
 		log.Errorf("read registration message: %v", err)
 		return
 	}
@@ -73,7 +73,7 @@ func (s *Backend) handleNodeAccept(conn net.Conn, cdec fatchoy.Codec) {
 	pkt2.Seq = pkt1.Seq
 	pkt2.Body = &protocol.RegisterAck{Node: uint32(s.NodeID())}
 	regOK := s.handleRegister(&req, pkt2)
-	if err := qnet.SendPacketMessage(conn, cdec, pkt2); err != nil {
+	if err := qnet.SendPacketMessage(conn, s.encoder, nil, pkt2); err != nil {
 		log.Errorf("send registration message: %v", err)
 		return
 	}
@@ -82,7 +82,7 @@ func (s *Backend) handleNodeAccept(conn net.Conn, cdec fatchoy.Codec) {
 	}
 	var ctx = s.Context()
 	var node = fatchoy.NodeID(req.Node)
-	var endpoint = qnet.NewTcpConn(node, conn, cdec, nil, nil,
+	var endpoint = qnet.NewTcpConn(node, conn, s.encoder, nil, nil,
 		ctx.Env().EndpointOutboundQueueSize, s.stats)
 	s.endpoints.Add(node, endpoint)
 	endpoint.Go(true, true)
@@ -126,7 +126,7 @@ func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 		return err
 	}
 	ctx := s.Context()
-	endpoint := qnet.NewTcpConn(node, conn, s.codec.Clone(), s.errors, ctx.InboundQueue(),
+	endpoint := qnet.NewTcpConn(node, conn, s.encoder, s.errors, ctx.InboundQueue(),
 		ctx.Env().EndpointOutboundQueueSize, s.stats)
 	if err := s.register(endpoint); err != nil {
 		return err
@@ -137,16 +137,14 @@ func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 // 注册自己
 func (s *Backend) register(endpoint fatchoy.Endpoint) error {
 	var env = s.Environ()
-	var opts = s.Context().Options()
 	var token = SignAccessToken(s.node, env.GameID, env.AccessKey)
 	var req = &protocol.RegisterReq{
-		Node:            uint32(s.node),
-		AccessToken:     token,
-		IsCrossDistrict: opts.IsCrossDistrict,
+		Node:        uint32(s.node),
+		AccessToken: token,
 	}
 	log.Infof("start register self(%v) to node %v", s.node, endpoint.NodeID())
 	var resp protocol.RegisterAck
-	if err := qnet.RequestMessage(endpoint.RawConn(), endpoint.Codec(), int32(protocol.MSG_INTERNAL_REGISTER),
+	if err := qnet.RequestMessage(endpoint.RawConn(), s.encoder, nil, int32(protocol.MSG_INTERNAL_REGISTER),
 		req, &resp); err != nil {
 		return err
 	}
@@ -168,8 +166,7 @@ func (s *Backend) sendPing(now time.Time, endpoint fatchoy.Endpoint) {
 	var msg = &protocol.KeepAliveReq{
 		Time: now.Unix(),
 	}
-	pkt := fatchoy.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_INTERNAL_KEEP_ALIVE),
-		0, 0, 0, msg)
+	pkt := fatchoy.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_INTERNAL_KEEP_ALIVE), 0, 0, msg)
 	if err := endpoint.SendPacket(pkt); err != nil {
 		log.Errorf("Send message %d: %v", pkt.Command, err)
 	}
@@ -178,8 +175,8 @@ func (s *Backend) sendPing(now time.Time, endpoint fatchoy.Endpoint) {
 // 持续心跳
 func (s *Backend) servePing(endpoint fatchoy.Endpoint) {
 	defer s.wg.Done()
-	defer log.Debugf("pinger of %v stop serving", endpoint.NodeID())
-	log.Debugf("start serve pinger for %v", endpoint.NodeID())
+	defer log.Debugf("service endpoint %v stop serving", endpoint.NodeID())
+	log.Debugf("start serve pinging for endpoint %v", endpoint.NodeID())
 
 	var ctx = s.Context()
 	ticker := time.NewTicker(time.Duration(ctx.Env().NetPeerPingInterval) * time.Second)

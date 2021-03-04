@@ -5,9 +5,7 @@
 package cluster
 
 import (
-	"fmt"
 	"net"
-	"strings"
 	"sync"
 
 	"devpkg.work/choykit/pkg/fatchoy"
@@ -44,13 +42,12 @@ func (s *Backend) Init(ctx *fatchoy.ServiceContext) error {
 	s.endpoints = fatchoy.NewEndpointMap()
 
 	opts := s.Context().Options()
-	for _, name := range strings.Split(opts.ServiceDependency, ",") {
-		if srvType := fatchoy.GetServiceTypeByName(name); srvType > 0 {
-			s.dependency = append(s.dependency, srvType)
-		} else {
-			return fmt.Errorf("unrecognized dependency type %s", name)
-		}
+	dependency, err := DependencyServiceTypes(opts.ServiceDependency)
+	if err != nil {
+		return err
 	}
+	s.dependency = dependency
+
 	s.discovery = NewEtcdDiscovery(opts, s)
 	ctx.Router().AddPolicy(fatchoy.NewBasicRoutePolicy(s.endpoints))
 	s.AddMessageHandler(true, s.handleMessage)

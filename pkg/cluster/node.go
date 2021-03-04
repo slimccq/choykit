@@ -7,8 +7,8 @@ package cluster
 import (
 	"sync/atomic"
 
-	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/codec"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 )
 
@@ -17,7 +17,7 @@ type Node struct {
 	fatchoy.Executor
 	closing  int32                   //
 	node     fatchoy.NodeID          // 节点编号
-	codec    fatchoy.Codec           // 消息编解码
+	encoder  fatchoy.ProtocolCodec   // 消息编解码
 	handlers []fatchoy.PacketHandler // 消息处理函数
 	ctx      *fatchoy.ServiceContext // context对象
 }
@@ -27,7 +27,7 @@ func (s *Node) Init(ctx *fatchoy.ServiceContext) error {
 	if err := s.Executor.Init(env.ExecutorCapacity, env.ExecutorConcurrency); err != nil {
 		return err
 	}
-	s.codec = codec.NewServerCodec()
+	s.encoder = codec.NewServerProtocolCodec()
 	s.ctx = ctx
 	return nil
 }
@@ -40,7 +40,7 @@ func (s *Node) Startup() error {
 func (s *Node) Shutdown() {
 	s.Executor.Shutdown()
 	log.Infof("executor shutdown succeed")
-	s.codec = nil
+	s.encoder = nil
 	s.ctx = nil
 	s.handlers = nil
 }
@@ -55,10 +55,6 @@ func (s *Node) SetNodeID(v fatchoy.NodeID) {
 
 func (s *Node) IsClosing() bool {
 	return atomic.LoadInt32(&s.closing) > 0
-}
-
-func (s *Node) Codec() fatchoy.Codec {
-	return s.codec.Clone()
 }
 
 func (s *Node) Environ() *fatchoy.Environ {

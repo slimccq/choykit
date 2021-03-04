@@ -30,19 +30,6 @@ func (m *NodeInfoMap) GetNodes(srvType uint8) []*protocol.NodeInfo {
 	return v
 }
 
-// 本区服所有类型的节点
-func (m *NodeInfoMap) GetNodesBy(srvType uint8, district uint16) []*protocol.NodeInfo {
-	m.RLock()
-	var result []*protocol.NodeInfo
-	for _, v := range m.nodes[srvType] {
-		if fatchoy.NodeID(v.Node).District() == district {
-			result = append(result, v)
-		}
-	}
-	m.RUnlock()
-	return result
-}
-
 // 添加一个节点
 func (m *NodeInfoMap) AddNode(info *protocol.NodeInfo) {
 	m.Lock()
