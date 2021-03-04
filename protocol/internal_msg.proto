@@ -14,9 +14,8 @@ import "internal_struct.proto";
 
 // 注册节点
 message RegisterReq {
-  string access_token    = 1; // 认证token
-  uint32 node            = 2; // 节点编号
-  bool is_cross_district = 4; // 是否跨区服
+  string access_token = 1; // 认证token
+  uint32 node         = 2; // 节点编号
 }
 
 message RegisterAck {
