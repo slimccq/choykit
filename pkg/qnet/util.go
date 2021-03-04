@@ -43,20 +43,28 @@ func ListenTCP(address string) (*net.TCPListener, error) {
 // recv一条protobuf消息
 func ReadProtoMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fatchoy.MessageEncryptor,
 	pkt *fatchoy.Packet, pbMsg proto.Message) error {
-	var deadline = fatchoy.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
-	conn.SetReadDeadline(deadline)
-	_, err := decoder.Unmarshal(conn, pkt)
-	if err != nil {
-		log.Errorf("decode message %d: %v", pkt.Command, err)
-		return err
-	}
-	if err = codec.DecodePacket(pkt, decrypt); err != nil {
+	if err := ReadPacketMessage(conn, decoder, decrypt, pkt); err != nil {
 		return err
 	}
 	if ec := pkt.Errno(); ec > 0 {
 		return errors.Errorf("message %d encountered error: %d", pkt.Command, ec)
 	}
 	if err := pkt.DecodeMsg(pbMsg); err != nil {
+		return err
+	}
+	return nil
+}
+
+// recv一个packet
+func ReadPacketMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fatchoy.MessageEncryptor,
+	pkt *fatchoy.Packet) error {
+	deadline := fatchoy.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
+	conn.SetReadDeadline(deadline)
+	if _, err := decoder.Unmarshal(conn, pkt); err != nil {
+		log.Errorf("decode message %d: %v", pkt.Command, err)
+		return err
+	}
+	if err := codec.DecodePacket(pkt, decrypt); err != nil {
 		return err
 	}
 	return nil

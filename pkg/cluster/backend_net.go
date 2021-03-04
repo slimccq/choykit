@@ -69,7 +69,7 @@ func (s *Backend) handleNodeAccept(conn net.Conn) {
 	}
 	pkt2 := fatchoy.MakePacket()
 	pkt2.Node = s.NodeID()
-	pkt2.Command = uint32(protocol.MSG_INTERNAL_REGISTER_STATUS)
+	pkt2.Command = uint32(protocol.MSG_SM_INTERNAL_REGISTER)
 	pkt2.Seq = pkt1.Seq
 	pkt2.Body = &protocol.RegisterAck{Node: uint32(s.NodeID())}
 	regOK := s.handleRegister(&req, pkt2)
@@ -144,7 +144,7 @@ func (s *Backend) register(endpoint fatchoy.Endpoint) error {
 	}
 	log.Infof("start register self(%v) to node %v", s.node, endpoint.NodeID())
 	var resp protocol.RegisterAck
-	if err := qnet.RequestMessage(endpoint.RawConn(), s.encoder, nil, int32(protocol.MSG_INTERNAL_REGISTER),
+	if err := qnet.RequestMessage(endpoint.RawConn(), s.encoder, nil, int32(protocol.MSG_CM_INTERNAL_REGISTER),
 		req, &resp); err != nil {
 		return err
 	}
@@ -166,7 +166,7 @@ func (s *Backend) sendPing(now time.Time, endpoint fatchoy.Endpoint) {
 	var msg = &protocol.KeepAliveReq{
 		Time: now.Unix(),
 	}
-	pkt := fatchoy.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_INTERNAL_KEEP_ALIVE), 0, 0, msg)
+	pkt := fatchoy.NewPacket(endpoint.NodeID(), uint32(protocol.MSG_CM_INTERNAL_KEEP_ALIVE), 0, 0, msg)
 	if err := endpoint.SendPacket(pkt); err != nil {
 		log.Errorf("Send message %d: %v", pkt.Command, err)
 	}

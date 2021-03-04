@@ -12,7 +12,7 @@ import (
 
 func (s *Backend) handleMessage(pkt *fatchoy.Packet) error {
 	switch protocol.InternalMsgType(pkt.Command) {
-	case protocol.MSG_INTERNAL_KEEP_ALIVE_STATUS:
+	case protocol.MSG_SM_INTERNAL_KEEP_ALIVE:
 		return s.handlePong(pkt)
 
 	case protocol.MSG_INTERNAL_INSTANCE_STATE_NOTIFY:
