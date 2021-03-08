@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/cluster"
+	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/protocol"
 )
@@ -21,7 +21,7 @@ type Service struct {
 	wg         sync.WaitGroup         //
 	closing    int32                  //
 	discovery  *cluster.EtcdDiscovery //
-	saddr      string                 // backend侦听地址
+	saddr      fatchoy.NetInterface   // backend侦听地址
 	sListener  net.Listener           // 与backend的连接
 	cListeners []net.Listener         // 与client的连接(TCP)
 	wservers   []*WsServer            // 与client的连接(Websocket)
@@ -45,23 +45,23 @@ func (g *Service) Init(ctx *fatchoy.ServiceContext) error {
 	g.backends = fatchoy.NewEndpointMap()
 	g.sessions = fatchoy.NewEndpointMap()
 	g.initRouter()
-	g.discovery = cluster.NewEtcdDiscovery(g.Context().Options(), g)
+
+	env := ctx.Env()
+	g.discovery = cluster.NewEtcdDiscovery(env, g)
 
 	// 第一个地址监听server连接，其他地址监听client连接
-	var addrString = g.Context().Options().Interface
-	var interfaces = strings.Split(addrString, ",")
-	if len(interfaces) < 2 {
-		log.Errorf("invalid interfaces [%s] specified", addrString)
+	if len(env.NetInterfaces) < 2 {
+		log.Errorf("invalid interfaces [%v] specified", env.NetInterfaces)
 		return errInvalidInterface
 	}
-	g.saddr = strings.TrimSpace(interfaces[0])
+	g.saddr = fatchoy.NetInterface(*env.NetInterfaces[0])
 	if err := g.createBackendListener(g.saddr); err != nil {
 		return err
 	}
-	for i := 1; i < len(interfaces); i++ {
-		addr := strings.TrimSpace(interfaces[i])
-		if strings.HasPrefix(addr, "ws") {
-			if err := g.createWSServer(addr); err != nil {
+	for i := 1; i < len(env.NetInterfaces); i++ {
+		addr := fatchoy.NetInterface(*env.NetInterfaces[i])
+		if strings.HasPrefix(addr.BindAddr, "ws") {
+			if err := g.createWSServer(addr.BindAddr); err != nil {
 				return err
 			}
 		} else {

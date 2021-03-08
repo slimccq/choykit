@@ -18,15 +18,15 @@ type TcpServer struct {
 	backlog chan fatchoy.Endpoint // queue of incoming connections
 	errors  chan error            // error queue
 	lns     []net.Listener        // listener list
-	encoder    fatchoy.ProtocolCodec         // message encoding/decoding
+	encoder fatchoy.ProtocolCodec // message encoding/decoding
 	inbound chan *fatchoy.Packet  // incoming message buffer queue
-	outsize int                   // size of outbound message queue
+	outsize int32                 // size of outbound message queue
 }
 
-func NewTcpServer(encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int) *TcpServer {
+func NewTcpServer(encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int32) *TcpServer {
 	return &TcpServer{
 		inbound: inbound,
-		encoder:    encoder,
+		encoder: encoder,
 		outsize: outsize,
 		done:    make(chan struct{}),
 		backlog: make(chan fatchoy.Endpoint, 128),

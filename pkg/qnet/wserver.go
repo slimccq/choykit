@@ -22,10 +22,10 @@ type WsServer struct {
 	errChan  chan error            //
 	inbound  chan *fatchoy.Packet  // incoming message queue
 	encoder  fatchoy.ProtocolCodec // message codec
-	outsize  int                   // outgoing queue size
+	outsize  int32                 // outgoing queue size
 }
 
-func NewWebsocketServer(addr, path string, encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int) *WsServer {
+func NewWebsocketServer(addr, path string, encoder fatchoy.ProtocolCodec, inbound chan *fatchoy.Packet, outsize int32) *WsServer {
 	mux := http.NewServeMux()
 	var server = &http.Server{
 		Addr:              addr,

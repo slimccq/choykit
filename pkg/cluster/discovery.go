@@ -46,11 +46,11 @@ type EtcdDiscovery struct {
 	sink      ServiceSinker    //
 }
 
-func NewEtcdDiscovery(opts *fatchoy.Options, sink ServiceSinker) *EtcdDiscovery {
+func NewEtcdDiscovery(env *fatchoy.Environ, sink ServiceSinker) *EtcdDiscovery {
 	d := &EtcdDiscovery{
-		endpoints: strings.Split(opts.EtcdAddress, ","),
-		keySpace:  fmt.Sprintf("%s/service", opts.EtcdKeySpace),
-		leaseTTL:  opts.EtcdLeaseTTL,
+		endpoints: strings.Split(env.EtcdAddr, ","),
+		keySpace:  fmt.Sprintf("%s/service", env.EtcdKeyspace),
+		leaseTTL:  int(env.EtcdLeaseTtl),
 		masterCtx: context.Background(),
 		done:      make(chan struct{}),
 		sink:      sink,

@@ -5,8 +5,8 @@
 package cluster
 
 import (
+	"fmt"
 	"net"
-	"strings"
 	"time"
 
 	"devpkg.work/choykit/pkg/fatchoy"
@@ -17,21 +17,12 @@ import (
 
 // 侦听其它node连接
 func (s *Backend) startListen() error {
-	opts := s.Context().Options()
-	if opts.Interface == "" {
-		return nil
+	env := s.Context().Env()
+	if len(env.NetInterfaces) == 0 {
+		return nil // 这个服务不提供网络接口
 	}
-	var addr string
-	addrs := strings.Split(opts.Interface, ",")
-	switch len(addrs) {
-	case 0:
-		return nil // 没有监听地址，服务不需要互联
-	case 1:
-		addr = addrs[0]
-	default:
-		addr = addrs[len(addrs)-1] // 如果有多个地址，则选择最后一个地址
-	}
-	ln, err := net.Listen("tcp", addr)
+	addr := env.NetInterfaces[0] // 如果有多个地址，选择第一个地址
+	ln, err := net.Listen("tcp", fmt.Sprintf("%s:%d", addr.BindAddr, addr.Port))
 	if err != nil {
 		return err
 	}
@@ -137,7 +128,7 @@ func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 // 注册自己
 func (s *Backend) register(endpoint fatchoy.Endpoint) error {
 	var env = s.Environ()
-	var token = SignAccessToken(s.node, env.GameID, env.AccessKey)
+	var token = SignAccessToken(s.node, env.GameId, env.AccessKey)
 	var req = &protocol.RegisterReq{
 		Node:        uint32(s.node),
 		AccessToken: token,

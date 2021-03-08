@@ -18,15 +18,8 @@ import (
 )
 
 //
-func (g *Service) createClientListener(addr string) error {
-	_, port, err := net.SplitHostPort(addr)
-	if err != nil {
-		log.Errorf("cannot listen to this interface[%s]: %v", addr, err)
-		return err
-	}
-	// listen to all interface
-	caddr := ":" + port
-	ln, err := qnet.ListenTCP(caddr)
+func (g *Service) createClientListener(addr fatchoy.NetInterface) error {
+	ln, err := qnet.ListenTCP(addr.Interface())
 	if err != nil {
 		log.Errorf("listen client interface %s: %v", addr, err)
 		return err

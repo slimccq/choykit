@@ -41,14 +41,14 @@ func (s *Backend) Init(ctx *fatchoy.ServiceContext) error {
 	s.stats = fatchoy.NewStats(qnet.NumStat)
 	s.endpoints = fatchoy.NewEndpointMap()
 
-	opts := s.Context().Options()
-	dependency, err := DependencyServiceTypes(opts.ServiceDependency)
+	env := ctx.Env()
+	dependency, err := DependencyServiceTypes(env.ServiceDependency)
 	if err != nil {
 		return err
 	}
 	s.dependency = dependency
 
-	s.discovery = NewEtcdDiscovery(opts, s)
+	s.discovery = NewEtcdDiscovery(env, s)
 	ctx.Router().AddPolicy(fatchoy.NewBasicRoutePolicy(s.endpoints))
 	s.AddMessageHandler(true, s.handleMessage)
 	return nil
@@ -125,6 +125,6 @@ func (s *Backend) DelDependency(etcdDown bool, node fatchoy.NodeID) {
 func (s *Backend) NodeInfo() *protocol.NodeInfo {
 	return &protocol.NodeInfo{
 		Node:      uint32(s.node),
-		Interface: s.Context().Options().Interface,
+		//Interface: s.Context().Options().Interface,
 	}
 }

@@ -57,12 +57,5 @@ func parseOptions() *fatchoy.Options {
 		}
 		os.Exit(0)
 	}
-	if opts.ConfigFile != "" {
-		if err := fatchoy.ReadFileOption(opts.ConfigFile, opts); err != nil {
-			fmt.Printf("%v\n", err)
-			os.Exit(1)
-			return nil
-		}
-	}
 	return opts
 }

@@ -18,8 +18,8 @@ import (
 	"devpkg.work/choykit/pkg/qnet"
 )
 
-func (g *Service) createBackendListener(addr string) error {
-	ln, err := qnet.ListenTCP(addr)
+func (g *Service) createBackendListener(addr fatchoy.NetInterface) error {
+	ln, err := qnet.ListenTCP(addr.Interface())
 	if err != nil {
 		log.Errorf("listen backend %s: %v", addr, err)
 		return err
@@ -97,7 +97,7 @@ func (g *Service) handShakeBackend(conn net.Conn) (fatchoy.Endpoint, error) {
 
 	// 验证安全性 AccessKeyID
 	var env = g.Environ()
-	var token = cluster.SignAccessToken(fatchoy.NodeID(req.Node), env.GameID, env.AccessKey)
+	var token = cluster.SignAccessToken(fatchoy.NodeID(req.Node), env.GameId, env.AccessKey)
 	if req.AccessToken != token {
 		log.Errorf("register token mismatch [%s] != [%s]", req.AccessToken, token)
 		rspPkt.SetErrno(uint32(protocol.ErrRegistrationDenied))
@@ -138,7 +138,7 @@ func (g *Service) handShakeBackend(conn net.Conn) (fatchoy.Endpoint, error) {
 func (g *Service) NodeInfo() *protocol.NodeInfo {
 	return &protocol.NodeInfo{
 		Node:      uint32(g.NodeID()),
-		Interface: g.saddr,
+		Interface: g.saddr.AdvertiseInterface(),
 	}
 }
 

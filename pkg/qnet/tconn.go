@@ -34,7 +34,7 @@ type TcpConn struct {
 }
 
 func NewTcpConn(node fatchoy.NodeID, conn net.Conn, encoder fatchoy.ProtocolCodec, errChan chan error,
-	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *TcpConn {
+	incoming chan<- *fatchoy.Packet, outsize int32, stats *fatchoy.Stats) *TcpConn {
 	tconn := &TcpConn{
 		conn:   conn,
 		reader: bufio.NewReader(conn),

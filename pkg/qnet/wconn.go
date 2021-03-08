@@ -33,7 +33,7 @@ type WsConn struct {
 }
 
 func NewWsConn(node fatchoy.NodeID, conn *websocket.Conn, encoder fatchoy.ProtocolCodec, errChan chan error,
-	incoming chan<- *fatchoy.Packet, outsize int, stats *fatchoy.Stats) *WsConn {
+	incoming chan<- *fatchoy.Packet, outsize int32, stats *fatchoy.Stats) *WsConn {
 	wsconn := &WsConn{
 		conn: conn,
 	}

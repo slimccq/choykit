@@ -6,6 +6,7 @@ package fatchoy
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 	"reflect"
@@ -148,12 +149,25 @@ func ParseNetInterface(text string) []*protocol.InterfaceAddr {
 			addr.AdvertiseAddr = host[:i]
 			addr.BindAddr = host[i+1:]
 		}
-		if addr.BindAddr == "" || addr.AdvertiseAddr == "" {
+		if addr.BindAddr == "" {
 			log.Panicf("invalid address: %s", addr)
+		}
+		if addr.AdvertiseAddr == "" {
+			addr.AdvertiseAddr = addr.BindAddr
 		}
 		result = append(result, addr)
 	}
 	return result
+}
+
+type NetInterface protocol.InterfaceAddr
+
+func (i NetInterface) Interface() string {
+	return fmt.Sprintf("%s:%d", i.BindAddr, i.Port)
+}
+
+func (i NetInterface) AdvertiseInterface() string {
+	return fmt.Sprintf("%s:%d", i.AdvertiseAddr, i.Port)
 }
 
 // MySQL配置

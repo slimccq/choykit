@@ -29,16 +29,16 @@ type Program struct {
 }
 
 func (d *Program) Init(opts *fatchoy.Options) error {
-	// create necessary dirs
-	if err := os.Chdir(opts.WorkingDir); err != nil {
-		return err
-	}
-	var dirNames = []string{"data", "log"}
-	for _, name := range dirNames {
-		os.Mkdir(name, 0755)
-	}
-
 	fatchoy.StartClock()
+
+	workDir := opts.WorkingDir
+	if workDir != "" {
+		if err := os.Chdir(workDir); err != nil {
+			return err
+		}
+	} else {
+		workDir, _ = os.Getwd()
+	}
 
 	// load .env variable
 	if opts.EnvFile != "" && fsutil.IsFileExist(opts.EnvFile) {
@@ -47,6 +47,7 @@ func (d *Program) Init(opts *fatchoy.Options) error {
 		}
 	}
 	env := fatchoy.LoadEnviron()
+	env.SetByOption(opts)
 
 	var srv = fatchoy.GetServiceByName(opts.ServiceType)
 	if srv == nil {
@@ -55,8 +56,14 @@ func (d *Program) Init(opts *fatchoy.Options) error {
 	var node = fatchoy.MakeNodeID(srv.ID(), opts.ServiceIndex)
 	srv.SetNodeID(node)
 
-	var filepath = fmt.Sprintf("log/%s_%d.log", srv.Name(), opts.ServiceIndex)
-	log.Setup(!env.DevelopMode, opts.EnableSysLog, opts.LogLevel, filepath, opts.SysLogParams)
+	os.Mkdir("logs", 0755)
+	var filepath = fmt.Sprintf("logs/%s_%d.log", srv.Name(), opts.ServiceIndex)
+	log.Setup(env.IsProd(), opts.EnableSysLog, opts.LogLevel, filepath, opts.SysLogParams)
+
+	log.Infof("working dir: %s", workDir)
+	log.Infof("service type: %s", env.ServiceType)
+	log.Infof("service index: %d", env.ServiceIndex)
+	log.Infof("service dependency: %s", env.ServiceDependency)
 
 	// 注册protobuf消息反射
 	// protocol.InitMessageRegistry()
@@ -98,7 +105,7 @@ func (d *Program) Run() error {
 }
 
 func (d *Program) Start(srv service.Service) error {
-	var ctx = fatchoy.NewServiceContext(d.opts, d.env)
+	var ctx = fatchoy.NewServiceContext(d.env)
 	if err := ctx.Start(d.app); err != nil {
 		return err
 	}

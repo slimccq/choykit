@@ -26,7 +26,7 @@ type ConnBase struct {
 	errChan  chan error              // error signal
 }
 
-func (c *ConnBase) init(node fatchoy.NodeID, encoder fatchoy.ProtocolCodec, inbound chan<- *fatchoy.Packet, outsize int,
+func (c *ConnBase) init(node fatchoy.NodeID, encoder fatchoy.ProtocolCodec, inbound chan<- *fatchoy.Packet, outsize int32,
 	errChan chan error, stats *fatchoy.Stats) {
 	if stats == nil {
 		stats = fatchoy.NewStats(NumStat)
