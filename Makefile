@@ -24,12 +24,14 @@ $(ALL_PB_GO_SRC): $(ALL_PB_SRC)
 	protoc --proto_path=$(PB_SRC_DIR) --gofast_out=$(PB_GO_SRC_DIR)  $(ALL_PB_SRC)
 
 genpb:
-	rm $(ALL_PB_GO_SRC)
+	# rm $(ALL_PB_GO_SRC)
 	clang-format -i $(ALL_PB_SRC)
 	protoc --proto_path=$(PB_SRC_DIR) --gofast_out=$(PB_GO_SRC_DIR) $(ALL_PB_SRC)
 
 test:
+	docker-compose up -d
 	go test -v $(GO_PKG_LIST)
+	docker-compose down
 	# $(foreach pkg, $(GO_PKG_LIST), go test -v $(pkg))
 
 clean:
