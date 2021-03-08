@@ -12,6 +12,55 @@ option (gogoproto.goproto_sizecache_all)    = false;
 option (gogoproto.goproto_enum_prefix_all)  = false;
 option (gogoproto.goproto_registration)     = true;
 
+// 基本概念
+//   游戏: 最顶级的单位
+//   大世界: 一个游戏下可以有一个或多个大世界，比如常见的分全球版大世界和TW-BETA版大世界
+//   游戏版本: 一个大世界下可以有一个或多个游戏版本，游戏版本的主要构成以平台+地区标识为粒度，比如IOS-EN / AMZ-FR
+//   游戏服务器: 用于大世界下面的一种逻辑分服
+
+// 通用环境变量
+message Environ {
+  string env                            = 1;  // 当前环境, dev, uat, cert, prod
+  string game_id                        = 2;  // 游戏ID
+  string channel_id                     = 3;  // 渠道ID
+  string server_id                      = 4;  // 服务器ID
+  string server_name                    = 5;  // 服务器名称
+  string access_key                     = 6;  // 访问密钥串
+  string service_type                   = 10; // 服务类型
+  int32 service_index                   = 11; // 服务编号
+  string service_dependency             = 12; // 服务依赖
+  string etcd_addr                      = 13; // etcd地址
+  string etcd_keyspace                  = 14; // etcd的key空间
+  int32 etcd_lease_ttl                  = 15; // etcd的lease时间
+  string log_level                      = 16; // 日志级别
+  bool enable_syslog                    = 17; // 开启syslog
+  string syslog_params                  = 18; // syslog参数
+  string pprof_addr                     = 19; // pprof监听地址
+  string working_dir                    = 20; //
+  int32 executor_capacity               = 30; //
+  int32 executor_concurrency            = 31; //
+  int32 context_inbound_queue_size      = 32; //
+  int32 context_outbound_queue_size     = 33; //
+  int32 endpoint_outbound_queue_size    = 34; //
+  bool net_enable_encryption            = 35; // 是否开启加密
+  string net_public_key_file            = 36; // 公钥文件
+  string net_private_key_file           = 37; // 私钥文件
+  int32 net_peer_ping_interval          = 38; //
+  int32 net_peer_read_timeout           = 39; //
+  int32 net_session_read_timeout        = 40; //
+  int32 net_rpc_timeout_interval        = 41; //
+  repeated InterfaceAddr net_interfaces = 42; // 开启网络接口地址
+  string db_mysql_dsn                   = 51; // MySQL地址
+  string db_redis_addr                  = 52; // redis地址
+}
+
+// 地址接口
+message InterfaceAddr {
+  string bind_addr      = 1; // bind地址
+  string advertise_addr = 2; // 对外地址
+  int32 port            = 3; // 端口
+}
+
 // 节点状态
 enum NodeState {
   StateDown = 0; // 下线

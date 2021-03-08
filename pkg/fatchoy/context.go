@@ -21,16 +21,14 @@ type ServiceContext struct {
 	finalizers []func()       // finalizers
 	service    Service        // service对象
 	env        *Environ       // 环境变量
-	opt        *Options       // 命令行参数
 	router     *Router        // 路由对象
 	inbound    chan *Packet   // 收取消息队列
 	outbound   chan *Packet   // 发送消息队列
 	filter     PacketFilter   // 消息过滤器(rpc使用)
 }
 
-func NewServiceContext(opt *Options, env *Environ) *ServiceContext {
+func NewServiceContext(env *Environ) *ServiceContext {
 	return &ServiceContext{
-		opt:      opt,
 		env:      env,
 		done:     make(chan struct{}),
 		inbound:  make(chan *Packet, env.ContextInboundQueueSize),
@@ -51,10 +49,6 @@ func (c *ServiceContext) Start(srv Service) error {
 		return err
 	}
 	return nil
-}
-
-func (c *ServiceContext) Options() *Options {
-	return c.opt
 }
 
 func (c *ServiceContext) Env() *Environ {

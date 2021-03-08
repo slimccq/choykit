@@ -34,7 +34,7 @@ type Executor struct {
 	stats       *Stats      // 执行统计
 }
 
-func (e *Executor) Init(queueSize, concurrency int) error {
+func (e *Executor) Init(queueSize, concurrency int32) error {
 	e.bus = make(chan Runner, queueSize)
 	e.concurrency = int32(concurrency)
 	e.stats = NewStats(NumStats)

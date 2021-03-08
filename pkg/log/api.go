@@ -5,22 +5,7 @@
 package log
 
 import (
-	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-)
-
-type (
-	Level int8
-)
-
-const (
-	DebugLevel  = Level(zap.DebugLevel)
-	InfoLevel   = Level(zap.InfoLevel)
-	WarnLevel   = Level(zap.WarnLevel)
-	ErrorLevel  = Level(zap.ErrorLevel)
-	DPanicLevel = Level(zap.DPanicLevel)
-	PanicLevel  = Level(zap.PanicLevel)
-	FatalLevel  = Level(zap.FatalLevel)
 )
 
 type Hooker interface {

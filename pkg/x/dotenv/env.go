@@ -35,6 +35,12 @@ func (e Env) GetInt(key string) int {
 	return n
 }
 
+func (e Env) GetInt64(key string) int64 {
+	v := e.Get(key)
+	n, _ := strconv.ParseInt(v, 10, 64)
+	return n
+}
+
 func (e Env) GetFloat(key string) float64 {
 	v := e.Get(key)
 	f, _ := strconv.ParseFloat(v, 64)
@@ -79,6 +85,14 @@ func GetBool(key string) bool {
 
 func GetInt(key string) int {
 	return _env.GetInt(key)
+}
+
+func GetInt32(key string) int32 {
+	return int32(_env.GetInt(key))
+}
+
+func GetInt64(key string) int64 {
+	return _env.GetInt64(key)
 }
 
 func GetFloat(key string) float64 {
