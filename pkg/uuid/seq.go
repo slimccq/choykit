@@ -10,6 +10,7 @@ import (
 	"sync"
 )
 
+// 默认每个counter分配2000个号
 const DefaultSeqStep = 2000
 
 // 发号器

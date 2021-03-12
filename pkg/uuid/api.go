@@ -43,6 +43,7 @@ func NextUUID() int64 {
 	return uniqueGen.Next()
 }
 
+// 生成GUID
 func MustCreateGUID() string {
 	u, err := NewV4()
 	if err != nil {
