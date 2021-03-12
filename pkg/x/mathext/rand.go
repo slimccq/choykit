@@ -5,25 +5,24 @@
 package mathext
 
 import (
-	"math"
 	"math/rand"
 	"sync"
 )
 
-// 线性同余数法 Linear congruential random number generator
+// 线性同余法的随机数生成器
 // see https://en.wikipedia.org/wiki/Linear_congruential_generator
-type LCRNG struct {
+type LCG struct {
 	seed  uint32
 	guard sync.Mutex
 }
 
-func (g *LCRNG) Seed(seed uint32) {
+func (g *LCG) Seed(seed uint32) {
 	g.guard.Lock()
 	g.seed = seed*214013 + 2531011
 	g.guard.Unlock()
 }
 
-func (g *LCRNG) Rand() uint32 {
+func (g *LCG) Rand() uint32 {
 	g.guard.Lock()
 	g.seed = g.seed*214013 + 2531011
 	var r = uint32(g.seed>>16) & 0x7fff
@@ -66,38 +65,4 @@ func RangePerm(min, max int) []int {
 		list[i] += min
 	}
 	return list
-}
-
-// 四舍五入
-func RoundHalf(v float64) int {
-	return int(RoundFloat(v))
-}
-
-// https://github.com/montanaflynn/stats/blob/master/round.go
-func RoundFloat(x float64) float64 {
-	// If the float is not a number
-	if math.IsNaN(x) {
-		return math.NaN()
-	}
-
-	// Find out the actual sign and correct the input for later
-	sign := 1.0
-	if x < 0 {
-		sign = -1
-		x *= -1
-	}
-
-	// Get the actual decimal number as a fraction to be compared
-	_, decimal := math.Modf(x)
-
-	// If the decimal is less than .5 we round down otherwise up
-	var rounded float64
-	if decimal >= 0.5 {
-		rounded = math.Ceil(x)
-	} else {
-		rounded = math.Floor(x)
-	}
-
-	// Finally we do the math to actually create a rounded number
-	return rounded * sign
 }
