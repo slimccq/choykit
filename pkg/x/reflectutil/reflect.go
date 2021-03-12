@@ -67,6 +67,7 @@ func CallObjectMethod(ptr interface{}, method string, args ...interface{}) []int
 	return result
 }
 
+// 深拷贝src到dst，内部实现是使用gob编码再解码
 func DeepCopy(src, dst interface{}) error {
 	buf := &bytes.Buffer{}
 	enc := gob.NewEncoder(buf)

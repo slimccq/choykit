@@ -1,21 +1,17 @@
 # X Kit
 
-
 可以跨多个项目使用的基础工具包
 
-
-
 ### 各子包说明
-
 
 包名        |  描述
 ------------|-----------------------------
 cipher      | 加密解密
-collections | 容器和算法
+collections | 算法和数据结构
 datetime    | 日期相关
 dotenv      | .env文件解析
 fsutil      | 文件相关
-mathext     | 数学扩展包  
+mathext     | 数学扩展  
 reflectutil | 反射相关
 strutil     | 字符串相关  
 

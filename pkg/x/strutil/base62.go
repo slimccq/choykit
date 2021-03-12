@@ -20,7 +20,7 @@ func buildIndexTable(s []byte) map[byte]int64 {
 	return table
 }
 
-// EncodeBase62String convert an integer to base-62 string
+// 编码Base62
 func EncodeBase62String(id int64) string {
 	if id == 0 {
 		return string(b62Alphabet[:1])
@@ -38,7 +38,7 @@ func EncodeBase62String(id int64) string {
 	return string(short)
 }
 
-// DecodeBase62String convert an base-62 string back to integer
+// 解码Base62
 func DecodeBase62String(s string) int64 {
 	var n int64
 	for i := 0; i < len(s); i++ {

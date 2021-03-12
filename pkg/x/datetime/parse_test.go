@@ -155,6 +155,8 @@ func BenchmarkParseDateTime(b *testing.B) {
 			b.Fatalf("%v", err)
 		}
 	}
+	// Output:
+	// BenchmarkParseDateTime-12    	1000000000	         0.00100 ns/op
 }
 
 func BenchmarkParseDateTimeStd(b *testing.B) {
@@ -164,6 +166,8 @@ func BenchmarkParseDateTimeStd(b *testing.B) {
 			b.Fatalf("%v", err)
 		}
 	}
+	// Output:
+	// BenchmarkParseDateTime-12    	1000000000	         0.00200 ns/op
 }
 
 func TestParseMomentTime(t *testing.T) {

@@ -6,7 +6,6 @@ package collections
 
 import (
 	"fmt"
-	"hash/crc32"
 	"sort"
 )
 
@@ -28,8 +27,16 @@ func NewConsistent() *Consistent {
 	}
 }
 
+// fnv hash
 func (c *Consistent) hashKey(key string) uint32 {
-	return crc32.ChecksumIEEE([]byte(key))
+	// see src/hash/fnv.go sum32a.Write
+	var hash = uint32(2166136261)
+	for i := 0; i < len(key); i++ {
+		var c = byte(key[i])
+		hash ^= uint32(c)
+		hash *= 16777619
+	}
+	return hash
 }
 
 // 添加一个节点

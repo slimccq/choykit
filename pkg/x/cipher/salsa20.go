@@ -9,6 +9,7 @@ import (
 	"golang.org/x/crypto/salsa20"
 )
 
+// https://en.wikipedia.org/wiki/Salsa20
 type Salsa20 struct {
 	key   [32]byte
 	nonce uint64

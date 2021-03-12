@@ -36,11 +36,12 @@ func NewBitSet(bitsize int) *BitSet {
 	}
 }
 
+// bit的数量
 func (bs *BitSet) Size() int {
 	return bs.bitsize
 }
 
-// set 1 to bits[i]
+// 设置bits[i]为1
 func (bs *BitSet) Set(i int) bool {
 	if i >= 0 && i < bs.bitsize {
 		var v = uint64(1) << (i % 64)
@@ -50,6 +51,7 @@ func (bs *BitSet) Set(i int) bool {
 	return false
 }
 
+// 反转第i位
 func (bs *BitSet) Flip(i int) bool {
 	if i >= 0 && i < bs.bitsize {
 		bs.bits[i/64] ^= 1 << (i % 64)
@@ -58,7 +60,7 @@ func (bs *BitSet) Flip(i int) bool {
 	return false
 }
 
-// set 0 to bits[i]
+// 设置bits[i]为0
 func (bs *BitSet) Clear(i int) bool {
 	if i >= 0 && i < bs.bitsize {
 		var v = uint64(1) << (i % 64)
@@ -68,7 +70,7 @@ func (bs *BitSet) Clear(i int) bool {
 	return false
 }
 
-// test bits[i]
+// 查看bits[i]是否为1
 func (bs *BitSet) Test(i int) bool {
 	if i >= 0 && i < bs.bitsize {
 		return bs.bits[i/64]&(1<<(i%64)) != 0
@@ -76,12 +78,14 @@ func (bs *BitSet) Test(i int) bool {
 	return false
 }
 
+// 清零所有位
 func (bs *BitSet) ClearAll() {
 	for i := 0; i < len(bs.bits); i++ {
 		bs.bits[i] = 0
 	}
 }
 
+// 置为1的位的数量
 func (bs *BitSet) Count() int {
 	var count = 0
 	for i := 0; i < len(bs.bits); i++ {

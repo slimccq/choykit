@@ -6,6 +6,7 @@
 
 package collections
 
+// 跳表实现的有序字典
 type SortedSet struct {
 	dict map[Comparable]int64 // value and score
 	zsl  *ZSkipList           // indexed linked list

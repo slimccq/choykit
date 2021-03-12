@@ -49,7 +49,7 @@ func (c *LRUCache) Reset() {
 	c.list.Init()
 }
 
-// removeElement remove a given list element from the cache
+//
 func (c *LRUCache) removeElement(e *list.Element) {
 	kv := e.Value.(*LRUEntry)
 	c.list.Remove(e)

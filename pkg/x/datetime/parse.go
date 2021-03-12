@@ -24,6 +24,10 @@ var (
 	DateTimeSep   = " "
 )
 
+//
+// 实现一个对时间日期的解析， 要求日期格式如：2001-3-4 12:34:56
+// 自己实现可以方便的定制，更加灵活
+
 // 解析年月日格式，如:2001-3-4, 12-4
 func ParseDateParts(s string, seg []int) error {
 	i := strings.Index(s, DateFormatSep)

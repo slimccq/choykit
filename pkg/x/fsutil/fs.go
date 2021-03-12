@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 )
 
-// ReadFileToLines read file into string lines
+// 把文件内容按一行一行读取
 func ReadFileToLines(filename string) ([]string, error) {
 	fd, err := os.Open(filename)
 	if err != nil {

@@ -28,6 +28,7 @@ func FastStringToBytes(s string) []byte {
 	return *(*[]byte)(unsafe.Pointer(&bh))
 }
 
+// 随机长度的字符串
 func RandString(length int) string {
 	if length <= 0 {
 		return ""
@@ -40,6 +41,7 @@ func RandString(length int) string {
 	return string(result)
 }
 
+// 随机长度的字节数组
 func RandBytes(length int) []byte {
 	if length <= 0 {
 		return nil
@@ -82,7 +84,7 @@ func FindFirstNonDigit(s string) int {
 	return -1
 }
 
-// reverses the string
+// 反转字符串
 func Reverse(str string) string {
 	runes := []rune(str)
 	l := len(runes)
@@ -92,7 +94,7 @@ func Reverse(str string) string {
 	return string(runes)
 }
 
-// pretty bytes to string
+// 打印容量大小
 func PrettyBytes(n int64) string {
 	if n < (1 << 10) {
 		return fmt.Sprintf("%dB", n)
@@ -107,7 +109,7 @@ func PrettyBytes(n int64) string {
 	}
 }
 
-// s1和s2的最长共同前缀
+// 字符串最长共同前缀
 func LongestCommonPrefix(s1, s2 string) string {
 	if s1 == "" || s2 == "" {
 		return ""

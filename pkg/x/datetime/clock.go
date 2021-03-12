@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	DefaultTickInterval = 400
+	DefaultTickInterval = 400 // 400毫秒tick一次
 )
 
-// Clock提供一些对壁钟时间的操作
-// 设计初衷是为精度至少为秒的上层业务服务, 不适用于高精度的计时场景
+// Clock提供一些对壁钟时间的操作，不适用于高精度的计时场景
+// 设计初衷是为精度至少为秒的上层业务服务, 支持时钟的往前/后调拨
 type Clock struct {
 	done     chan struct{}
 	wg       sync.WaitGroup
