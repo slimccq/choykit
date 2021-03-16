@@ -11,6 +11,7 @@ import (
 	"devpkg.work/choykit/pkg/fatchoy"
 )
 
+// TcpConn和WsConn的公共基类
 type ConnBase struct {
 	done     chan struct{}           // done signal
 	wg       sync.WaitGroup          // wait group

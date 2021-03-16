@@ -12,7 +12,7 @@ const (
 	ServiceAll   = 0xFF       // 所有服务
 )
 
-// 与errno.proto一致
+// 错误码，定义与errno.proto一致
 const (
 	ErrBadRequest            = 101 // 错误的请求
 	ErrInvalidArgument       = 102 // 参数错误
@@ -32,6 +32,7 @@ const (
 	ErrSessionNotFound       = 208 // 未找到会话
 )
 
+// 服务类型
 const (
-	SERVICE_GATEWAY = 0x01
+	SERVICE_GATEWAY = 0x01	// 网关服务
 )

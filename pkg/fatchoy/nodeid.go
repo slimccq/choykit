@@ -11,11 +11,11 @@ import (
 )
 
 const (
-	NodeServiceShift  = 16
-	NodeServiceMask   = 0xFF00FFFF
-	NodeInstanceMask  = 0xFFFF0000
-	NodeTypeShift     = 31
-	NodeTypeClient    = NodeID(1 << NodeTypeShift)
+	NodeServiceShift = 16
+	NodeServiceMask  = 0xFF00FFFF
+	NodeInstanceMask = 0xFFFF0000
+	NodeTypeShift    = 31
+	NodeTypeClient   = NodeID(1 << NodeTypeShift)
 )
 
 // 一个32位整数表示的节点号，用以标识一个service（最高位为0），或者一个客户端session(最高位为1)
@@ -29,6 +29,7 @@ const (
 //		8位服务编号，16位服务实例编号
 //
 
+// 节点号
 type NodeID uint32
 
 func MakeNodeID(service uint8, instance uint16) NodeID {
@@ -46,7 +47,6 @@ func MustParseNodeID(s string) NodeID {
 	}
 	return NodeID(n)
 }
-
 
 // 是否backend instance
 func (n NodeID) IsBackend() bool {

@@ -132,12 +132,12 @@ func (d *Program) Stop(srv service.Service) error {
 
 func (d *Program) signaler() {
 	sigChan := make(chan os.Signal)
-	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGKILL)
+	signal.Notify(sigChan, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL)
 	for {
 		select {
 		case sig := <-sigChan:
 			switch sig {
-			case syscall.SIGINT, syscall.SIGKILL:
+			case syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL:
 				d.logger.Infof("signal %s received, start shutdown %s service",
 					sig, d.app.Name())
 				d.doCleanJob()
