@@ -7,103 +7,144 @@
 package collections
 
 import (
-	"strings"
 	"testing"
 )
 
-func TestSensitiveSimple(t *testing.T) {
-	var words = []string{
-		"fuck you",
-		"damn shit",
-		"我日",
+func createProfanityTrie(dict []string) *HashTrie {
+	var trie = NewHashTrie()
+	for _, word := range dict {
+		trie.AddWord(word)
 	}
-	var trie = NewTrie()
-	for _, text := range words {
-		var filtered = trie.FilterText(text)
-		if strings.Index(filtered, "*") < 0 {
-			t.Fatalf("filter failed: %s, %s", text, filtered)
+	return trie
+}
+
+// 测试删除字段
+func TestTrie_Remove(t *testing.T) {
+	var dirtyWords = []string{
+		"fuck",
+		"fuckyou",
+		"shit",
+		"pussy",
+		"dick",
+		"eatdick",
+	}
+
+	var trie = createProfanityTrie(dirtyWords)
+	println(trie.String())
+	var toDel = []string{
+		"fuck",
+		"fuckyou",
+		"eatdick",
+		"dick",
+	}
+	for _, word := range toDel {
+		ok := trie.Remove(word)
+		if !ok {
+			t.Fatalf("remove failed")
+		}
+	}
+	trie = createProfanityTrie(dirtyWords)
+	toDel = []string{
+		"fuckyou",
+		"fuck",
+		"dick",
+		"eatdick",
+	}
+	for _, word := range toDel {
+		ok := trie.Remove(word)
+		if !ok {
+			t.Fatalf("remove failed")
 		}
 	}
 }
 
-func TestSensitiveExample(t *testing.T) {
-	var names []string
-	var trie = NewTrie()
-	trie.Insert("习*近*平")
-	trie.Insert("毛*泽*东")
-	trie.Insert("法*轮*功")
-
-	matchAll := func(names []string) {
-		for _, name := range names {
-			begin, end := trie.MatchWords([]rune(name))
-			if begin < 0 || end < begin {
-				t.Fatalf("MatchWords failed")
-			}
+// 测试精确匹配
+func TestTrie_ExactMatch(t *testing.T) {
+	var dirtyWords = []string{
+		"fuck",
+		"shit",
+		"我操",
+		"*你妈",
+		"你妈*",
+	}
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"", false},
+		{"fuck", true},
+		{"fucku", false},
+		{"ufuck", false},
+		{"我操", true},
+		{"我操她", false},
+		{"哎哟我操", false},
+		{"哎哟我操", false},
+		{"曰你妈", true},
+		{"你妈B", true},
+	}
+	var trie = createProfanityTrie(dirtyWords)
+	for _, tc := range tests {
+		output := trie.ExactMatch(tc.input)
+		if output != tc.expected {
+			t.Fatalf("unexpected output for [%s]: %v != %v", tc.input, output, tc.expected)
 		}
 	}
-
-	matchNone := func(names []string) {
-		for _, name := range names {
-			begin, end := trie.MatchWords([]rune(name))
-			if begin < 0 || end < begin {
-				t.Fatalf("MatchWords failed, %d, %d, %s", begin, end, name)
-			}
-		}
-	}
-
-	names = []string{
-		"近平",
-		"习近",
-		"习平",
-		"习一一近平",
-		"零零习近二二平",
-		"习近二二平",
-		"零零习一一近平",
-		"习近二二平三三",
-	}
-	matchNone(names)
-
-	names = []string{
-		"习近平",
-		"一一习近平",
-		"习近平四四",
-		"一一习近平四四",
-		"一习近平",
-		"习近平四",
-		"习二近平",
-		"习近三平",
-		"一习二近平",
-		"一习近三平",
-		"一习近平四",
-		"习二近三平",
-		"习二近平四",
-		"习近三平四",
-		"一习二近三平",
-		"一习近三平四",
-		"一习二近平四",
-		"习二近三平四",
-		"一习二近三平四",
-	}
-	matchAll(names)
-
-	names = []string{
-		"习毛近平",
-		"习毛近泽平",
-		"习毛近泽东",
-		"习毛近泽平东",
-		"毛习泽近东",
-	}
-	matchAll(names)
 }
 
-func TestSensitiveFilter(t *testing.T) {
-	var trie = NewTrie()
-	trie.Insert("干死")
-	var text = "干死AA干死BB"
-	var filtered = trie.FilterText(text)
-	var replaced = strings.Replace(text, "干死", "**", -1)
-	if replaced != filtered {
-		t.Fatalf("sensitive filter failure: expect: %s, got: %s", replaced, filtered)
+// 测试模糊匹配
+func TestTrie_Match(t *testing.T) {
+	var dirtyWords = []string{
+		"sm",
+		"台独",
+		"*泽东",
 	}
-	t.Logf("filtered text: %s\n", filtered)
+	tests := []struct {
+		input    string
+		expected bool
+	}{
+		{"", false},
+		{"small", true},
+		{"smith", true},
+		{"台独", true},
+		{"一台独立服务器", true},
+		{"毛泽东", true},
+		{"泽东影业", false},
+	}
+	var trie = createProfanityTrie(dirtyWords)
+	for _, tc := range tests {
+		output := trie.Contains(tc.input)
+		if output != tc.expected {
+			t.Fatalf("unexpected output for [%s]: %v != %v", tc.input, output, tc.expected)
+		}
+	}
+}
+
+// 测试*号过滤
+func TestTrie_Filter(t *testing.T) {
+	var dirtyWords = []string{
+		"sm",
+		"fuck",
+		"毛泽东",
+	}
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"", ""},
+		{"quickfox", "quickfox"},
+		{"sm", "**"},
+		{"small", "**all"},
+		{"jrsmith", "jr**ith"},
+		{"go_fuck_u_smith", "go_****_u_**ith"},
+		{"毛泽东", "***"},
+		{"你好毛泽东", "你好***"},
+		{"毛-泽-东", "毛-泽-东"},
+	}
+	var trie = createProfanityTrie(dirtyWords)
+	for _, tc := range tests {
+		output := trie.Filter(tc.input)
+		if output != tc.expected {
+			t.Fatalf("unexpected output for [%s]: %v != %v", tc.input, output, tc.expected)
+		}
+	}
 }
