@@ -7,7 +7,7 @@
 
 ```go
 // 初始化传入workerID, etcd地址，和命名空间前缀
-uuid.Init(1234, "localhost:2379", "keyspace")
+uuid.Init(1001, "localhost:2379", "/keyspace/")
 
 // 返回一个ID，使用发号器算法，可用于角色、工会ID
 id := NextID()
