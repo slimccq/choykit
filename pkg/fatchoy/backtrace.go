@@ -27,12 +27,13 @@ func Backtrace(message interface{}, f *os.File) {
 	var buf bytes.Buffer
 	var now = time.Now()
 	fmt.Fprintf(&buf, "Traceback[%s] (most recent call last):\n", now.Format(timestampLayout))
-	for i := 0; ; i++ {
-		pc, file, line, ok := runtime.Caller(i + 1)
+	for i := 1; i < 50; i++ {
+		pc, file, line, ok := runtime.Caller(i)
 		if !ok {
 			break
 		}
-		fmt.Fprintf(&buf, "% 3d. %s() %s:%d\n", i, runtime.FuncForPC(pc).Name(), file, line)
+		funcName := runtime.FuncForPC(pc).Name()
+		fmt.Fprintf(&buf, "% 2d. %s() %s:%d\n", i, funcName, file, line)
 	}
 	fmt.Fprintf(&buf, "%v\n", message)
 	buf.WriteTo(f)
