@@ -96,19 +96,6 @@ func (bs *BitSet) Count() int {
 	return count
 }
 
-func (bs BitSet) String() string {
-	var sb strings.Builder
-	sb.Grow(bs.bitsize)
-	for i := 0; i < bs.bitsize; i++ {
-		if bs.Test(i) {
-			sb.WriteByte('1')
-		} else {
-			sb.WriteByte('0')
-		}
-	}
-	return sb.String()
-}
-
 func (bs BitSet) HashCode() string {
 	h := md5.New()
 	for i := 0; i < len(bs.bits); i++ {
@@ -127,6 +114,19 @@ func (bs BitSet) FormattedString(width int) string {
 			sb.WriteByte('\n')
 		}
 		n++
+		if bs.Test(i) {
+			sb.WriteByte('1')
+		} else {
+			sb.WriteByte('0')
+		}
+	}
+	return sb.String()
+}
+
+func (bs BitSet) String() string {
+	var sb strings.Builder
+	sb.Grow(bs.bitsize)
+	for i := 0; i < bs.bitsize; i++ {
 		if bs.Test(i) {
 			sb.WriteByte('1')
 		} else {

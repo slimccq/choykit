@@ -63,7 +63,7 @@ func ParseDateParts(s string, seg []int) error {
 		if year <= 0 {
 			return fmt.Errorf("invalid date format '%s'", s)
 		}
-		if max := DayCountOfMonth(year, month); day > max {
+		if max := DaysCountOfMonth(year, month); day > max {
 			return fmt.Errorf("invalid date format '%s'", s)
 		}
 		seg[0] = year
@@ -184,7 +184,7 @@ func IsLeapYear(year int) bool {
 }
 
 // 一个月的天数
-func DayCountOfMonth(year, month int) int {
+func DaysCountOfMonth(year, month int) int {
 	switch time.Month(month) {
 	case time.January:
 		return 31
@@ -238,10 +238,10 @@ func FormatUnixTime(v int64) string {
 
 // 转换unix毫秒时间戳
 func TimeToMillis(t time.Time) int64 {
-	return t.UnixNano() / int64(1e6)
+	return t.UnixNano() / int64(1000_000)
 }
 
 // 当前unix毫秒时间戳
 func CurrentTimeMillis() int64 {
-	return time.Now().UnixNano() / int64(1e6)
+	return time.Now().UnixNano() / int64(1000_000)
 }
