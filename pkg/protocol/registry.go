@@ -5,7 +5,6 @@
 package protocol
 
 import (
-	"fmt"
 	"hash/fnv"
 	"log"
 	"reflect"
@@ -52,7 +51,7 @@ func isNil(c interface{}) bool {
 
 // 根据消息名称的hash注册
 func registerByNameHash(fileDescriptor protoreflect.FileDescriptor) bool {
-	fmt.Printf("register %s\n", fileDescriptor.Path())
+	log.Printf("register %s\n", fileDescriptor.Path())
 	msgDescriptors := fileDescriptor.Messages()
 	for i := 0; i < msgDescriptors.Len(); i++ {
 		descriptor := msgDescriptors.Get(i)
@@ -74,19 +73,18 @@ func registerByNameHash(fileDescriptor protoreflect.FileDescriptor) bool {
 }
 
 // 从message的option里获取消息ID
-func getMsgIdByExtension(descriptor protoreflect.MessageDescriptor, ext *proto.ExtensionDesc) uint32 {
+func getMsgIdByExtension(descriptor protoreflect.MessageDescriptor, xtName protoreflect.FullName) uint32 {
 	ovi := descriptor.Options()
 	if isNil(ovi) {
 		return 0
 	}
 	omi := ovi.ProtoReflect()
 	var msgId uint32
-	fullname := ext.TypeDescriptor().FullName()
 	omi.Range(func(fd protoreflect.FieldDescriptor, v protoreflect.Value) bool {
 		if !fd.IsExtension() {
 			return true
 		}
-		if fd.FullName() == fullname {
+		if fd.FullName() == xtName {
 			ivs := v.String()
 			n, _ := strconv.ParseInt(ivs, 10, 64)
 			msgId = uint32(n)
@@ -98,8 +96,8 @@ func getMsgIdByExtension(descriptor protoreflect.MessageDescriptor, ext *proto.E
 }
 
 // 根据消息option指定的ID注册
-func registerByExtension(fileDescriptor protoreflect.FileDescriptor, ext *proto.ExtensionDesc) bool {
-	fmt.Printf("register %s\n", fileDescriptor.Path())
+func registerByExtension(fileDescriptor protoreflect.FileDescriptor, xtName protoreflect.FullName) bool {
+	log.Printf("register %s\n", fileDescriptor.Path())
 	msgDescriptors := fileDescriptor.Messages()
 	for i := 0; i < msgDescriptors.Len(); i++ {
 		descriptor := msgDescriptors.Get(i)
@@ -108,7 +106,7 @@ func registerByExtension(fileDescriptor protoreflect.FileDescriptor, ext *proto.
 			continue
 		}
 		name := string(fullname)
-		msgid := getMsgIdByExtension(descriptor, ext)
+		msgid := getMsgIdByExtension(descriptor, xtName)
 		if msgid == 0 {
 			continue
 		}
@@ -125,14 +123,19 @@ func registerByExtension(fileDescriptor protoreflect.FileDescriptor, ext *proto.
 
 func RegisterV1() {
 	protoregistry.GlobalFiles.RangeFiles(registerByNameHash)
-	fmt.Printf("%d messages registered\n", len(msgRegistry))
+	log.Printf("%d messages registered\n", len(msgRegistry))
 }
 
-func RegisterV2(ext *proto.ExtensionDesc) {
+func RegisterV2(exName string) {
+	fullname := protoreflect.FullName(exName)
+	_, err := protoregistry.GlobalTypes.FindExtensionByName(fullname)
+	if err != nil {
+		log.Panicf("%v", err)
+	}
 	protoregistry.GlobalFiles.RangeFiles(func(fd protoreflect.FileDescriptor) bool {
-		return registerByExtension(fd, ext)
+		return registerByExtension(fd, fullname)
 	})
-	fmt.Printf("%d messages registered\n", len(msgRegistry))
+	log.Printf("%d messages registered\n", len(msgRegistry))
 }
 
 // 根据消息ID创建message
