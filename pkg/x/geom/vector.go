@@ -13,8 +13,8 @@ type Vector struct {
 	X, Y int
 }
 
-func NewVectorFrom(a, b Point) *Vector {
-	return &Vector{
+func NewVectorFrom(a, b Point) Vector {
+	return Vector{
 		X: b.X - a.X,
 		Y: b.Y - a.Y,
 	}
@@ -65,6 +65,22 @@ func (a *Vector) Dot(b *Vector) int64 {
 // 叉积(cross product)
 func (a *Vector) Cross(b *Vector) int64 {
 	return int64(a.X*b.Y) - int64(a.Y*b.X)
+}
+
+// 按比例截断
+func (a *Vector) Trunc(ratio float64) Vector {
+	return Vector{
+		X: int(ratio * float64(a.X)),
+		Y: int(ratio * float64(a.Y)),
+	}
+}
+
+// 转换成坐标
+func (a Vector) ToPoint(start Point) Point {
+	return Point{
+		X: start.X + a.X,
+		Y: start.Y + a.Y,
+	}
 }
 
 // 向量按照角度逆时针旋转获得新的向量，如果需要顺时针旋转，angle传入负值

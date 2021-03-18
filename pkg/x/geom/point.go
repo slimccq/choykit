@@ -13,8 +13,6 @@ type Point struct {
 	X, Y int
 }
 
-var EmptyPoint Point
-
 func NewPoint(x, y int) *Point {
 	return &Point{x, y}
 }

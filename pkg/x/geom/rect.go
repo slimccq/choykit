@@ -6,16 +6,12 @@ package geom
 
 // 四边形
 type Rectangle struct {
-	Point // 左下角原点
+	Point             // 左下角原点
 	Width, Height int // 宽度、高度
 }
 
-var (
-	EmptyRect Rectangle
-)
-
-func NewRectangle(x, y, w, h int) *Rectangle {
-	return &Rectangle{
+func NewRectangle(x, y, w, h int) Rectangle {
+	return Rectangle{
 		Point: Point{X: x,
 			Y: y,
 		},
@@ -66,7 +62,7 @@ func (r *Rectangle) IsIntersectsWith(rec *Rectangle) bool {
 }
 
 // 矩形相交区域
-func RectIntersect(a *Rectangle, b *Rectangle) *Rectangle {
+func RectIntersect(a *Rectangle, b *Rectangle) Rectangle {
 	var x1 = IntMax(a.X, b.X)
 	var x2 = IntMax(a.X+a.Width, b.X+b.Width)
 	var y1 = IntMax(a.Y, b.Y)
@@ -74,11 +70,11 @@ func RectIntersect(a *Rectangle, b *Rectangle) *Rectangle {
 	if x2 >= x1 && y2 >= y1 {
 		return NewRectangle(x1, y1, x2-x1, y2-y1)
 	}
-	return &EmptyRect
+	return Rectangle{}
 }
 
 // 矩形结合区域
-func RectUnion(a *Rectangle, b *Rectangle) *Rectangle {
+func RectUnion(a *Rectangle, b *Rectangle) Rectangle {
 	var x1 = IntMax(a.X, b.X)
 	var x2 = IntMax(a.X+a.Width, b.X+b.Width)
 	var y1 = IntMax(a.Y, b.Y)
