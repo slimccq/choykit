@@ -2,10 +2,11 @@
 // Distributed under the terms and conditions of the BSD License.
 // See accompanying files LICENSE.
 
-package mathext
+package geom
 
+// 四边形
 type Rectangle struct {
-	X, Y          int // 原点
+	Point // 左下角原点
 	Width, Height int // 宽度、高度
 }
 
@@ -15,15 +16,17 @@ var (
 
 func NewRectangle(x, y, w, h int) *Rectangle {
 	return &Rectangle{
-		X:      x,
-		Y:      y,
+		Point: Point{X: x,
+			Y: y,
+		},
 		Width:  w,
 		Height: h,
 	}
 }
 
-func (r *Rectangle) GetVertexes() [4]Point2 {
-	return [4]Point2{
+// 四个顶点
+func (r *Rectangle) GetVertexes() [4]Point {
+	return [4]Point{
 		{r.X, r.Y},
 		{r.X + r.Width, r.Y},
 		{r.X + r.Width, r.Y + r.Height},
@@ -31,7 +34,7 @@ func (r *Rectangle) GetVertexes() [4]Point2 {
 	}
 }
 
-// Inflates this rectangle
+// 展开或者收缩矩形
 func (r *Rectangle) Inflate(width, height int) {
 	r.X -= width
 	r.Y -= height
@@ -39,44 +42,46 @@ func (r *Rectangle) Inflate(width, height int) {
 	r.Height += 2 * height
 }
 
-// Determines if a point is contained within the rectangle
+// 点是否在矩形内
 func (r *Rectangle) Contains(x, y int) bool {
 	return r.X <= x && x < r.X+r.Width &&
 		r.Y <= y && y < r.Y+r.Height
 }
 
-func (r *Rectangle) ContainsPoint(pt Point2) bool {
+// 点是否在矩形内
+func (r *Rectangle) ContainsPoint(pt Point) bool {
 	return r.Contains(pt.X, pt.Y)
 }
 
+// 是否包含
 func (r *Rectangle) ContainsRegion(rec *Rectangle) bool {
 	return r.X <= rec.X && (rec.X+rec.Width) <= (r.X+r.Width) &&
 		r.Y <= rec.Y && (rec.Y+rec.Height) <= (r.Y+r.Height)
 }
 
-// Determines if this rectangle intersets with rect.
+// 是否相交
 func (r *Rectangle) IsIntersectsWith(rec *Rectangle) bool {
 	return (rec.X < r.X+r.Width) && r.X < (rec.X+rec.Width) &&
 		(rec.Y < r.Y+r.Height) && r.Y < (rec.Y+rec.Height)
 }
 
-// Creates a rectangle that represents the intersetion between a and b
+// 矩形相交区域
 func RectIntersect(a *Rectangle, b *Rectangle) *Rectangle {
-	var x1 = Int.Max(a.X, b.X)
-	var x2 = Int.Max(a.X+a.Width, b.X+b.Width)
-	var y1 = Int.Max(a.Y, b.Y)
-	var y2 = Int.Max(a.Y+a.Height, b.Y+b.Height)
+	var x1 = IntMax(a.X, b.X)
+	var x2 = IntMax(a.X+a.Width, b.X+b.Width)
+	var y1 = IntMax(a.Y, b.Y)
+	var y2 = IntMax(a.Y+a.Height, b.Y+b.Height)
 	if x2 >= x1 && y2 >= y1 {
 		return NewRectangle(x1, y1, x2-x1, y2-y1)
 	}
 	return &EmptyRect
 }
 
-// Creates a rectangle that represents the union between a and b
+// 矩形结合区域
 func RectUnion(a *Rectangle, b *Rectangle) *Rectangle {
-	var x1 = Int.Max(a.X, b.X)
-	var x2 = Int.Max(a.X+a.Width, b.X+b.Width)
-	var y1 = Int.Max(a.Y, b.Y)
-	var y2 = Int.Max(a.Y+a.Height, b.Y+b.Height)
+	var x1 = IntMax(a.X, b.X)
+	var x2 = IntMax(a.X+a.Width, b.X+b.Width)
+	var y1 = IntMax(a.Y, b.Y)
+	var y2 = IntMax(a.Y+a.Height, b.Y+b.Height)
 	return NewRectangle(x1, y1, x2-x1, y2-y1)
 }
