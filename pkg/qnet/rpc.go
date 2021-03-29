@@ -104,7 +104,7 @@ func (r *RpcFactory) Init(ctx *fatchoy.ServiceContext) error {
 	r.done = make(chan struct{})
 	r.pending = make(map[uint16]*RpcContext)
 	r.registry = make(map[int32]bool)
-	r.ttl = time.Duration(ctx.Env().NetRpcTimeoutInterval) * time.Second
+	r.ttl = time.Duration(ctx.Env().GetInt(fatchoy.NET_RPC_TTL)) * time.Second
 	r.ctx = ctx
 	r.seq = 2000 // magic number
 	ctx.SetMessageFilter(r.filterRpcMessage)

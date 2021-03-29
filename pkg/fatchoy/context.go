@@ -31,8 +31,8 @@ func NewServiceContext(env *Environ) *ServiceContext {
 	return &ServiceContext{
 		env:      env,
 		done:     make(chan struct{}),
-		inbound:  make(chan *Packet, env.ContextInboundQueueSize),
-		outbound: make(chan *Packet, env.ContextOutboundQueueSize),
+		inbound:  make(chan *Packet, env.GetInt(RUNTIME_CONTEXT_INBOUND_SIZE)),
+		outbound: make(chan *Packet, env.GetInt(RUNTIME_CONTEXT_OUTBOUND_SIZE)),
 	}
 }
 

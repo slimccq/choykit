@@ -7,10 +7,11 @@ package codec
 import (
 	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
+	"devpkg.work/choykit/pkg/x/cipher"
 )
 
 // 根据pkt的Flag标志位，对body进行压缩和加密
-func EncodePacket(pkt *fatchoy.Packet, threshold int, encrypt fatchoy.MessageEncryptor) error {
+func EncodePacket(pkt *fatchoy.Packet, threshold int, encrypt cipher.BlockCryptor) error {
 	payload, err := pkt.EncodeBody()
 	if err != nil {
 		return err
@@ -28,11 +29,7 @@ func EncodePacket(pkt *fatchoy.Packet, threshold int, encrypt fatchoy.MessageEnc
 		}
 	}
 	if encrypt != nil {
-		encrypted, er := encrypt.Encrypt(payload)
-		if er != nil {
-			log.Errorf("encrypt packet %d with %d bytes: %v", pkt.Command, len(payload), err)
-			return er
-		}
+		encrypted := encrypt.Encrypt(payload)
 		payload = encrypted
 		pkt.Flag |= fatchoy.PacketFlagEncrypted
 	}
@@ -41,7 +38,7 @@ func EncodePacket(pkt *fatchoy.Packet, threshold int, encrypt fatchoy.MessageEnc
 }
 
 // 根据pkt的Flag标志位，对body进行解密和解压缩
-func DecodePacket(pkt *fatchoy.Packet, decrypt fatchoy.MessageEncryptor) error {
+func DecodePacket(pkt *fatchoy.Packet, decrypt cipher.BlockCryptor) error {
 	payload, err := pkt.EncodeBody()
 	if err != nil {
 		return err
@@ -50,10 +47,7 @@ func DecodePacket(pkt *fatchoy.Packet, decrypt fatchoy.MessageEncryptor) error {
 		return nil
 	}
 	if (pkt.Flag&fatchoy.PacketFlagEncrypted) != 0 && decrypt != nil {
-		decrypted, err := decrypt.Decrypt(payload)
-		if err != nil {
-			return err
-		}
+		decrypted := decrypt.Decrypt(payload)
 		payload = decrypted
 		pkt.Flag &= ^uint16(fatchoy.PacketFlagEncrypted)
 	}

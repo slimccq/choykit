@@ -33,17 +33,19 @@ type ServiceSinker interface {
 	DelDependency(bool, fatchoy.NodeID)
 }
 
+// 基于ETCD的服务发现
 type EtcdDiscovery struct {
 	done      chan struct{}
 	wg        sync.WaitGroup
-	closing   int32            //
-	endpoints []string         //
-	keySpace  string           //
-	leaseTTL  int              // lease TTL seconds
-	masterCtx context.Context  // master context
-	client    *clientv3.Client // etcd client
-	leaseID   clientv3.LeaseID // etcd lease ID
-	sink      ServiceSinker    //
+	closing   int32              //
+	endpoints []string           //
+	keySpace  string             //
+	leaseTTL  int                // lease TTL seconds
+	ctx       context.Context    // master context
+	cancel    context.CancelFunc //
+	client    *clientv3.Client   // etcd client
+	leaseID   clientv3.LeaseID   // etcd lease ID
+	sink      ServiceSinker      //
 }
 
 func NewEtcdDiscovery(env *fatchoy.Environ, sink ServiceSinker) *EtcdDiscovery {
@@ -51,8 +53,8 @@ func NewEtcdDiscovery(env *fatchoy.Environ, sink ServiceSinker) *EtcdDiscovery {
 		endpoints: strings.Split(env.EtcdAddr, ","),
 		keySpace:  fmt.Sprintf("%s/service", env.EtcdKeyspace),
 		leaseTTL:  int(env.EtcdLeaseTtl),
-		masterCtx: context.Background(),
 		done:      make(chan struct{}),
+		ctx:       context.Background(),
 		sink:      sink,
 	}
 	if d.leaseTTL <= 0 {
@@ -65,12 +67,13 @@ func (d *EtcdDiscovery) Start() error {
 	if err := d.makeClient(); err != nil {
 		return err
 	}
-	if err := d.listServiceList(); err != nil {
+	if err := d.listService(); err != nil {
 		return err
 	}
 
-	watchCh := d.watch()
-	leaseCh, err := d.register()
+	d.ctx, d.cancel = context.WithCancel(context.Background())
+	watchCh := d.client.Watch(clientv3.WithRequireLeader(d.ctx), d.keySpace, clientv3.WithPrefix())
+	leaseCh, err := d.register(d.ctx)
 	if err != nil {
 		return err
 	}
@@ -88,11 +91,11 @@ func (d *EtcdDiscovery) makeClient() error {
 		return err
 	}
 	d.client = cli
-	d.masterCtx = context.Background()
+	d.ctx = context.Background()
 	return nil
 }
 
-func (d *EtcdDiscovery) listServiceList() error {
+func (d *EtcdDiscovery) listService() error {
 	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*TimeoutSecond)
 	defer cancel()
 	resp, err := d.client.Get(ctx, d.keySpace, clientv3.WithPrefix())
@@ -107,13 +110,8 @@ func (d *EtcdDiscovery) listServiceList() error {
 	return nil
 }
 
-func (d *EtcdDiscovery) watch() clientv3.WatchChan {
-	ctx, _ := context.WithCancel(d.masterCtx)
-	return d.client.Watch(clientv3.WithRequireLeader(ctx), d.keySpace, clientv3.WithPrefix())
-}
-
-func (d *EtcdDiscovery) register() (<-chan *clientv3.LeaseKeepAliveResponse, error) {
-	ctx, cancel := context.WithTimeout(context.TODO(), time.Second*TimeoutSecond)
+func (d *EtcdDiscovery) register(leaseCtx context.Context) (<-chan *clientv3.LeaseKeepAliveResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*TimeoutSecond)
 	defer cancel()
 	info := d.sink.NodeInfo()
 	key := fmt.Sprintf("%s/%s", d.keySpace, fatchoy.NodeID(info.Node).String())
@@ -129,7 +127,7 @@ func (d *EtcdDiscovery) register() (<-chan *clientv3.LeaseKeepAliveResponse, err
 		return nil, err
 	}
 
-	ctx, cancel = context.WithTimeout(context.TODO(), time.Second*TimeoutSecond)
+	ctx, cancel = context.WithTimeout(context.Background(), time.Second*TimeoutSecond)
 	defer cancel()
 	lease, err := d.client.Grant(ctx, int64(d.leaseTTL))
 	if err != nil {
@@ -137,13 +135,12 @@ func (d *EtcdDiscovery) register() (<-chan *clientv3.LeaseKeepAliveResponse, err
 	}
 	d.leaseID = lease.ID
 
-	ctx, cancel = context.WithTimeout(context.TODO(), time.Second*TimeoutSecond)
+	ctx, cancel = context.WithTimeout(ctx, time.Second*TimeoutSecond)
 	defer cancel()
 	if _, err := d.client.Put(ctx, key, string(data), clientv3.WithLease(lease.ID)); err != nil {
 		return nil, err
 	}
 
-	leaseCtx, _ := context.WithCancel(d.masterCtx)
 	return d.client.KeepAlive(leaseCtx, lease.ID)
 }
 
@@ -151,11 +148,15 @@ func (d *EtcdDiscovery) reconnect() (<-chan *clientv3.LeaseKeepAliveResponse, cl
 	if err := d.makeClient(); err != nil {
 		return nil, nil, err
 	}
-	if err := d.listServiceList(); err != nil {
+	if err := d.listService(); err != nil {
 		return nil, nil, err
 	}
-	watchCh := d.watch()
-	leaseCh, err := d.register()
+	if d.cancel != nil {
+		d.cancel()
+	}
+	d.ctx, d.cancel = context.WithCancel(context.Background())
+	watchCh := d.client.Watch(clientv3.WithRequireLeader(d.ctx), d.keySpace, clientv3.WithPrefix())
+	leaseCh, err := d.register(d.ctx)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -192,7 +193,6 @@ func (d *EtcdDiscovery) serve(lch <-chan *clientv3.LeaseKeepAliveResponse, wch c
 		case <-ticker.C:
 			if atomic.LoadInt32(&d.closing) > 0 {
 				d.sink.DelDependency(true, 0)
-				d.masterCtx.Done()
 				d.client.Close()
 				if leaseCh, watchCh, err := d.reconnect(); err != nil {
 					log.Errorf("reconnect etcd: %v", err)
@@ -244,7 +244,10 @@ func (d *EtcdDiscovery) delDependency(key, value []byte) {
 }
 
 func (d *EtcdDiscovery) Close() {
-	d.masterCtx.Done()
+	if d.cancel != nil {
+		d.cancel()
+		d.cancel = nil
+	}
 	close(d.done)
 	d.wg.Wait()
 	d.client.Close()

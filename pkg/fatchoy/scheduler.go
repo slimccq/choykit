@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	TimerTickInterval = 10  // every 10ms a tick
-	TimerChanCapacity = 256 //
+	TimerPrecision    = 10  // 精度为10ms
+	TimerChanCapacity = 128 //
 )
 
 type Scheduler struct {
@@ -32,7 +32,7 @@ type Scheduler struct {
 func (s *Scheduler) Init() error {
 	s.nextId = 1000 // magic number
 	s.done = make(chan struct{})
-	s.ticker = time.NewTicker(TimerTickInterval * time.Millisecond)
+	s.ticker = time.NewTicker(TimerPrecision * time.Millisecond)
 	s.timers = make(TimerHeap, 0, 16)
 	s.refs = make(map[int32]*TimerNode, 16)
 	s.C = make(chan *TimerNode, TimerChanCapacity)

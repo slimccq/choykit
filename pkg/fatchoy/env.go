@@ -19,43 +19,37 @@ import (
 	"github.com/go-sql-driver/mysql"
 )
 
-type Environ protocol.Environ
+//
+const (
+	RUNTIME_EXECUTOR_CAPACITY      = "RUNTIME_EXECUTOR_CAPACITY"
+	RUNTIME_EXECUTOR_CONCURRENCY   = "RUNTIME_EXECUTOR_CONCURRENCY"
+	RUNTIME_CONTEXT_INBOUND_SIZE   = "RUNTIME_CONTEXT_INBOUND_SIZE"
+	RUNTIME_CONTEXT_OUTBOUND_SIZE  = "RUNTIME_CONTEXT_OUTBOUND_SIZE"
+	RUNTIME_ENDPOINT_OUTBOUND_SIZE = "RUNTIME_ENDPOINT_OUTBOUND_SIZE"
+	NET_PEER_PING_INTERVAL         = "NET_PEER_PING_INTERVAL"
+	NET_PEER_READ_INTERVAL         = "NET_PEER_READ_INTERVAL"
+	NET_RPC_TTL                    = "NET_RPC_TTL"
+	NET_SESSION_READ_TIMEOUT       = "NET_SESSION_READ_TIMEOUT"
+	NET_INTERFACES                 = "NET_INTERFACES"
+)
 
-// Environ的字段对应的.env变量名
-var envFieldMapping = map[string]string{
-	"Env":                       "APP_ENV",
-	"GameId":                    "APP_GAME_ID",
-	"ChannelId":                 "APP_CHANNEL_ID",
-	"ServerName":                "APP_SERVER_NAME",
-	"ServerId":                  "APP_SERVER_ID",
-	"AccessKey":                 "APP_ACCESS_KEY",
-	"ServiceType":               "APP_SERVICE_TYPE",
-	"ServiceIndex":              "APP_SERVICE_INDEX",
-	"ServiceDependency":         "APP_SERVICE_DEPENDENCY",
-	"WorkingDir":                "APP_WORKING_DIR",
-	"PprofAddr":                 "APP_PPROF_ADDR",
-	"ExecutorCapacity":          "RUNTIME_EXECUTOR_CAPACITY",
-	"ContextInboundQueueSize":   "RUNTIME_CONTEXT_INBOUND_SIZE",
-	"ContextOutboundQueueSize":  "RUNTIME_CONTEXT_OUTBOUND_SIZE",
-	"EndpointOutboundQueueSize": "RUNTIME_ENDPOINT_OUTBOUND_SIZE",
-	"NetEnableEncryption":       "NET_ENABLE_ENCRYPTION",
-	"NetPublicKeyFile":          "NET_PUBLIC_KEY_FILE",
-	"NetPrivateKeyFile":         "NET_PRIVATE_KEY_FILE",
-	"NetRpcTimeoutInterval":     "NET_RPC_TIMEOUT_INTERVAL",
-	"NetPeerPingInterval":       "NET_PEER_PING_INTERVAL",
-	"NetPeerReadTimeout":        "NET_PEER_READ_TIMEOUT",
-	"NetSessionReadTimeout":     "NET_SESSION_READ_TIMEOUT",
-	"DbMysqlDsn":                "DB_MYSQL_DSN",
-	"DbRedisAddr":               "DB_REDIS_ADDR",
+// 进程的环境， 代码内部都使用environ获取变量参数
+type Environ struct {
+	protocol.Environ
+	dotenv.Env
 }
 
 func (e *Environ) IsProd() bool {
-	return e.Env == "prod"
+	return e.AppEnv == "prod"
 }
 
+// command line option只是一种设置environ的手段
 func (e *Environ) SetByOption(opt *Options) {
 	if opt.WorkingDir != "" {
-		e.WorkingDir = opt.WorkingDir
+		e.AppWorkingDir = opt.WorkingDir
+	}
+	if opt.LogLevel != "" {
+		e.AppLogLevel = opt.LogLevel
 	}
 	if opt.ServiceType != "" {
 		e.ServiceType = opt.ServiceType
@@ -75,31 +69,18 @@ func (e *Environ) SetByOption(opt *Options) {
 	if opt.EtcdLeaseTTL > 0 {
 		e.EtcdLeaseTtl = int32(opt.EtcdLeaseTTL)
 	}
-	if opt.LogLevel != "" {
-		e.LogLevel = opt.LogLevel
-	}
-	if opt.EnableSysLog {
-		e.EnableSyslog = opt.EnableSysLog
-	}
-	if opt.SysLogParams != "" {
-		e.SyslogParams = opt.SysLogParams
-	}
 }
 
 func NewEnviron() *Environ {
 	return &Environ{
-		EtcdAddr:                  "127.0.0.1:2379",
-		EtcdKeyspace:              "choyd",
-		EtcdLeaseTtl:              5,
-		LogLevel:                  "debug",
-		ExecutorCapacity:          20000, //
-		ContextInboundQueueSize:   60000, //
-		ContextOutboundQueueSize:  8000,  //
-		EndpointOutboundQueueSize: 1000,  //
-		NetRpcTimeoutInterval:     60,    // 60s
-		NetPeerPingInterval:       10,    // 10s
-		NetPeerReadTimeout:        100,   // 100s
-		NetSessionReadTimeout:     180,   // 180s
+		Environ: protocol.Environ{
+			AppEnv:       "dev",
+			AppLogLevel:  "debug",
+			EtcdAddr:     "127.0.0.1:2379",
+			EtcdKeyspace: "choyd",
+			EtcdLeaseTtl: 5,
+		},
+		Env: make(dotenv.Env),
 	}
 }
 
@@ -109,55 +90,25 @@ func LoadEnviron() *Environ {
 	rv := reflect.ValueOf(env).Elem()
 	rType := rv.Type()
 	for i := 0; i < rv.NumField(); i++ {
-		var name = rType.Field(i).Name
-		var key = envFieldMapping[name]
-		if key == "" {
-			continue
-		}
-		var value = strings.TrimSpace(dotenv.Get(key))
+		var name = strutil.ToSnakeCase(rType.Field(i).Name) // 'APP_ID' ==> 'AppId'
+		var envKey = strings.ToUpper(name)
+		var value = strings.TrimSpace(dotenv.Get(envKey))
 		if value == "" {
 			continue // 值为空的时候不覆盖
 		}
 		strutil.ParseStringToValue(value, rv.Field(i))
 	}
 	// 加载网络接口地址
-	env.NetInterfaces = ParseNetInterface(dotenv.Get("NET_INTERFACES"))
+	for _, iftext := range strings.Split(dotenv.Get(NET_INTERFACES), ",") {
+		eth := ParseNetInterface(iftext)
+		env.NetInterfaces = append(env.NetInterfaces, eth)
+	}
 	return env
 }
 
 func (e Environ) String() string {
 	data, _ := json.Marshal(&e)
 	return string(data)
-}
-
-// 解析地址格式，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
-func ParseNetInterface(text string) []*protocol.InterfaceAddr {
-	var result []*protocol.InterfaceAddr
-	addrItems := strings.Split(text, ",")
-	for _, addrText := range addrItems {
-		host, port, err := net.SplitHostPort(addrText)
-		if err != nil {
-			log.Panicf("parse address %s: %v", addrText, err)
-		}
-		n, _ := strconv.Atoi(port)
-		addr := &protocol.InterfaceAddr{Port: int32(n)}
-		i := strings.Index(host, "@")
-		if i < 0 {
-			addr.AdvertiseAddr = host
-			addr.BindAddr = host
-		} else {
-			addr.AdvertiseAddr = host[:i]
-			addr.BindAddr = host[i+1:]
-		}
-		if addr.BindAddr == "" {
-			log.Panicf("invalid address: %s", addr)
-		}
-		if addr.AdvertiseAddr == "" {
-			addr.AdvertiseAddr = addr.BindAddr
-		}
-		result = append(result, addr)
-	}
-	return result
 }
 
 type NetInterface protocol.InterfaceAddr
@@ -168,6 +119,30 @@ func (i NetInterface) Interface() string {
 
 func (i NetInterface) AdvertiseInterface() string {
 	return fmt.Sprintf("%s:%d", i.AdvertiseAddr, i.Port)
+}
+
+// 解析地址格式，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
+func ParseNetInterface(text string) *protocol.InterfaceAddr {
+	addr := &protocol.InterfaceAddr{}
+	i := strings.Index(text, "@")
+	if i > 0 {
+		addr.AdvertiseAddr = text[:i]
+		text = text[i+1:]
+	}
+	host, port, err := net.SplitHostPort(text)
+	if err != nil {
+		log.Panicf("parse address %s: %v", text, err)
+	}
+	n, _ := strconv.Atoi(port)
+	addr.Port = int32(n)
+	addr.BindAddr = host
+	if addr.BindAddr == "" {
+		log.Panicf("invalid address: %s", addr)
+	}
+	if addr.AdvertiseAddr == "" {
+		addr.AdvertiseAddr = addr.BindAddr
+	}
+	return addr
 }
 
 // MySQL配置

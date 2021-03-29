@@ -16,10 +16,11 @@ import (
 )
 
 const (
-	ServerCodecVersion      = 1               // 协议版本
-	ServerCodecHeaderSize   = 20              // 消息头大小
-	MaxAllowedV2PayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
+	ServerCodecVersion    = 1  // 协议版本
+	ServerCodecHeaderSize = 20 // 消息头大小
 )
+
+var MaxAllowedServerCodecPayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
 
 // wire format of codec header
 //       ---------------------------------------
@@ -44,11 +45,11 @@ func (c *serverProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
 	if err != nil {
 		return err
 	}
-	if n := len(payload); n >= MaxAllowedV2PayloadSize {
+	if n := len(payload); n >= MaxAllowedServerCodecPayloadSize {
 		pkt.Flag |= fatchoy.PacketFlagError
 		var data [10]byte
 		payload = fatchoy.EncodeNumber(protocol.ErrDataCodecFailure, data[:])
-		log.Errorf("message %d too large payload %d/%d", pkt.Command, n, MaxAllowedV2PayloadSize)
+		log.Errorf("message %d too large payload %d/%d", pkt.Command, n, MaxAllowedServerCodecPayloadSize)
 	}
 
 	n := uint32(len(payload))
@@ -85,9 +86,9 @@ func (c *serverProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, 
 	pkt.Node = fatchoy.NodeID(binary.LittleEndian.Uint32(headbuf[12:]))
 	checksum := binary.LittleEndian.Uint32(headbuf[16:])
 
-	if bodyLen > MaxAllowedV2PayloadSize {
+	if bodyLen > MaxAllowedServerCodecPayloadSize {
 		return 0, errors.Errorf("packet %d payload size overflow %d/%d",
-			pkt.Command, bodyLen, MaxAllowedV2PayloadSize)
+			pkt.Command, bodyLen, MaxAllowedServerCodecPayloadSize)
 	}
 
 	var bytesRead = ServerCodecHeaderSize

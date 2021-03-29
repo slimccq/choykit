@@ -51,38 +51,22 @@ func (NodeState) EnumDescriptor() ([]byte, []int) {
 
 // 通用环境变量
 type Environ struct {
-	Env                       string           `protobuf:"bytes,1,opt,name=env,proto3" json:"env,omitempty"`
-	GameId                    string           `protobuf:"bytes,2,opt,name=game_id,json=gameId,proto3" json:"game_id,omitempty"`
-	ChannelId                 string           `protobuf:"bytes,3,opt,name=channel_id,json=channelId,proto3" json:"channel_id,omitempty"`
-	ServerId                  string           `protobuf:"bytes,4,opt,name=server_id,json=serverId,proto3" json:"server_id,omitempty"`
-	ServerName                string           `protobuf:"bytes,5,opt,name=server_name,json=serverName,proto3" json:"server_name,omitempty"`
-	AccessKey                 string           `protobuf:"bytes,6,opt,name=access_key,json=accessKey,proto3" json:"access_key,omitempty"`
-	ServiceType               string           `protobuf:"bytes,10,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
-	ServiceIndex              int32            `protobuf:"varint,11,opt,name=service_index,json=serviceIndex,proto3" json:"service_index,omitempty"`
-	ServiceDependency         string           `protobuf:"bytes,12,opt,name=service_dependency,json=serviceDependency,proto3" json:"service_dependency,omitempty"`
-	EtcdAddr                  string           `protobuf:"bytes,13,opt,name=etcd_addr,json=etcdAddr,proto3" json:"etcd_addr,omitempty"`
-	EtcdKeyspace              string           `protobuf:"bytes,14,opt,name=etcd_keyspace,json=etcdKeyspace,proto3" json:"etcd_keyspace,omitempty"`
-	EtcdLeaseTtl              int32            `protobuf:"varint,15,opt,name=etcd_lease_ttl,json=etcdLeaseTtl,proto3" json:"etcd_lease_ttl,omitempty"`
-	LogLevel                  string           `protobuf:"bytes,16,opt,name=log_level,json=logLevel,proto3" json:"log_level,omitempty"`
-	EnableSyslog              bool             `protobuf:"varint,17,opt,name=enable_syslog,json=enableSyslog,proto3" json:"enable_syslog,omitempty"`
-	SyslogParams              string           `protobuf:"bytes,18,opt,name=syslog_params,json=syslogParams,proto3" json:"syslog_params,omitempty"`
-	PprofAddr                 string           `protobuf:"bytes,19,opt,name=pprof_addr,json=pprofAddr,proto3" json:"pprof_addr,omitempty"`
-	WorkingDir                string           `protobuf:"bytes,20,opt,name=working_dir,json=workingDir,proto3" json:"working_dir,omitempty"`
-	ExecutorCapacity          int32            `protobuf:"varint,30,opt,name=executor_capacity,json=executorCapacity,proto3" json:"executor_capacity,omitempty"`
-	ExecutorConcurrency       int32            `protobuf:"varint,31,opt,name=executor_concurrency,json=executorConcurrency,proto3" json:"executor_concurrency,omitempty"`
-	ContextInboundQueueSize   int32            `protobuf:"varint,32,opt,name=context_inbound_queue_size,json=contextInboundQueueSize,proto3" json:"context_inbound_queue_size,omitempty"`
-	ContextOutboundQueueSize  int32            `protobuf:"varint,33,opt,name=context_outbound_queue_size,json=contextOutboundQueueSize,proto3" json:"context_outbound_queue_size,omitempty"`
-	EndpointOutboundQueueSize int32            `protobuf:"varint,34,opt,name=endpoint_outbound_queue_size,json=endpointOutboundQueueSize,proto3" json:"endpoint_outbound_queue_size,omitempty"`
-	NetEnableEncryption       bool             `protobuf:"varint,35,opt,name=net_enable_encryption,json=netEnableEncryption,proto3" json:"net_enable_encryption,omitempty"`
-	NetPublicKeyFile          string           `protobuf:"bytes,36,opt,name=net_public_key_file,json=netPublicKeyFile,proto3" json:"net_public_key_file,omitempty"`
-	NetPrivateKeyFile         string           `protobuf:"bytes,37,opt,name=net_private_key_file,json=netPrivateKeyFile,proto3" json:"net_private_key_file,omitempty"`
-	NetPeerPingInterval       int32            `protobuf:"varint,38,opt,name=net_peer_ping_interval,json=netPeerPingInterval,proto3" json:"net_peer_ping_interval,omitempty"`
-	NetPeerReadTimeout        int32            `protobuf:"varint,39,opt,name=net_peer_read_timeout,json=netPeerReadTimeout,proto3" json:"net_peer_read_timeout,omitempty"`
-	NetSessionReadTimeout     int32            `protobuf:"varint,40,opt,name=net_session_read_timeout,json=netSessionReadTimeout,proto3" json:"net_session_read_timeout,omitempty"`
-	NetRpcTimeoutInterval     int32            `protobuf:"varint,41,opt,name=net_rpc_timeout_interval,json=netRpcTimeoutInterval,proto3" json:"net_rpc_timeout_interval,omitempty"`
-	NetInterfaces             []*InterfaceAddr `protobuf:"bytes,42,rep,name=net_interfaces,json=netInterfaces,proto3" json:"net_interfaces,omitempty"`
-	DbMysqlDsn                string           `protobuf:"bytes,51,opt,name=db_mysql_dsn,json=dbMysqlDsn,proto3" json:"db_mysql_dsn,omitempty"`
-	DbRedisAddr               string           `protobuf:"bytes,52,opt,name=db_redis_addr,json=dbRedisAddr,proto3" json:"db_redis_addr,omitempty"`
+	AppEnv            string           `protobuf:"bytes,1,opt,name=app_env,json=appEnv,proto3" json:"app_env,omitempty"`
+	AppGameId         string           `protobuf:"bytes,2,opt,name=app_game_id,json=appGameId,proto3" json:"app_game_id,omitempty"`
+	AppChannelId      string           `protobuf:"bytes,3,opt,name=app_channel_id,json=appChannelId,proto3" json:"app_channel_id,omitempty"`
+	AppServerId       string           `protobuf:"bytes,4,opt,name=app_server_id,json=appServerId,proto3" json:"app_server_id,omitempty"`
+	AppServerName     string           `protobuf:"bytes,5,opt,name=app_server_name,json=appServerName,proto3" json:"app_server_name,omitempty"`
+	AppAccessKey      string           `protobuf:"bytes,6,opt,name=app_access_key,json=appAccessKey,proto3" json:"app_access_key,omitempty"`
+	AppLogLevel       string           `protobuf:"bytes,7,opt,name=app_log_level,json=appLogLevel,proto3" json:"app_log_level,omitempty"`
+	AppPprofAddr      string           `protobuf:"bytes,19,opt,name=app_pprof_addr,json=appPprofAddr,proto3" json:"app_pprof_addr,omitempty"`
+	AppWorkingDir     string           `protobuf:"bytes,20,opt,name=app_working_dir,json=appWorkingDir,proto3" json:"app_working_dir,omitempty"`
+	ServiceType       string           `protobuf:"bytes,10,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
+	ServiceIndex      int32            `protobuf:"varint,11,opt,name=service_index,json=serviceIndex,proto3" json:"service_index,omitempty"`
+	ServiceDependency string           `protobuf:"bytes,12,opt,name=service_dependency,json=serviceDependency,proto3" json:"service_dependency,omitempty"`
+	EtcdAddr          string           `protobuf:"bytes,13,opt,name=etcd_addr,json=etcdAddr,proto3" json:"etcd_addr,omitempty"`
+	EtcdKeyspace      string           `protobuf:"bytes,14,opt,name=etcd_keyspace,json=etcdKeyspace,proto3" json:"etcd_keyspace,omitempty"`
+	EtcdLeaseTtl      int32            `protobuf:"varint,15,opt,name=etcd_lease_ttl,json=etcdLeaseTtl,proto3" json:"etcd_lease_ttl,omitempty"`
+	NetInterfaces     []*InterfaceAddr `protobuf:"bytes,22,rep,name=net_interfaces,json=netInterfaces,proto3" json:"net_interfaces,omitempty"`
 }
 
 func (m *Environ) Reset()         { *m = Environ{} }
@@ -118,44 +102,65 @@ func (m *Environ) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Environ proto.InternalMessageInfo
 
-func (m *Environ) GetEnv() string {
+func (m *Environ) GetAppEnv() string {
 	if m != nil {
-		return m.Env
+		return m.AppEnv
 	}
 	return ""
 }
 
-func (m *Environ) GetGameId() string {
+func (m *Environ) GetAppGameId() string {
 	if m != nil {
-		return m.GameId
+		return m.AppGameId
 	}
 	return ""
 }
 
-func (m *Environ) GetChannelId() string {
+func (m *Environ) GetAppChannelId() string {
 	if m != nil {
-		return m.ChannelId
+		return m.AppChannelId
 	}
 	return ""
 }
 
-func (m *Environ) GetServerId() string {
+func (m *Environ) GetAppServerId() string {
 	if m != nil {
-		return m.ServerId
+		return m.AppServerId
 	}
 	return ""
 }
 
-func (m *Environ) GetServerName() string {
+func (m *Environ) GetAppServerName() string {
 	if m != nil {
-		return m.ServerName
+		return m.AppServerName
 	}
 	return ""
 }
 
-func (m *Environ) GetAccessKey() string {
+func (m *Environ) GetAppAccessKey() string {
 	if m != nil {
-		return m.AccessKey
+		return m.AppAccessKey
+	}
+	return ""
+}
+
+func (m *Environ) GetAppLogLevel() string {
+	if m != nil {
+		return m.AppLogLevel
+	}
+	return ""
+}
+
+func (m *Environ) GetAppPprofAddr() string {
+	if m != nil {
+		return m.AppPprofAddr
+	}
+	return ""
+}
+
+func (m *Environ) GetAppWorkingDir() string {
+	if m != nil {
+		return m.AppWorkingDir
 	}
 	return ""
 }
@@ -202,125 +207,6 @@ func (m *Environ) GetEtcdLeaseTtl() int32 {
 	return 0
 }
 
-func (m *Environ) GetLogLevel() string {
-	if m != nil {
-		return m.LogLevel
-	}
-	return ""
-}
-
-func (m *Environ) GetEnableSyslog() bool {
-	if m != nil {
-		return m.EnableSyslog
-	}
-	return false
-}
-
-func (m *Environ) GetSyslogParams() string {
-	if m != nil {
-		return m.SyslogParams
-	}
-	return ""
-}
-
-func (m *Environ) GetPprofAddr() string {
-	if m != nil {
-		return m.PprofAddr
-	}
-	return ""
-}
-
-func (m *Environ) GetWorkingDir() string {
-	if m != nil {
-		return m.WorkingDir
-	}
-	return ""
-}
-
-func (m *Environ) GetExecutorCapacity() int32 {
-	if m != nil {
-		return m.ExecutorCapacity
-	}
-	return 0
-}
-
-func (m *Environ) GetExecutorConcurrency() int32 {
-	if m != nil {
-		return m.ExecutorConcurrency
-	}
-	return 0
-}
-
-func (m *Environ) GetContextInboundQueueSize() int32 {
-	if m != nil {
-		return m.ContextInboundQueueSize
-	}
-	return 0
-}
-
-func (m *Environ) GetContextOutboundQueueSize() int32 {
-	if m != nil {
-		return m.ContextOutboundQueueSize
-	}
-	return 0
-}
-
-func (m *Environ) GetEndpointOutboundQueueSize() int32 {
-	if m != nil {
-		return m.EndpointOutboundQueueSize
-	}
-	return 0
-}
-
-func (m *Environ) GetNetEnableEncryption() bool {
-	if m != nil {
-		return m.NetEnableEncryption
-	}
-	return false
-}
-
-func (m *Environ) GetNetPublicKeyFile() string {
-	if m != nil {
-		return m.NetPublicKeyFile
-	}
-	return ""
-}
-
-func (m *Environ) GetNetPrivateKeyFile() string {
-	if m != nil {
-		return m.NetPrivateKeyFile
-	}
-	return ""
-}
-
-func (m *Environ) GetNetPeerPingInterval() int32 {
-	if m != nil {
-		return m.NetPeerPingInterval
-	}
-	return 0
-}
-
-func (m *Environ) GetNetPeerReadTimeout() int32 {
-	if m != nil {
-		return m.NetPeerReadTimeout
-	}
-	return 0
-}
-
-func (m *Environ) GetNetSessionReadTimeout() int32 {
-	if m != nil {
-		return m.NetSessionReadTimeout
-	}
-	return 0
-}
-
-func (m *Environ) GetNetRpcTimeoutInterval() int32 {
-	if m != nil {
-		return m.NetRpcTimeoutInterval
-	}
-	return 0
-}
-
 func (m *Environ) GetNetInterfaces() []*InterfaceAddr {
 	if m != nil {
 		return m.NetInterfaces
@@ -328,21 +214,7 @@ func (m *Environ) GetNetInterfaces() []*InterfaceAddr {
 	return nil
 }
 
-func (m *Environ) GetDbMysqlDsn() string {
-	if m != nil {
-		return m.DbMysqlDsn
-	}
-	return ""
-}
-
-func (m *Environ) GetDbRedisAddr() string {
-	if m != nil {
-		return m.DbRedisAddr
-	}
-	return ""
-}
-
-// 地址接口
+// 地址接口，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
 type InterfaceAddr struct {
 	BindAddr      string `protobuf:"bytes,1,opt,name=bind_addr,json=bindAddr,proto3" json:"bind_addr,omitempty"`
 	AdvertiseAddr string `protobuf:"bytes,2,opt,name=advertise_addr,json=advertiseAddr,proto3" json:"advertise_addr,omitempty"`
@@ -466,64 +338,43 @@ func init() {
 func init() { proto.RegisterFile("internal_struct.proto", fileDescriptor_cfb596b5e210fda8) }
 
 var fileDescriptor_cfb596b5e210fda8 = []byte{
-	// 905 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x94, 0x4d, 0x73, 0x5b, 0xb5,
-	0x17, 0xc6, 0xed, 0x7f, 0x9a, 0x17, 0xcb, 0x76, 0xfe, 0x8e, 0x92, 0x12, 0xd1, 0x96, 0x1b, 0xd7,
-	0x4d, 0xa9, 0x29, 0xd3, 0x74, 0xda, 0x30, 0xc3, 0x82, 0xb7, 0x01, 0x12, 0x66, 0x3c, 0x29, 0x25,
-	0x38, 0x61, 0xad, 0x91, 0xaf, 0x4e, 0x8c, 0x26, 0xd7, 0xd2, 0xad, 0x24, 0xbb, 0xb9, 0xfd, 0x14,
-	0x2c, 0xf9, 0x38, 0xec, 0x60, 0x99, 0x25, 0x4b, 0x88, 0xbf, 0x08, 0xa3, 0xa3, 0x7b, 0xed, 0xe9,
-	0xb4, 0x2b, 0xeb, 0xfe, 0x9e, 0xe7, 0x39, 0x7a, 0xf5, 0x21, 0xb7, 0x95, 0xf6, 0x60, 0xb5, 0xc8,
-	0xb8, 0xf3, 0x76, 0x9a, 0xfa, 0x83, 0xdc, 0x1a, 0x6f, 0xe8, 0x06, 0xfe, 0xa4, 0x26, 0xbb, 0xb3,
-	0x33, 0x36, 0x63, 0x83, 0x5f, 0x4f, 0xc3, 0x28, 0xea, 0xbd, 0x3f, 0x09, 0x59, 0x3f, 0xd6, 0x33,
-	0x65, 0x8d, 0xa6, 0x1d, 0xb2, 0x02, 0x7a, 0xc6, 0xea, 0xdd, 0x7a, 0xbf, 0x31, 0x0c, 0x43, 0xba,
-	0x4b, 0xd6, 0xc7, 0x62, 0x02, 0x5c, 0x49, 0xf6, 0x3f, 0xa4, 0x6b, 0xe1, 0x73, 0x20, 0xe9, 0x47,
-	0x84, 0xa4, 0xbf, 0x0a, 0xad, 0x21, 0x0b, 0xda, 0x0a, 0x6a, 0x8d, 0x92, 0x0c, 0x24, 0xbd, 0x4b,
-	0x1a, 0x0e, 0xec, 0x0c, 0x6c, 0x50, 0x6f, 0xa1, 0xba, 0x11, 0xc1, 0x40, 0xd2, 0x3d, 0xd2, 0x2c,
-	0x45, 0x2d, 0x26, 0xc0, 0x56, 0x51, 0x26, 0x11, 0xbd, 0x14, 0x13, 0x08, 0xc5, 0x45, 0x9a, 0x82,
-	0x73, 0xfc, 0x12, 0x0a, 0xb6, 0x16, 0x8b, 0x47, 0x72, 0x02, 0x05, 0xbd, 0x4f, 0x5a, 0xc1, 0xac,
-	0x52, 0xe0, 0xbe, 0xc8, 0x81, 0x11, 0x34, 0x34, 0x4b, 0x76, 0x5e, 0xe4, 0x40, 0x1f, 0x90, 0x76,
-	0x65, 0x51, 0x5a, 0xc2, 0x15, 0x6b, 0x76, 0xeb, 0xfd, 0xd5, 0x61, 0x95, 0x1b, 0x04, 0x46, 0x9f,
-	0x10, 0x5a, 0x99, 0x24, 0xe4, 0xa0, 0x25, 0xe8, 0xb4, 0x60, 0x2d, 0xac, 0xb6, 0x55, 0x2a, 0x47,
-	0x0b, 0x21, 0xec, 0x09, 0x7c, 0x2a, 0xb9, 0x90, 0xd2, 0xb2, 0x76, 0xdc, 0x53, 0x00, 0xdf, 0x4a,
-	0x69, 0xc3, 0x84, 0x28, 0x5e, 0x42, 0xe1, 0x72, 0x91, 0x02, 0xdb, 0x44, 0x43, 0x2b, 0xc0, 0x93,
-	0x92, 0xd1, 0x7d, 0xb2, 0x89, 0xa6, 0x0c, 0x84, 0x03, 0xee, 0x7d, 0xc6, 0xfe, 0x1f, 0x97, 0x15,
-	0xe8, 0x8b, 0x00, 0xcf, 0x7d, 0x16, 0xe6, 0xc9, 0xcc, 0x98, 0x67, 0x30, 0x83, 0x8c, 0x75, 0xe2,
-	0x3c, 0x99, 0x19, 0xbf, 0x08, 0xdf, 0x38, 0x8f, 0x16, 0xa3, 0x0c, 0xb8, 0x2b, 0x5c, 0x66, 0xc6,
-	0x6c, 0xab, 0x5b, 0xef, 0x6f, 0x0c, 0x5b, 0x11, 0x9e, 0x21, 0xc3, 0xdd, 0xe3, 0x88, 0xe7, 0xc2,
-	0x8a, 0x89, 0x63, 0x34, 0x2e, 0x26, 0xc2, 0x53, 0x64, 0xe1, 0x90, 0xf3, 0xdc, 0x9a, 0x8b, 0xb8,
-	0x9f, 0xed, 0x78, 0xc8, 0x48, 0x70, 0x43, 0x7b, 0xa4, 0xf9, 0xda, 0xd8, 0x4b, 0xa5, 0xc7, 0x5c,
-	0x2a, 0xcb, 0x76, 0xe2, 0x25, 0x95, 0xe8, 0x48, 0x59, 0xfa, 0x29, 0xd9, 0x82, 0x2b, 0x48, 0xa7,
-	0xde, 0x58, 0x9e, 0x8a, 0x5c, 0xa4, 0xca, 0x17, 0x2c, 0xc1, 0xfd, 0x74, 0x2a, 0xe1, 0xfb, 0x92,
-	0xd3, 0x67, 0x64, 0x67, 0x69, 0x36, 0x3a, 0x9d, 0x5a, 0x8b, 0x87, 0xbd, 0x87, 0xfe, 0xed, 0x85,
-	0x7f, 0x29, 0xd1, 0x2f, 0xc8, 0x9d, 0xd4, 0x68, 0x0f, 0x57, 0x9e, 0x2b, 0x3d, 0x32, 0x53, 0x2d,
-	0xf9, 0xab, 0x29, 0x4c, 0x81, 0x3b, 0xf5, 0x06, 0x58, 0x17, 0x83, 0xbb, 0xa5, 0x63, 0x10, 0x0d,
-	0x3f, 0x07, 0xfd, 0x4c, 0xbd, 0x01, 0xfa, 0x15, 0xb9, 0x5b, 0x85, 0xcd, 0xd4, 0xbf, 0x93, 0xbe,
-	0x8f, 0x69, 0x56, 0x5a, 0x7e, 0x2a, 0x1d, 0xcb, 0xf8, 0x37, 0xe4, 0x1e, 0x68, 0x99, 0x1b, 0xa5,
-	0xdf, 0x9f, 0xef, 0x61, 0xfe, 0xc3, 0xca, 0xf3, 0x6e, 0x81, 0xe7, 0xe4, 0xb6, 0x06, 0xcf, 0xcb,
-	0xab, 0x02, 0x9d, 0xda, 0x22, 0xf7, 0xca, 0x68, 0xf6, 0x00, 0xaf, 0x6b, 0x5b, 0x83, 0x3f, 0x46,
-	0xed, 0x78, 0x21, 0xd1, 0x27, 0x24, 0x60, 0x9e, 0x4f, 0x47, 0x99, 0x4a, 0xc3, 0x43, 0xe2, 0x17,
-	0x2a, 0x03, 0xb6, 0x8f, 0x27, 0xdf, 0xd1, 0xe0, 0x4f, 0x51, 0x39, 0x81, 0xe2, 0x07, 0x95, 0x01,
-	0x7d, 0x4a, 0x76, 0xd0, 0x6e, 0xd5, 0x4c, 0x78, 0x58, 0xfa, 0x1f, 0xc6, 0xf7, 0x1b, 0xfc, 0x51,
-	0xaa, 0x02, 0x87, 0xe4, 0x03, 0x0c, 0x00, 0x58, 0x9e, 0x87, 0x7b, 0xc5, 0x86, 0x31, 0x13, 0x19,
-	0xfb, 0x38, 0xde, 0x42, 0x88, 0x00, 0xd8, 0x53, 0xa5, 0xc7, 0x83, 0x52, 0xa2, 0xcf, 0xe2, 0x46,
-	0x30, 0x64, 0x41, 0x48, 0xee, 0xd5, 0x04, 0xcc, 0xd4, 0xb3, 0x47, 0x98, 0xa1, 0x65, 0x66, 0x08,
-	0x42, 0x9e, 0x47, 0x85, 0x7e, 0x4e, 0x58, 0x88, 0x38, 0x70, 0x4e, 0x19, 0xfd, 0x76, 0xaa, 0x8f,
-	0xa9, 0x50, 0xf2, 0x2c, 0xca, 0xef, 0x09, 0xda, 0x3c, 0xad, 0xfc, 0xcb, 0x25, 0x7e, 0xb2, 0x08,
-	0x0e, 0xf3, 0xb4, 0x0c, 0x2c, 0x16, 0xf9, 0x35, 0xd9, 0x0c, 0x41, 0x34, 0x5f, 0x88, 0x14, 0x1c,
-	0x7b, 0xdc, 0x5d, 0xe9, 0x37, 0x9f, 0xef, 0x1e, 0x54, 0xcd, 0xef, 0x60, 0x50, 0x69, 0xe1, 0x71,
-	0x0f, 0xdb, 0x1a, 0xfc, 0x82, 0x38, 0xda, 0x25, 0x2d, 0x39, 0xe2, 0x93, 0xc2, 0xbd, 0xca, 0xb8,
-	0x74, 0x9a, 0x1d, 0xc6, 0xc7, 0x2e, 0x47, 0x3f, 0x06, 0x74, 0xe4, 0x34, 0xed, 0x91, 0xb6, 0x1c,
-	0x71, 0x0b, 0x52, 0xb9, 0xf8, 0x7f, 0xf9, 0x2c, 0xf6, 0x1c, 0x39, 0x1a, 0x06, 0x16, 0x8a, 0xf6,
-	0xc6, 0xa4, 0xfd, 0xd6, 0x2c, 0xe1, 0x8f, 0x3c, 0x52, 0xba, 0x6c, 0x18, 0xb1, 0xa9, 0x6e, 0x04,
-	0x80, 0xe2, 0x43, 0xb2, 0x29, 0xe4, 0x0c, 0xac, 0x57, 0x0e, 0xa2, 0x23, 0x36, 0xd8, 0xf6, 0x82,
-	0xa2, 0x8d, 0x92, 0x5b, 0xb9, 0xb1, 0x1e, 0x3b, 0xec, 0xea, 0x10, 0xc7, 0xbd, 0x2f, 0xc9, 0xc6,
-	0x4b, 0x23, 0x61, 0xa0, 0x2f, 0x4c, 0xd0, 0xb5, 0x91, 0x80, 0xe5, 0xdb, 0x43, 0x1c, 0xd3, 0x7b,
-	0xa4, 0xb1, 0x38, 0x8a, 0xb2, 0xea, 0x12, 0x3c, 0x7e, 0x44, 0x1a, 0x21, 0x7d, 0xe6, 0x85, 0x07,
-	0xda, 0x26, 0x0d, 0x1c, 0x1c, 0x99, 0xd7, 0xba, 0x53, 0xa3, 0x4d, 0xb2, 0x8e, 0x9f, 0xbf, 0xe4,
-	0x9d, 0xfa, 0x77, 0xfb, 0xd7, 0xff, 0x26, 0xb5, 0xbf, 0x6e, 0x92, 0xfa, 0xf5, 0x4d, 0x52, 0xff,
-	0xe7, 0x26, 0xa9, 0xff, 0x36, 0x4f, 0x6a, 0xbf, 0xcf, 0x93, 0xda, 0x1f, 0xf3, 0xa4, 0x7e, 0x3d,
-	0x4f, 0x6a, 0x7f, 0xcf, 0x93, 0xda, 0x68, 0x0d, 0x8f, 0xf8, 0xf0, 0xbf, 0x00, 0x00, 0x00, 0xff,
-	0xff, 0x6a, 0xb2, 0x09, 0xd2, 0x7f, 0x06, 0x00, 0x00,
+	// 568 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x92, 0x4f, 0x6f, 0xd3, 0x30,
+	0x18, 0xc6, 0x93, 0xfd, 0x6b, 0xe3, 0x36, 0xdd, 0x30, 0x83, 0x59, 0x80, 0xa2, 0xd2, 0x0d, 0xa8,
+	0x90, 0x28, 0x12, 0x5c, 0x11, 0xd2, 0xa0, 0x13, 0x8a, 0x56, 0x4d, 0xa8, 0x1b, 0xe2, 0x18, 0x79,
+	0xf1, 0xdb, 0x10, 0x35, 0xb5, 0x2d, 0xc7, 0x64, 0xe4, 0x5b, 0x70, 0xe4, 0xe3, 0x70, 0xe4, 0xd8,
+	0x23, 0x47, 0x68, 0x8f, 0x7c, 0x09, 0x64, 0xa7, 0x89, 0xe0, 0x94, 0x37, 0xbf, 0xe7, 0xf1, 0xfb,
+	0x3e, 0xb6, 0x5e, 0x74, 0x27, 0xe5, 0x1a, 0x14, 0xa7, 0x59, 0x94, 0x6b, 0xf5, 0x39, 0xd6, 0x23,
+	0xa9, 0x84, 0x16, 0xb8, 0x6d, 0x3f, 0xb1, 0xc8, 0xee, 0x1d, 0x26, 0x22, 0x11, 0xf6, 0xef, 0xb9,
+	0xa9, 0x2a, 0x7d, 0xf0, 0x67, 0x07, 0xb5, 0xce, 0x78, 0x91, 0x2a, 0xc1, 0xf1, 0x11, 0x6a, 0x51,
+	0x29, 0x23, 0xe0, 0x05, 0x71, 0xfb, 0xee, 0xd0, 0x9b, 0xee, 0x51, 0x29, 0xcf, 0x78, 0x81, 0x03,
+	0xd4, 0x31, 0x42, 0x42, 0x17, 0x10, 0xa5, 0x8c, 0x6c, 0x59, 0xd1, 0xa3, 0x52, 0xbe, 0xa3, 0x0b,
+	0x08, 0x19, 0x3e, 0x41, 0x3d, 0xa3, 0xc7, 0x9f, 0x28, 0xe7, 0x90, 0x19, 0xcb, 0xb6, 0xb5, 0x74,
+	0xa9, 0x94, 0x6f, 0x2b, 0x18, 0x32, 0x3c, 0x40, 0xbe, 0x71, 0xe5, 0xa0, 0x0a, 0x50, 0xc6, 0xb4,
+	0x63, 0x4d, 0xa6, 0xf5, 0xa5, 0x65, 0x21, 0xc3, 0x8f, 0xd1, 0xfe, 0x3f, 0x1e, 0x4e, 0x17, 0x40,
+	0x76, 0xad, 0xcb, 0x6f, 0x5c, 0x17, 0x74, 0x01, 0xf5, 0x44, 0x1a, 0xc7, 0x90, 0xe7, 0xd1, 0x1c,
+	0x4a, 0xb2, 0xd7, 0x4c, 0x3c, 0xb5, 0xf0, 0x1c, 0xca, 0x7a, 0x62, 0x26, 0x92, 0x28, 0x83, 0x02,
+	0x32, 0xd2, 0x6a, 0x26, 0x4e, 0x44, 0x32, 0x31, 0xa8, 0xee, 0x24, 0xa5, 0x12, 0xb3, 0x88, 0x32,
+	0xa6, 0xc8, 0xed, 0xa6, 0xd3, 0x7b, 0x03, 0x4f, 0x19, 0x53, 0x75, 0xae, 0x1b, 0xa1, 0xe6, 0x29,
+	0x4f, 0x22, 0x96, 0x2a, 0x72, 0xd8, 0xe4, 0xfa, 0x58, 0xd1, 0x71, 0xaa, 0xf0, 0x43, 0xd4, 0x35,
+	0xd9, 0xd3, 0x18, 0x22, 0x5d, 0x4a, 0x20, 0xa8, 0x1a, 0xb8, 0x61, 0x57, 0xa5, 0x04, 0x7c, 0x8c,
+	0xfc, 0xda, 0x92, 0x72, 0x06, 0x5f, 0x48, 0xa7, 0xef, 0x0e, 0x77, 0xa7, 0xf5, 0xb9, 0xd0, 0x30,
+	0xfc, 0x0c, 0xe1, 0xda, 0xc4, 0x40, 0x02, 0x67, 0xc0, 0xe3, 0x92, 0x74, 0x6d, 0xb7, 0x5b, 0x1b,
+	0x65, 0xdc, 0x08, 0xf8, 0x3e, 0xf2, 0x40, 0xc7, 0xac, 0xca, 0xef, 0x5b, 0x57, 0xdb, 0x00, 0x9b,
+	0xfd, 0x18, 0xf9, 0x56, 0x9c, 0x43, 0x99, 0x4b, 0x1a, 0x03, 0xe9, 0x55, 0x17, 0x34, 0xf0, 0x7c,
+	0xc3, 0xcc, 0x33, 0x58, 0x53, 0x06, 0x34, 0x87, 0x48, 0xeb, 0x8c, 0xec, 0x57, 0xb1, 0x0c, 0x9d,
+	0x18, 0x78, 0xa5, 0x33, 0xfc, 0x1a, 0xf5, 0x38, 0xe8, 0xc8, 0xae, 0xda, 0x8c, 0xc6, 0x90, 0x93,
+	0xbb, 0xfd, 0xed, 0x61, 0xe7, 0xc5, 0xd1, 0xa8, 0x5e, 0xb3, 0x51, 0x58, 0x6b, 0x66, 0xf6, 0xd4,
+	0xe7, 0xa0, 0x1b, 0x92, 0x0f, 0x12, 0xe4, 0xff, 0xa7, 0x9b, 0xe0, 0xd7, 0x29, 0xdf, 0x04, 0xaf,
+	0x96, 0xae, 0x6d, 0x80, 0x15, 0x1f, 0xa1, 0x1e, 0x65, 0x05, 0x28, 0x9d, 0xe6, 0x50, 0x39, 0xb6,
+	0x36, 0x6f, 0x5e, 0x53, 0x6b, 0xc3, 0x68, 0x47, 0x0a, 0xa5, 0xed, 0xce, 0xed, 0x4e, 0x6d, 0x3d,
+	0x78, 0x85, 0xda, 0x17, 0x82, 0x41, 0xc8, 0x67, 0xc2, 0xe8, 0x5c, 0x30, 0xb0, 0xed, 0xfd, 0xa9,
+	0xad, 0xf1, 0x03, 0xe4, 0x35, 0x97, 0xa8, 0xf7, 0xb9, 0x01, 0x4f, 0x9f, 0x20, 0xcf, 0x9c, 0xbe,
+	0xd4, 0x54, 0x03, 0xf6, 0x91, 0x67, 0x8b, 0xb1, 0xb8, 0xe1, 0x07, 0x0e, 0xee, 0xa0, 0x96, 0xfd,
+	0xfd, 0x20, 0x0f, 0xdc, 0x37, 0x27, 0xcb, 0xdf, 0x81, 0xf3, 0x63, 0x15, 0xb8, 0xcb, 0x55, 0xe0,
+	0xfe, 0x5a, 0x05, 0xee, 0xd7, 0x75, 0xe0, 0x7c, 0x5b, 0x07, 0xce, 0xf7, 0x75, 0xe0, 0x2e, 0xd7,
+	0x81, 0xf3, 0x73, 0x1d, 0x38, 0xd7, 0x7b, 0xf6, 0x71, 0x5e, 0xfe, 0x0d, 0x00, 0x00, 0xff, 0xff,
+	0x73, 0x2b, 0xcd, 0x10, 0xa3, 0x03, 0x00, 0x00,
 }
 
 func (m *Environ) Marshal() (dAtA []byte, err error) {
@@ -546,24 +397,6 @@ func (m *Environ) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
-	if len(m.DbRedisAddr) > 0 {
-		i -= len(m.DbRedisAddr)
-		copy(dAtA[i:], m.DbRedisAddr)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.DbRedisAddr)))
-		i--
-		dAtA[i] = 0x3
-		i--
-		dAtA[i] = 0xa2
-	}
-	if len(m.DbMysqlDsn) > 0 {
-		i -= len(m.DbMysqlDsn)
-		copy(dAtA[i:], m.DbMysqlDsn)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.DbMysqlDsn)))
-		i--
-		dAtA[i] = 0x3
-		i--
-		dAtA[i] = 0x9a
-	}
 	if len(m.NetInterfaces) > 0 {
 		for iNdEx := len(m.NetInterfaces) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -575,151 +408,28 @@ func (m *Environ) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 				i = encodeVarintInternalStruct(dAtA, i, uint64(size))
 			}
 			i--
-			dAtA[i] = 0x2
+			dAtA[i] = 0x1
 			i--
-			dAtA[i] = 0xd2
+			dAtA[i] = 0xb2
 		}
 	}
-	if m.NetRpcTimeoutInterval != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.NetRpcTimeoutInterval))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xc8
-	}
-	if m.NetSessionReadTimeout != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.NetSessionReadTimeout))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xc0
-	}
-	if m.NetPeerReadTimeout != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.NetPeerReadTimeout))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xb8
-	}
-	if m.NetPeerPingInterval != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.NetPeerPingInterval))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xb0
-	}
-	if len(m.NetPrivateKeyFile) > 0 {
-		i -= len(m.NetPrivateKeyFile)
-		copy(dAtA[i:], m.NetPrivateKeyFile)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.NetPrivateKeyFile)))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xaa
-	}
-	if len(m.NetPublicKeyFile) > 0 {
-		i -= len(m.NetPublicKeyFile)
-		copy(dAtA[i:], m.NetPublicKeyFile)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.NetPublicKeyFile)))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0xa2
-	}
-	if m.NetEnableEncryption {
-		i--
-		if m.NetEnableEncryption {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
-		}
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0x98
-	}
-	if m.EndpointOutboundQueueSize != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.EndpointOutboundQueueSize))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0x90
-	}
-	if m.ContextOutboundQueueSize != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.ContextOutboundQueueSize))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0x88
-	}
-	if m.ContextInboundQueueSize != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.ContextInboundQueueSize))
-		i--
-		dAtA[i] = 0x2
-		i--
-		dAtA[i] = 0x80
-	}
-	if m.ExecutorConcurrency != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.ExecutorConcurrency))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0xf8
-	}
-	if m.ExecutorCapacity != 0 {
-		i = encodeVarintInternalStruct(dAtA, i, uint64(m.ExecutorCapacity))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0xf0
-	}
-	if len(m.WorkingDir) > 0 {
-		i -= len(m.WorkingDir)
-		copy(dAtA[i:], m.WorkingDir)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.WorkingDir)))
+	if len(m.AppWorkingDir) > 0 {
+		i -= len(m.AppWorkingDir)
+		copy(dAtA[i:], m.AppWorkingDir)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppWorkingDir)))
 		i--
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0xa2
 	}
-	if len(m.PprofAddr) > 0 {
-		i -= len(m.PprofAddr)
-		copy(dAtA[i:], m.PprofAddr)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.PprofAddr)))
+	if len(m.AppPprofAddr) > 0 {
+		i -= len(m.AppPprofAddr)
+		copy(dAtA[i:], m.AppPprofAddr)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppPprofAddr)))
 		i--
 		dAtA[i] = 0x1
 		i--
 		dAtA[i] = 0x9a
-	}
-	if len(m.SyslogParams) > 0 {
-		i -= len(m.SyslogParams)
-		copy(dAtA[i:], m.SyslogParams)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.SyslogParams)))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0x92
-	}
-	if m.EnableSyslog {
-		i--
-		if m.EnableSyslog {
-			dAtA[i] = 1
-		} else {
-			dAtA[i] = 0
-		}
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0x88
-	}
-	if len(m.LogLevel) > 0 {
-		i -= len(m.LogLevel)
-		copy(dAtA[i:], m.LogLevel)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.LogLevel)))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0x82
 	}
 	if m.EtcdLeaseTtl != 0 {
 		i = encodeVarintInternalStruct(dAtA, i, uint64(m.EtcdLeaseTtl))
@@ -759,45 +469,52 @@ func (m *Environ) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x52
 	}
-	if len(m.AccessKey) > 0 {
-		i -= len(m.AccessKey)
-		copy(dAtA[i:], m.AccessKey)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AccessKey)))
+	if len(m.AppLogLevel) > 0 {
+		i -= len(m.AppLogLevel)
+		copy(dAtA[i:], m.AppLogLevel)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppLogLevel)))
+		i--
+		dAtA[i] = 0x3a
+	}
+	if len(m.AppAccessKey) > 0 {
+		i -= len(m.AppAccessKey)
+		copy(dAtA[i:], m.AppAccessKey)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppAccessKey)))
 		i--
 		dAtA[i] = 0x32
 	}
-	if len(m.ServerName) > 0 {
-		i -= len(m.ServerName)
-		copy(dAtA[i:], m.ServerName)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.ServerName)))
+	if len(m.AppServerName) > 0 {
+		i -= len(m.AppServerName)
+		copy(dAtA[i:], m.AppServerName)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppServerName)))
 		i--
 		dAtA[i] = 0x2a
 	}
-	if len(m.ServerId) > 0 {
-		i -= len(m.ServerId)
-		copy(dAtA[i:], m.ServerId)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.ServerId)))
+	if len(m.AppServerId) > 0 {
+		i -= len(m.AppServerId)
+		copy(dAtA[i:], m.AppServerId)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppServerId)))
 		i--
 		dAtA[i] = 0x22
 	}
-	if len(m.ChannelId) > 0 {
-		i -= len(m.ChannelId)
-		copy(dAtA[i:], m.ChannelId)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.ChannelId)))
+	if len(m.AppChannelId) > 0 {
+		i -= len(m.AppChannelId)
+		copy(dAtA[i:], m.AppChannelId)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppChannelId)))
 		i--
 		dAtA[i] = 0x1a
 	}
-	if len(m.GameId) > 0 {
-		i -= len(m.GameId)
-		copy(dAtA[i:], m.GameId)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.GameId)))
+	if len(m.AppGameId) > 0 {
+		i -= len(m.AppGameId)
+		copy(dAtA[i:], m.AppGameId)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppGameId)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if len(m.Env) > 0 {
-		i -= len(m.Env)
-		copy(dAtA[i:], m.Env)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.Env)))
+	if len(m.AppEnv) > 0 {
+		i -= len(m.AppEnv)
+		copy(dAtA[i:], m.AppEnv)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppEnv)))
 		i--
 		dAtA[i] = 0xa
 	}
@@ -898,27 +615,31 @@ func (m *Environ) Size() (n int) {
 	}
 	var l int
 	_ = l
-	l = len(m.Env)
+	l = len(m.AppEnv)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
-	l = len(m.GameId)
+	l = len(m.AppGameId)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
-	l = len(m.ChannelId)
+	l = len(m.AppChannelId)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
-	l = len(m.ServerId)
+	l = len(m.AppServerId)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
-	l = len(m.ServerName)
+	l = len(m.AppServerName)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
-	l = len(m.AccessKey)
+	l = len(m.AppAccessKey)
+	if l > 0 {
+		n += 1 + l + sovInternalStruct(uint64(l))
+	}
+	l = len(m.AppLogLevel)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
@@ -944,76 +665,19 @@ func (m *Environ) Size() (n int) {
 	if m.EtcdLeaseTtl != 0 {
 		n += 1 + sovInternalStruct(uint64(m.EtcdLeaseTtl))
 	}
-	l = len(m.LogLevel)
+	l = len(m.AppPprofAddr)
 	if l > 0 {
 		n += 2 + l + sovInternalStruct(uint64(l))
 	}
-	if m.EnableSyslog {
-		n += 3
-	}
-	l = len(m.SyslogParams)
+	l = len(m.AppWorkingDir)
 	if l > 0 {
 		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	l = len(m.PprofAddr)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	l = len(m.WorkingDir)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	if m.ExecutorCapacity != 0 {
-		n += 2 + sovInternalStruct(uint64(m.ExecutorCapacity))
-	}
-	if m.ExecutorConcurrency != 0 {
-		n += 2 + sovInternalStruct(uint64(m.ExecutorConcurrency))
-	}
-	if m.ContextInboundQueueSize != 0 {
-		n += 2 + sovInternalStruct(uint64(m.ContextInboundQueueSize))
-	}
-	if m.ContextOutboundQueueSize != 0 {
-		n += 2 + sovInternalStruct(uint64(m.ContextOutboundQueueSize))
-	}
-	if m.EndpointOutboundQueueSize != 0 {
-		n += 2 + sovInternalStruct(uint64(m.EndpointOutboundQueueSize))
-	}
-	if m.NetEnableEncryption {
-		n += 3
-	}
-	l = len(m.NetPublicKeyFile)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	l = len(m.NetPrivateKeyFile)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	if m.NetPeerPingInterval != 0 {
-		n += 2 + sovInternalStruct(uint64(m.NetPeerPingInterval))
-	}
-	if m.NetPeerReadTimeout != 0 {
-		n += 2 + sovInternalStruct(uint64(m.NetPeerReadTimeout))
-	}
-	if m.NetSessionReadTimeout != 0 {
-		n += 2 + sovInternalStruct(uint64(m.NetSessionReadTimeout))
-	}
-	if m.NetRpcTimeoutInterval != 0 {
-		n += 2 + sovInternalStruct(uint64(m.NetRpcTimeoutInterval))
 	}
 	if len(m.NetInterfaces) > 0 {
 		for _, e := range m.NetInterfaces {
 			l = e.Size()
 			n += 2 + l + sovInternalStruct(uint64(l))
 		}
-	}
-	l = len(m.DbMysqlDsn)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	l = len(m.DbRedisAddr)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
 	}
 	return n
 }
@@ -1091,7 +755,7 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Env", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppEnv", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1119,11 +783,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Env = string(dAtA[iNdEx:postIndex])
+			m.AppEnv = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field GameId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppGameId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1151,11 +815,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.GameId = string(dAtA[iNdEx:postIndex])
+			m.AppGameId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ChannelId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppChannelId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1183,11 +847,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ChannelId = string(dAtA[iNdEx:postIndex])
+			m.AppChannelId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 4:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerId", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppServerId", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1215,11 +879,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ServerId = string(dAtA[iNdEx:postIndex])
+			m.AppServerId = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 5:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServerName", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppServerName", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1247,11 +911,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.ServerName = string(dAtA[iNdEx:postIndex])
+			m.AppServerName = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 6:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field AccessKey", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppAccessKey", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1279,7 +943,39 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.AccessKey = string(dAtA[iNdEx:postIndex])
+			m.AppAccessKey = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field AppLogLevel", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.AppLogLevel = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 10:
 			if wireType != 2 {
@@ -1447,93 +1143,9 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 					break
 				}
 			}
-		case 16:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field LogLevel", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.LogLevel = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 17:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EnableSyslog", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.EnableSyslog = bool(v != 0)
-		case 18:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field SyslogParams", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.SyslogParams = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
 		case 19:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field PprofAddr", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppPprofAddr", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1561,11 +1173,11 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.PprofAddr = string(dAtA[iNdEx:postIndex])
+			m.AppPprofAddr = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 20:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field WorkingDir", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field AppWorkingDir", wireType)
 			}
 			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
@@ -1593,264 +1205,9 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.WorkingDir = string(dAtA[iNdEx:postIndex])
+			m.AppWorkingDir = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 30:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ExecutorCapacity", wireType)
-			}
-			m.ExecutorCapacity = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ExecutorCapacity |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 31:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ExecutorConcurrency", wireType)
-			}
-			m.ExecutorConcurrency = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ExecutorConcurrency |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 32:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ContextInboundQueueSize", wireType)
-			}
-			m.ContextInboundQueueSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ContextInboundQueueSize |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 33:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ContextOutboundQueueSize", wireType)
-			}
-			m.ContextOutboundQueueSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ContextOutboundQueueSize |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 34:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EndpointOutboundQueueSize", wireType)
-			}
-			m.EndpointOutboundQueueSize = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.EndpointOutboundQueueSize |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 35:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetEnableEncryption", wireType)
-			}
-			var v int
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				v |= int(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			m.NetEnableEncryption = bool(v != 0)
-		case 36:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetPublicKeyFile", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.NetPublicKeyFile = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 37:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetPrivateKeyFile", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.NetPrivateKeyFile = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 38:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetPeerPingInterval", wireType)
-			}
-			m.NetPeerPingInterval = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.NetPeerPingInterval |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 39:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetPeerReadTimeout", wireType)
-			}
-			m.NetPeerReadTimeout = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.NetPeerReadTimeout |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 40:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetSessionReadTimeout", wireType)
-			}
-			m.NetSessionReadTimeout = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.NetSessionReadTimeout |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 41:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field NetRpcTimeoutInterval", wireType)
-			}
-			m.NetRpcTimeoutInterval = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.NetRpcTimeoutInterval |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 42:
+		case 22:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field NetInterfaces", wireType)
 			}
@@ -1883,70 +1240,6 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if err := m.NetInterfaces[len(m.NetInterfaces)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			iNdEx = postIndex
-		case 51:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DbMysqlDsn", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.DbMysqlDsn = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 52:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field DbRedisAddr", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.DbRedisAddr = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

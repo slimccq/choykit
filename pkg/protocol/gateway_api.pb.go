@@ -158,25 +158,24 @@ func (m *ClientDisconnectNtf) GetReason() uint32 {
 }
 
 //握手
-type ClientHandShakeReq struct {
-	Method uint32 `protobuf:"varint,1,opt,name=method,proto3" json:"method,omitempty"`
+type ClientHandshakeReq struct {
+	Cipher string `protobuf:"bytes,1,opt,name=cipher,proto3" json:"cipher,omitempty"`
 	Key    []byte `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Salt   []byte `protobuf:"bytes,3,opt,name=salt,proto3" json:"salt,omitempty"`
-	Iv     uint64 `protobuf:"varint,4,opt,name=iv,proto3" json:"iv,omitempty"`
+	Iv     []byte `protobuf:"bytes,3,opt,name=iv,proto3" json:"iv,omitempty"`
 }
 
-func (m *ClientHandShakeReq) Reset()         { *m = ClientHandShakeReq{} }
-func (m *ClientHandShakeReq) String() string { return proto.CompactTextString(m) }
-func (*ClientHandShakeReq) ProtoMessage()    {}
-func (*ClientHandShakeReq) Descriptor() ([]byte, []int) {
+func (m *ClientHandshakeReq) Reset()         { *m = ClientHandshakeReq{} }
+func (m *ClientHandshakeReq) String() string { return proto.CompactTextString(m) }
+func (*ClientHandshakeReq) ProtoMessage()    {}
+func (*ClientHandshakeReq) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d19061a37068d4c6, []int{3}
 }
-func (m *ClientHandShakeReq) XXX_Unmarshal(b []byte) error {
+func (m *ClientHandshakeReq) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClientHandShakeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClientHandshakeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ClientHandShakeReq.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ClientHandshakeReq.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -186,66 +185,57 @@ func (m *ClientHandShakeReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *ClientHandShakeReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClientHandShakeReq.Merge(m, src)
+func (m *ClientHandshakeReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClientHandshakeReq.Merge(m, src)
 }
-func (m *ClientHandShakeReq) XXX_Size() int {
+func (m *ClientHandshakeReq) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClientHandShakeReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClientHandShakeReq.DiscardUnknown(m)
+func (m *ClientHandshakeReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClientHandshakeReq.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClientHandShakeReq proto.InternalMessageInfo
+var xxx_messageInfo_ClientHandshakeReq proto.InternalMessageInfo
 
-func (m *ClientHandShakeReq) GetMethod() uint32 {
+func (m *ClientHandshakeReq) GetCipher() string {
 	if m != nil {
-		return m.Method
+		return m.Cipher
 	}
-	return 0
+	return ""
 }
 
-func (m *ClientHandShakeReq) GetKey() []byte {
+func (m *ClientHandshakeReq) GetKey() []byte {
 	if m != nil {
 		return m.Key
 	}
 	return nil
 }
 
-func (m *ClientHandShakeReq) GetSalt() []byte {
+func (m *ClientHandshakeReq) GetIv() []byte {
 	if m != nil {
-		return m.Salt
+		return m.Iv
 	}
 	return nil
 }
 
-func (m *ClientHandShakeReq) GetIv() uint64 {
-	if m != nil {
-		return m.Iv
-	}
-	return 0
-}
-
-type ClientHandShakeAck struct {
-	Method uint32 `protobuf:"varint,1,opt,name=method,proto3" json:"method,omitempty"`
+type ClientHandshakeAck struct {
+	Cipher string `protobuf:"bytes,1,opt,name=cipher,proto3" json:"cipher,omitempty"`
 	Key    []byte `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
-	Salt   []byte `protobuf:"bytes,3,opt,name=salt,proto3" json:"salt,omitempty"`
-	Iv     uint64 `protobuf:"varint,4,opt,name=iv,proto3" json:"iv,omitempty"`
-	Seq    uint32 `protobuf:"varint,5,opt,name=seq,proto3" json:"seq,omitempty"`
+	Iv     []byte `protobuf:"bytes,3,opt,name=iv,proto3" json:"iv,omitempty"`
 }
 
-func (m *ClientHandShakeAck) Reset()         { *m = ClientHandShakeAck{} }
-func (m *ClientHandShakeAck) String() string { return proto.CompactTextString(m) }
-func (*ClientHandShakeAck) ProtoMessage()    {}
-func (*ClientHandShakeAck) Descriptor() ([]byte, []int) {
+func (m *ClientHandshakeAck) Reset()         { *m = ClientHandshakeAck{} }
+func (m *ClientHandshakeAck) String() string { return proto.CompactTextString(m) }
+func (*ClientHandshakeAck) ProtoMessage()    {}
+func (*ClientHandshakeAck) Descriptor() ([]byte, []int) {
 	return fileDescriptor_d19061a37068d4c6, []int{4}
 }
-func (m *ClientHandShakeAck) XXX_Unmarshal(b []byte) error {
+func (m *ClientHandshakeAck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
 }
-func (m *ClientHandShakeAck) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+func (m *ClientHandshakeAck) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
 	if deterministic {
-		return xxx_messageInfo_ClientHandShakeAck.Marshal(b, m, deterministic)
+		return xxx_messageInfo_ClientHandshakeAck.Marshal(b, m, deterministic)
 	} else {
 		b = b[:cap(b)]
 		n, err := m.MarshalToSizedBuffer(b)
@@ -255,65 +245,51 @@ func (m *ClientHandShakeAck) XXX_Marshal(b []byte, deterministic bool) ([]byte, 
 		return b[:n], nil
 	}
 }
-func (m *ClientHandShakeAck) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_ClientHandShakeAck.Merge(m, src)
+func (m *ClientHandshakeAck) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ClientHandshakeAck.Merge(m, src)
 }
-func (m *ClientHandShakeAck) XXX_Size() int {
+func (m *ClientHandshakeAck) XXX_Size() int {
 	return m.Size()
 }
-func (m *ClientHandShakeAck) XXX_DiscardUnknown() {
-	xxx_messageInfo_ClientHandShakeAck.DiscardUnknown(m)
+func (m *ClientHandshakeAck) XXX_DiscardUnknown() {
+	xxx_messageInfo_ClientHandshakeAck.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_ClientHandShakeAck proto.InternalMessageInfo
+var xxx_messageInfo_ClientHandshakeAck proto.InternalMessageInfo
 
-func (m *ClientHandShakeAck) GetMethod() uint32 {
+func (m *ClientHandshakeAck) GetCipher() string {
 	if m != nil {
-		return m.Method
+		return m.Cipher
 	}
-	return 0
+	return ""
 }
 
-func (m *ClientHandShakeAck) GetKey() []byte {
+func (m *ClientHandshakeAck) GetKey() []byte {
 	if m != nil {
 		return m.Key
 	}
 	return nil
 }
 
-func (m *ClientHandShakeAck) GetSalt() []byte {
-	if m != nil {
-		return m.Salt
-	}
-	return nil
-}
-
-func (m *ClientHandShakeAck) GetIv() uint64 {
+func (m *ClientHandshakeAck) GetIv() []byte {
 	if m != nil {
 		return m.Iv
 	}
-	return 0
-}
-
-func (m *ClientHandShakeAck) GetSeq() uint32 {
-	if m != nil {
-		return m.Seq
-	}
-	return 0
+	return nil
 }
 
 func init() {
 	proto.RegisterType((*ClientPingReq)(nil), "protocol.ClientPingReq")
 	proto.RegisterType((*ClientPongAck)(nil), "protocol.ClientPongAck")
 	proto.RegisterType((*ClientDisconnectNtf)(nil), "protocol.ClientDisconnectNtf")
-	proto.RegisterType((*ClientHandShakeReq)(nil), "protocol.ClientHandShakeReq")
-	proto.RegisterType((*ClientHandShakeAck)(nil), "protocol.ClientHandShakeAck")
+	proto.RegisterType((*ClientHandshakeReq)(nil), "protocol.ClientHandshakeReq")
+	proto.RegisterType((*ClientHandshakeAck)(nil), "protocol.ClientHandshakeAck")
 }
 
 func init() { proto.RegisterFile("gateway_api.proto", fileDescriptor_d19061a37068d4c6) }
 
 var fileDescriptor_d19061a37068d4c6 = []byte{
-	// 273 bytes of a gzipped FileDescriptorProto
+	// 245 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x12, 0x4c, 0x4f, 0x2c, 0x49,
 	0x2d, 0x4f, 0xac, 0x8c, 0x4f, 0x2c, 0xc8, 0xd4, 0x2b, 0x28, 0xca, 0x2f, 0xc9, 0x17, 0xe2, 0x00,
 	0x53, 0xc9, 0xf9, 0x39, 0x52, 0x22, 0xe9, 0xf9, 0xe9, 0xf9, 0x60, 0x9e, 0x3e, 0x88, 0x05, 0x91,
@@ -322,16 +298,14 @@ var fileDescriptor_d19061a37068d4c6 = []byte{
 	0x02, 0xb3, 0x91, 0x14, 0xe5, 0xe7, 0xa5, 0x3b, 0x26, 0x67, 0xc3, 0x15, 0x31, 0x21, 0x29, 0xd2,
 	0xe5, 0x12, 0x86, 0x28, 0x72, 0xc9, 0x2c, 0x4e, 0xce, 0xcf, 0xcb, 0x4b, 0x4d, 0x2e, 0xf1, 0x2b,
 	0x49, 0x13, 0x12, 0xe3, 0x62, 0x2b, 0x4a, 0x4d, 0x2c, 0xce, 0xcf, 0x03, 0x2b, 0xe6, 0x0d, 0x82,
-	0xf2, 0x94, 0x92, 0xb8, 0x84, 0x20, 0xca, 0x3d, 0x12, 0xf3, 0x52, 0x82, 0x33, 0x12, 0xb3, 0x53,
-	0x41, 0xb6, 0x8b, 0x71, 0xb1, 0xe5, 0xa6, 0x96, 0x64, 0xe4, 0xa7, 0x80, 0xed, 0xe7, 0x0d, 0x82,
-	0xf2, 0x84, 0x04, 0xb8, 0x98, 0xb3, 0x53, 0x2b, 0xc1, 0x46, 0xf0, 0x04, 0x81, 0x98, 0x20, 0x27,
-	0x14, 0x27, 0xe6, 0x94, 0x48, 0x30, 0x83, 0x85, 0xc0, 0x6c, 0x21, 0x3e, 0x2e, 0xa6, 0xcc, 0x32,
-	0x09, 0x16, 0x05, 0x46, 0x0d, 0x96, 0x20, 0xa6, 0xcc, 0x32, 0xa5, 0x12, 0x0c, 0x3b, 0x40, 0x8e,
-	0xa7, 0xaa, 0x1d, 0x20, 0x5d, 0xc5, 0xa9, 0x85, 0x12, 0xac, 0x60, 0xa3, 0x40, 0x4c, 0x27, 0x99,
-	0x13, 0x8f, 0xe4, 0x18, 0x2f, 0x3c, 0x92, 0x63, 0x7c, 0xf0, 0x48, 0x8e, 0x71, 0xc2, 0x63, 0x39,
-	0x86, 0x19, 0x8f, 0xe5, 0x18, 0x2e, 0x3c, 0x96, 0x63, 0xb8, 0xf1, 0x58, 0x8e, 0x21, 0x89, 0x0d,
-	0x1c, 0xee, 0xc6, 0x80, 0x00, 0x00, 0x00, 0xff, 0xff, 0x12, 0x94, 0x7d, 0x26, 0xac, 0x01, 0x00,
-	0x00,
+	0xf2, 0x94, 0xfc, 0xb8, 0x84, 0x20, 0xca, 0x3d, 0x12, 0xf3, 0x52, 0x8a, 0x33, 0x12, 0xb3, 0x53,
+	0x41, 0xb6, 0x8b, 0x71, 0xb1, 0x25, 0x67, 0x16, 0x64, 0xa4, 0x16, 0x81, 0xed, 0xe7, 0x0c, 0x82,
+	0xf2, 0x84, 0x04, 0xb8, 0x98, 0xb3, 0x53, 0x2b, 0xc1, 0x46, 0xf0, 0x04, 0x81, 0x98, 0x42, 0x7c,
+	0x5c, 0x4c, 0x99, 0x65, 0x12, 0xcc, 0x60, 0x01, 0xa6, 0xcc, 0x32, 0x2c, 0xe6, 0x81, 0x1c, 0x4a,
+	0xb6, 0x79, 0x4e, 0x32, 0x27, 0x1e, 0xc9, 0x31, 0x5e, 0x78, 0x24, 0xc7, 0xf8, 0xe0, 0x91, 0x1c,
+	0xe3, 0x84, 0xc7, 0x72, 0x0c, 0x33, 0x1e, 0xcb, 0x31, 0x5c, 0x78, 0x2c, 0xc7, 0x70, 0xe3, 0xb1,
+	0x1c, 0x43, 0x12, 0x1b, 0x38, 0xf4, 0x8c, 0x01, 0x01, 0x00, 0x00, 0xff, 0xff, 0x6b, 0x8d, 0x03,
+	0xda, 0x72, 0x01, 0x00, 0x00,
 }
 
 func (m *ClientPingReq) Marshal() (dAtA []byte, err error) {
@@ -418,7 +392,7 @@ func (m *ClientDisconnectNtf) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	return len(dAtA) - i, nil
 }
 
-func (m *ClientHandShakeReq) Marshal() (dAtA []byte, err error) {
+func (m *ClientHandshakeReq) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -428,25 +402,20 @@ func (m *ClientHandShakeReq) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClientHandShakeReq) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientHandshakeReq) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClientHandShakeReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientHandshakeReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Iv != 0 {
-		i = encodeVarintGatewayApi(dAtA, i, uint64(m.Iv))
-		i--
-		dAtA[i] = 0x20
-	}
-	if len(m.Salt) > 0 {
-		i -= len(m.Salt)
-		copy(dAtA[i:], m.Salt)
-		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Salt)))
+	if len(m.Iv) > 0 {
+		i -= len(m.Iv)
+		copy(dAtA[i:], m.Iv)
+		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Iv)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -457,15 +426,17 @@ func (m *ClientHandShakeReq) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.Method != 0 {
-		i = encodeVarintGatewayApi(dAtA, i, uint64(m.Method))
+	if len(m.Cipher) > 0 {
+		i -= len(m.Cipher)
+		copy(dAtA[i:], m.Cipher)
+		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Cipher)))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *ClientHandShakeAck) Marshal() (dAtA []byte, err error) {
+func (m *ClientHandshakeAck) Marshal() (dAtA []byte, err error) {
 	size := m.Size()
 	dAtA = make([]byte, size)
 	n, err := m.MarshalToSizedBuffer(dAtA[:size])
@@ -475,30 +446,20 @@ func (m *ClientHandShakeAck) Marshal() (dAtA []byte, err error) {
 	return dAtA[:n], nil
 }
 
-func (m *ClientHandShakeAck) MarshalTo(dAtA []byte) (int, error) {
+func (m *ClientHandshakeAck) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *ClientHandShakeAck) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *ClientHandshakeAck) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	_ = i
 	var l int
 	_ = l
-	if m.Seq != 0 {
-		i = encodeVarintGatewayApi(dAtA, i, uint64(m.Seq))
-		i--
-		dAtA[i] = 0x28
-	}
-	if m.Iv != 0 {
-		i = encodeVarintGatewayApi(dAtA, i, uint64(m.Iv))
-		i--
-		dAtA[i] = 0x20
-	}
-	if len(m.Salt) > 0 {
-		i -= len(m.Salt)
-		copy(dAtA[i:], m.Salt)
-		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Salt)))
+	if len(m.Iv) > 0 {
+		i -= len(m.Iv)
+		copy(dAtA[i:], m.Iv)
+		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Iv)))
 		i--
 		dAtA[i] = 0x1a
 	}
@@ -509,10 +470,12 @@ func (m *ClientHandShakeAck) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.Method != 0 {
-		i = encodeVarintGatewayApi(dAtA, i, uint64(m.Method))
+	if len(m.Cipher) > 0 {
+		i -= len(m.Cipher)
+		copy(dAtA[i:], m.Cipher)
+		i = encodeVarintGatewayApi(dAtA, i, uint64(len(m.Cipher)))
 		i--
-		dAtA[i] = 0x8
+		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
@@ -564,51 +527,44 @@ func (m *ClientDisconnectNtf) Size() (n int) {
 	return n
 }
 
-func (m *ClientHandShakeReq) Size() (n int) {
+func (m *ClientHandshakeReq) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Method != 0 {
-		n += 1 + sovGatewayApi(uint64(m.Method))
+	l = len(m.Cipher)
+	if l > 0 {
+		n += 1 + l + sovGatewayApi(uint64(l))
 	}
 	l = len(m.Key)
 	if l > 0 {
 		n += 1 + l + sovGatewayApi(uint64(l))
 	}
-	l = len(m.Salt)
+	l = len(m.Iv)
 	if l > 0 {
 		n += 1 + l + sovGatewayApi(uint64(l))
-	}
-	if m.Iv != 0 {
-		n += 1 + sovGatewayApi(uint64(m.Iv))
 	}
 	return n
 }
 
-func (m *ClientHandShakeAck) Size() (n int) {
+func (m *ClientHandshakeAck) Size() (n int) {
 	if m == nil {
 		return 0
 	}
 	var l int
 	_ = l
-	if m.Method != 0 {
-		n += 1 + sovGatewayApi(uint64(m.Method))
+	l = len(m.Cipher)
+	if l > 0 {
+		n += 1 + l + sovGatewayApi(uint64(l))
 	}
 	l = len(m.Key)
 	if l > 0 {
 		n += 1 + l + sovGatewayApi(uint64(l))
 	}
-	l = len(m.Salt)
+	l = len(m.Iv)
 	if l > 0 {
 		n += 1 + l + sovGatewayApi(uint64(l))
-	}
-	if m.Iv != 0 {
-		n += 1 + sovGatewayApi(uint64(m.Iv))
-	}
-	if m.Seq != 0 {
-		n += 1 + sovGatewayApi(uint64(m.Seq))
 	}
 	return n
 }
@@ -835,7 +791,7 @@ func (m *ClientDisconnectNtf) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
+func (m *ClientHandshakeReq) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -858,17 +814,17 @@ func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClientHandShakeReq: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClientHandshakeReq: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClientHandShakeReq: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClientHandshakeReq: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Method", wireType)
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cipher", wireType)
 			}
-			m.Method = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowGatewayApi
@@ -878,11 +834,24 @@ func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Method |= uint32(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGatewayApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGatewayApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Cipher = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Key", wireType)
@@ -919,7 +888,7 @@ func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Salt", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Iv", wireType)
 			}
 			var byteLen int
 			for shift := uint(0); ; shift += 7 {
@@ -946,30 +915,11 @@ func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Salt = append(m.Salt[:0], dAtA[iNdEx:postIndex]...)
-			if m.Salt == nil {
-				m.Salt = []byte{}
+			m.Iv = append(m.Iv[:0], dAtA[iNdEx:postIndex]...)
+			if m.Iv == nil {
+				m.Iv = []byte{}
 			}
 			iNdEx = postIndex
-		case 4:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Iv", wireType)
-			}
-			m.Iv = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGatewayApi
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Iv |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipGatewayApi(dAtA[iNdEx:])
@@ -994,7 +944,7 @@ func (m *ClientHandShakeReq) Unmarshal(dAtA []byte) error {
 	}
 	return nil
 }
-func (m *ClientHandShakeAck) Unmarshal(dAtA []byte) error {
+func (m *ClientHandshakeAck) Unmarshal(dAtA []byte) error {
 	l := len(dAtA)
 	iNdEx := 0
 	for iNdEx < l {
@@ -1017,17 +967,17 @@ func (m *ClientHandShakeAck) Unmarshal(dAtA []byte) error {
 		fieldNum := int32(wire >> 3)
 		wireType := int(wire & 0x7)
 		if wireType == 4 {
-			return fmt.Errorf("proto: ClientHandShakeAck: wiretype end group for non-group")
+			return fmt.Errorf("proto: ClientHandshakeAck: wiretype end group for non-group")
 		}
 		if fieldNum <= 0 {
-			return fmt.Errorf("proto: ClientHandShakeAck: illegal tag %d (wire type %d)", fieldNum, wire)
+			return fmt.Errorf("proto: ClientHandshakeAck: illegal tag %d (wire type %d)", fieldNum, wire)
 		}
 		switch fieldNum {
 		case 1:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Method", wireType)
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cipher", wireType)
 			}
-			m.Method = 0
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowGatewayApi
@@ -1037,11 +987,24 @@ func (m *ClientHandShakeAck) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				m.Method |= uint32(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthGatewayApi
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthGatewayApi
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Cipher = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Key", wireType)
@@ -1078,7 +1041,7 @@ func (m *ClientHandShakeAck) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 3:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Salt", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Iv", wireType)
 			}
 			var byteLen int
 			for shift := uint(0); ; shift += 7 {
@@ -1105,49 +1068,11 @@ func (m *ClientHandShakeAck) Unmarshal(dAtA []byte) error {
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			m.Salt = append(m.Salt[:0], dAtA[iNdEx:postIndex]...)
-			if m.Salt == nil {
-				m.Salt = []byte{}
+			m.Iv = append(m.Iv[:0], dAtA[iNdEx:postIndex]...)
+			if m.Iv == nil {
+				m.Iv = []byte{}
 			}
 			iNdEx = postIndex
-		case 4:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Iv", wireType)
-			}
-			m.Iv = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGatewayApi
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Iv |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 5:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Seq", wireType)
-			}
-			m.Seq = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowGatewayApi
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.Seq |= uint32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
 		default:
 			iNdEx = preIndex
 			skippy, err := skipGatewayApi(dAtA[iNdEx:])

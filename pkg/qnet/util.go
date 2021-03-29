@@ -6,10 +6,11 @@ package qnet
 
 import (
 	"bytes"
-	"devpkg.work/choykit/pkg/codec"
 	"net"
 	"time"
 
+	"devpkg.work/choykit/pkg/codec"
+	"devpkg.work/choykit/pkg/x/cipher"
 	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"github.com/gogo/protobuf/proto"
@@ -41,7 +42,7 @@ func ListenTCP(address string) (*net.TCPListener, error) {
 }
 
 // recv一条protobuf消息
-func ReadProtoMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fatchoy.MessageEncryptor,
+func ReadProtoMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt cipher.BlockCryptor,
 	pkt *fatchoy.Packet, pbMsg proto.Message) error {
 	if err := ReadPacketMessage(conn, decoder, decrypt, pkt); err != nil {
 		return err
@@ -56,7 +57,7 @@ func ReadProtoMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fa
 }
 
 // recv一个packet
-func ReadPacketMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt fatchoy.MessageEncryptor,
+func ReadPacketMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt cipher.BlockCryptor,
 	pkt *fatchoy.Packet) error {
 	deadline := fatchoy.Now().Add(time.Duration(RequestReadTimeout) * time.Second)
 	conn.SetReadDeadline(deadline)
@@ -71,7 +72,7 @@ func ReadPacketMessage(conn net.Conn, decoder fatchoy.ProtocolDecoder, decrypt f
 }
 
 // send一个packet
-func SendPacketMessage(conn net.Conn, encoder fatchoy.ProtocolEncoder, encrypt fatchoy.MessageEncryptor,
+func SendPacketMessage(conn net.Conn, encoder fatchoy.ProtocolEncoder, encrypt cipher.BlockCryptor,
 	pkt *fatchoy.Packet) error {
 	if err := codec.EncodePacket(pkt, 0, encrypt); err != nil {
 		return err
@@ -89,7 +90,7 @@ func SendPacketMessage(conn net.Conn, encoder fatchoy.ProtocolEncoder, encrypt f
 }
 
 // send一条protobuf消息
-func SendProtoMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt fatchoy.MessageEncryptor,
+func SendProtoMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt cipher.BlockCryptor,
 	command int32, outMsg proto.Message) error {
 	var buf bytes.Buffer
 	var pkt = fatchoy.MakePacket()
@@ -110,7 +111,7 @@ func SendProtoMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt fatc
 }
 
 // send并且立即等待recv
-func RequestMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt fatchoy.MessageEncryptor,
+func RequestMessage(conn net.Conn, encoder fatchoy.ProtocolCodec, encrypt cipher.BlockCryptor,
 	reqCommand int32, msgReq, msgResp proto.Message) error {
 	if err := SendProtoMessage(conn, encoder, encrypt, reqCommand, msgReq); err != nil {
 		return err

@@ -16,10 +16,13 @@ import (
 )
 
 const (
-	ClientCodecVersion    = 1         // 协议版本
-	ClientCodecHeaderSize = 14        // 消息头大小
+	ClientCodecVersion    = 1  // 协议版本
+	ClientCodecHeaderSize = 14 // 消息头大小
+)
+
+var (
 	MaxAllowedV1SendBytes = 60 * 1024 // 最大发送消息大小(60k)
-	MaxAllowedV1RecvBytes = 16 * 1024 // 最大接收消息大小(16k)
+	MaxAllowedV1RecvBytes = 8 * 1024  // 最大接收消息大小(8k)
 )
 
 //  header wire format

@@ -74,7 +74,7 @@ func (s *Backend) handleNodeAccept(conn net.Conn) {
 	var ctx = s.Context()
 	var node = fatchoy.NodeID(req.Node)
 	var endpoint = qnet.NewTcpConn(node, conn, s.encoder, nil, nil,
-		ctx.Env().EndpointOutboundQueueSize, s.stats)
+		ctx.Env().GetInt32(fatchoy.RUNTIME_ENDPOINT_OUTBOUND_SIZE), s.stats)
 	s.endpoints.Add(node, endpoint)
 	endpoint.Go(true, true)
 	s.endpoints.Add(node, endpoint)
@@ -118,7 +118,7 @@ func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 	}
 	ctx := s.Context()
 	endpoint := qnet.NewTcpConn(node, conn, s.encoder, s.errors, ctx.InboundQueue(),
-		ctx.Env().EndpointOutboundQueueSize, s.stats)
+		ctx.Env().GetInt32(fatchoy.RUNTIME_ENDPOINT_OUTBOUND_SIZE), s.stats)
 	if err := s.register(endpoint); err != nil {
 		return err
 	}
@@ -128,7 +128,7 @@ func (s *Backend) establishTo(node fatchoy.NodeID, addr string) error {
 // 注册自己
 func (s *Backend) register(endpoint fatchoy.Endpoint) error {
 	var env = s.Environ()
-	var token = SignAccessToken(s.node, env.GameId, env.AccessKey)
+	var token = SignAccessToken(s.node, env.AppGameId, env.AppAccessKey)
 	var req = &protocol.RegisterReq{
 		Node:        uint32(s.node),
 		AccessToken: token,
@@ -170,7 +170,7 @@ func (s *Backend) servePing(endpoint fatchoy.Endpoint) {
 	log.Debugf("start serve pinging for endpoint %v", endpoint.NodeID())
 
 	var ctx = s.Context()
-	ticker := time.NewTicker(time.Duration(ctx.Env().NetPeerPingInterval) * time.Second)
+	ticker := time.NewTicker(time.Duration(ctx.Env().GetInt(fatchoy.NET_PEER_PING_INTERVAL)) * time.Second)
 	defer ticker.Stop()
 
 	s.sendPing(time.Now(), endpoint)

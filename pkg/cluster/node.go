@@ -24,7 +24,9 @@ type Node struct {
 
 func (s *Node) Init(ctx *fatchoy.ServiceContext) error {
 	var env = ctx.Env()
-	if err := s.Executor.Init(env.ExecutorCapacity, env.ExecutorConcurrency); err != nil {
+	capacity := env.GetInt32(fatchoy.RUNTIME_EXECUTOR_CAPACITY)
+	concurrency := env.GetInt32(fatchoy.RUNTIME_EXECUTOR_CONCURRENCY)
+	if err := s.Executor.Init(capacity, concurrency); err != nil {
 		return err
 	}
 	s.encoder = codec.NewServerProtocolCodec()

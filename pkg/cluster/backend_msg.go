@@ -42,7 +42,7 @@ func (s *Backend) handleInstanceStateNtf(pkt *fatchoy.Packet) error {
 // 其它节点注册进来
 func (s *Backend) handleRegister(req *protocol.RegisterReq, pkt *fatchoy.Packet) bool {
 	var env = s.Environ()
-	var token = SignAccessToken(fatchoy.NodeID(req.Node), env.GameId, env.AccessKey)
+	var token = SignAccessToken(fatchoy.NodeID(req.Node), env.AppGameId, env.AppAccessKey)
 	if req.AccessToken != token {
 		log.Errorf("register token mismatch [%s] != [%s]", req.AccessToken, token)
 		pkt.SetErrno(uint32(protocol.ErrRegistrationDenied))
