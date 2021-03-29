@@ -5,37 +5,38 @@
 package cipher
 
 import (
-	"crypto/aes"
 	"crypto/cipher"
 	"log"
+
+	"golang.org/x/crypto/xtea"
 )
 
-// https://en.wikipedia.org/wiki/Advanced_Encryption_Standard
-type aesCFBCrypt struct {
-	encbuf [aes.BlockSize]byte
-	decbuf [2 * aes.BlockSize]byte
+// https://en.wikipedia.org/wiki/XTEA
+type xteaCrypt struct {
+	encbuf [xtea.BlockSize]byte
+	decbuf [2 * xtea.BlockSize]byte
 	block  cipher.Block
 	iv     []byte
 }
 
-// key should be 16, 24, or 32 bytes
-func NewAESCFB(key, iv []byte) BlockCryptor {
-	block, err := aes.NewCipher(key)
+// key must be 16 bytes
+func NewXTEA(key, iv []byte) BlockCryptor {
+	block, err := xtea.NewCipher(key)
 	if err != nil {
 		log.Panicf("%v", err)
 	}
-	return &aesCFBCrypt{
+	return &xteaCrypt{
 		block: block,
 		iv:    iv,
 	}
 }
 
-func (c *aesCFBCrypt) Encrypt(src []byte) []byte {
+func (c *xteaCrypt) Encrypt(src []byte) []byte {
 	encrypt(c.block, c.iv, src, src, c.encbuf[:])
 	return src
 }
 
-func (c *aesCFBCrypt) Decrypt(src []byte) []byte {
+func (c *xteaCrypt) Decrypt(src []byte) []byte {
 	decrypt(c.block, c.iv, src, src, c.decbuf[:])
 	return src
 }

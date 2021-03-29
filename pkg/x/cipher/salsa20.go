@@ -7,7 +7,6 @@ package cipher
 import (
 	"encoding/binary"
 	"golang.org/x/crypto/salsa20"
-	"log"
 )
 
 // https://en.wikipedia.org/wiki/Salsa20
@@ -16,15 +15,9 @@ type salsa20Crypt struct {
 	nonce uint64
 }
 
-func NewSalsa20(key, nonce []byte) *salsa20Crypt {
-	if len(nonce) != 8 {
-		log.Panicf("unexpected nonce size: %d != 8", len(nonce))
-	}
-	if len(key) != 32 {
-		log.Panicf("unexpected key size: %d != 32", len(nonce))
-	}
+func NewSalsa20(key, nonce []byte) BlockCryptor {
 	s := &salsa20Crypt{
-		nonce: binary.BigEndian.Uint64(nonce),
+		nonce: binary.BigEndian.Uint64(nonce[:8]),
 	}
 	copy(s.key[:], key)
 	return s

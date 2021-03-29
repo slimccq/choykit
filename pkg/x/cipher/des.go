@@ -19,7 +19,7 @@ type tripleDESCrypt struct {
 }
 
 // key must be 24-byte
-func NewTripleDES(key, iv []byte) *tripleDESCrypt {
+func NewTripleDES(key, iv []byte) BlockCryptor {
 	block, err := des.NewTripleDESCipher(key)
 	if err != nil {
 		log.Panicf("%v", err)

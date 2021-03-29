@@ -20,7 +20,7 @@ type sm4Crypt struct {
 }
 
 // key must be 16-byte
-func NewSM4(key, iv []byte) *sm4Crypt {
+func NewSM4(key, iv []byte) BlockCryptor {
 	block, err := sm4.NewCipher(key)
 	if err != nil {
 		log.Panicf("%v", err)
