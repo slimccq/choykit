@@ -13,12 +13,21 @@ import (
 // 环境变量
 type Env map[string]string
 
-var _env = make(Env)
-
 func (e Env) Get(key string) string {
 	val, found := e[key]
 	if !found {
 		val = os.Getenv(key)
+	}
+	return val
+}
+
+func (e Env) GetDefault(key, dflt string) string {
+	val, found := e[key]
+	if !found {
+		val = os.Getenv(key)
+	}
+	if val == "" {
+		val = dflt
 	}
 	return val
 }
@@ -35,6 +44,12 @@ func (e Env) GetInt(key string) int {
 	return n
 }
 
+func (e Env) GetInt32(key string) int32 {
+	v := e.Get(key)
+	n, _ := strconv.Atoi(v)
+	return int32(n)
+}
+
 func (e Env) GetInt64(key string) int64 {
 	v := e.Get(key)
 	n, _ := strconv.ParseInt(v, 10, 64)
@@ -46,6 +61,8 @@ func (e Env) GetFloat(key string) float64 {
 	f, _ := strconv.ParseFloat(v, 64)
 	return f
 }
+
+var _env = make(Env)
 
 // 加载.env变量配置
 func Load(filename string, overload bool) error {
@@ -77,24 +94,4 @@ func Add(envMap map[string]string, overload bool) {
 
 func Get(key string) string {
 	return _env.Get(key)
-}
-
-func GetBool(key string) bool {
-	return _env.GetBool(key)
-}
-
-func GetInt(key string) int {
-	return _env.GetInt(key)
-}
-
-func GetInt32(key string) int32 {
-	return int32(_env.GetInt(key))
-}
-
-func GetInt64(key string) int64 {
-	return _env.GetInt64(key)
-}
-
-func GetFloat(key string) float64 {
-	return _env.GetFloat(key)
 }
