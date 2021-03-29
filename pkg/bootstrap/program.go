@@ -65,9 +65,6 @@ func (d *Program) Init(opts *fatchoy.Options) error {
 	log.Infof("service index: %d", env.ServiceIndex)
 	log.Infof("service dependency: %s", env.ServiceDependency)
 
-	// 注册protobuf消息反射
-	// protocol.InitMessageRegistry()
-
 	var cfg = &service.Config{
 		Name:             "Choyd",
 		DisplayName:      "Service Launcher",

@@ -20,41 +20,25 @@ option (gogoproto.goproto_registration)     = true;
 
 // 通用环境变量
 message Environ {
-  string env                            = 1;  // 当前环境, dev, uat, cert, prod
-  string game_id                        = 2;  // 游戏ID
-  string channel_id                     = 3;  // 渠道ID
-  string server_id                      = 4;  // 服务器ID
-  string server_name                    = 5;  // 服务器名称
-  string access_key                     = 6;  // 访问密钥串
+  string app_env                        = 1;  // 当前环境, dev, uat, cert, prod
+  string app_game_id                    = 2;  // 游戏ID
+  string app_channel_id                 = 3;  // 渠道ID
+  string app_server_id                  = 4;  // 服务器ID
+  string app_server_name                = 5;  // 服务器名称
+  string app_access_key                 = 6;  // 访问密钥串
+  string app_log_level                  = 7;  // 日志级别
+  string app_pprof_addr                 = 19; // pprof监听地址
+  string app_working_dir                = 20; // 工作目录
   string service_type                   = 10; // 服务类型
   int32 service_index                   = 11; // 服务编号
   string service_dependency             = 12; // 服务依赖
   string etcd_addr                      = 13; // etcd地址
   string etcd_keyspace                  = 14; // etcd的key空间
   int32 etcd_lease_ttl                  = 15; // etcd的lease时间
-  string log_level                      = 16; // 日志级别
-  bool enable_syslog                    = 17; // 开启syslog
-  string syslog_params                  = 18; // syslog参数
-  string pprof_addr                     = 19; // pprof监听地址
-  string working_dir                    = 20; //
-  int32 executor_capacity               = 30; //
-  int32 executor_concurrency            = 31; //
-  int32 context_inbound_queue_size      = 32; //
-  int32 context_outbound_queue_size     = 33; //
-  int32 endpoint_outbound_queue_size    = 34; //
-  bool net_enable_encryption            = 35; // 是否开启加密
-  string net_public_key_file            = 36; // 公钥文件
-  string net_private_key_file           = 37; // 私钥文件
-  int32 net_peer_ping_interval          = 38; //
-  int32 net_peer_read_timeout           = 39; //
-  int32 net_session_read_timeout        = 40; //
-  int32 net_rpc_timeout_interval        = 41; //
-  repeated InterfaceAddr net_interfaces = 42; // 开启网络接口地址
-  string db_mysql_dsn                   = 51; // MySQL地址
-  string db_redis_addr                  = 52; // redis地址
+  repeated InterfaceAddr net_interfaces = 22; // 开启网络接口地址
 }
 
-// 地址接口
+// 地址接口，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
 message InterfaceAddr {
   string bind_addr      = 1; // bind地址
   string advertise_addr = 2; // 对外地址

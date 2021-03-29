@@ -25,7 +25,7 @@ func (g *Service) createClientListener(addr fatchoy.NetInterface) error {
 		return err
 	}
 	log.Infof("listen client at %s", addr)
-	g.cListeners = append(g.cListeners, ln)
+	g.cListener = ln
 	return nil
 }
 
@@ -33,8 +33,11 @@ func (g *Service) createClientListener(addr fatchoy.NetInterface) error {
 func (g *Service) serveClientSession(ln net.Listener) {
 	addr := ln.Addr()
 	log.Infof("serve client at %v", addr)
-	defer log.Infof("stop serving client at %v", addr)
-	defer g.wg.Done()
+	defer func() {
+		g.wg.Done()
+		log.Infof("stop serving client at %v", addr)
+	}()
+
 	for !g.IsClosing() {
 		conn, err := ln.Accept()
 		if err != nil {
@@ -62,14 +65,17 @@ func (g *Service) handleClientConn(conn net.Conn, node fatchoy.NodeID) {
 		conn.Close()
 		return
 	}
-	defer log.Infof("client #%d(%v) disconnected", sid, session.RemoteAddr())
-	defer g.closeSession(session)
+	defer func() {
+		log.Infof("client #%d(%v) disconnected", sid, session.RemoteAddr())
+		g.closeSession(session)
+	}()
+
 	session.SetContext(g.Context())
 	session.Go(true, false)
 
 	var reader = bufio.NewReader(conn)
 	var env = g.Context().Env()
-	var interval = time.Duration(env.NetSessionReadTimeout) * time.Second
+	var interval = time.Duration(env.GetInt(fatchoy.NET_SESSION_READ_TIMEOUT)) * time.Second
 	var encoder = codec.ClientProtocolCodec
 	for !g.IsClosing() {
 		var pkt = fatchoy.MakePacket()
@@ -96,9 +102,10 @@ func (g *Service) handshakeClient(conn net.Conn, node fatchoy.NodeID) (fatchoy.E
 	// TODO: net encryption
 
 	// handle login & authentication
+	var env = g.Context().Env()
 	var encoder = codec.ClientProtocolCodec
 	var session = qnet.NewTcpConn(node, conn, encoder, nil, g.Context().InboundQueue(),
-		g.Context().Env().EndpointOutboundQueueSize, g.cStats)
+		env.GetInt32(fatchoy.RUNTIME_ENDPOINT_OUTBOUND_SIZE), g.cStats)
 	if err := g.forwardClientLogin(session); err != nil {
 		log.Errorf("handle login error: %v", err)
 		return nil, err

@@ -17,21 +17,21 @@ import (
 
 type Service struct {
 	cluster.Node
-	done       chan struct{}          //
-	wg         sync.WaitGroup         //
-	closing    int32                  //
-	discovery  *cluster.EtcdDiscovery //
-	saddr      fatchoy.NetInterface   // backend侦听地址
-	sListener  net.Listener           // 与backend的连接
-	cListeners []net.Listener         // 与client的连接(TCP)
-	wservers   []*WsServer            // 与client的连接(Websocket)
-	backends   *fatchoy.EndpointMap   // 所有backend连接
-	sessions   *fatchoy.EndpointMap   // 所有TCP client连接
-	router     *fatchoy.Router        // 消息路由
-	cStats     *fatchoy.Stats         // client消息统计
-	sStats     *fatchoy.Stats         // backend消息统计
-	nextSid    uint32                 // session id分配号
-	pcu        uint32                 // PCU
+	done        chan struct{}          //
+	wg          sync.WaitGroup         //
+	closing     int32                  //
+	discovery   *cluster.EtcdDiscovery //
+	backendAddr fatchoy.NetInterface   // backend侦听地址
+	sListener   net.Listener           // 与backend的连接
+	cListener   net.Listener           // 与client的连接(TCP)
+	wsvr        *WsServer              // 与client的连接(Websocket)
+	backends    *fatchoy.EndpointMap   // 所有backend连接
+	sessions    *fatchoy.EndpointMap   // 所有TCP client连接
+	router      *fatchoy.Router        // 消息路由
+	cStats      *fatchoy.Stats         // client消息统计
+	sStats      *fatchoy.Stats         // backend消息统计
+	nextSid     uint32                 // session id分配号
+	pcu         uint32                 // PCU
 }
 
 func (g *Service) Init(ctx *fatchoy.ServiceContext) error {
@@ -54,8 +54,8 @@ func (g *Service) Init(ctx *fatchoy.ServiceContext) error {
 		log.Errorf("invalid interfaces [%v] specified", env.NetInterfaces)
 		return errInvalidInterface
 	}
-	g.saddr = fatchoy.NetInterface(*env.NetInterfaces[0])
-	if err := g.createBackendListener(g.saddr); err != nil {
+	g.backendAddr = fatchoy.NetInterface(*env.NetInterfaces[0])
+	if err := g.createBackendListener(g.backendAddr); err != nil {
 		return err
 	}
 	for i := 1; i < len(env.NetInterfaces); i++ {
@@ -80,14 +80,12 @@ func (g *Service) Startup() error {
 	g.wg.Add(1)
 	go g.serveBackend()
 
-	for _, ln := range g.cListeners {
+	if g.cListener != nil {
 		g.wg.Add(1)
-		go g.serveClientSession(ln)
+		go g.serveClientSession(g.cListener)
 	}
-	for _, ws := range g.wservers {
-		if ws != nil {
-			ws.Start()
-		}
+	if g.wsvr != nil {
+		g.wsvr.Start()
 	}
 	g.discovery.Start()
 	return nil
@@ -95,11 +93,11 @@ func (g *Service) Startup() error {
 
 func (g *Service) Shutdown() {
 	g.disconnectAll()
-	for _, ln := range g.cListeners {
-		ln.Close()
+	if g.cListener != nil {
+		g.cListener.Close()
 	}
-	for _, ws := range g.wservers {
-		ws.Close()
+	if g.wsvr != nil {
+		g.wsvr.Close()
 	}
 	g.discovery.Close()
 	g.sListener.Close()
@@ -109,8 +107,8 @@ func (g *Service) Shutdown() {
 	g.Node.Shutdown()
 	g.sessions = nil
 	g.backends = nil
-	g.cListeners = nil
-	g.wservers = nil
+	g.cListener = nil
+	g.wsvr = nil
 	g.router = nil
 	g.cStats = nil
 	g.sStats = nil
@@ -126,8 +124,4 @@ func (g *Service) Name() string {
 
 func (g *Service) ID() uint8 {
 	return protocol.SERVICE_GATEWAY
-}
-
-func init() {
-	fatchoy.Register(&Service{})
 }

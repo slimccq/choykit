@@ -5,11 +5,11 @@
 package gateway
 
 import (
-	"devpkg.work/choykit/pkg/codec"
 	"net/http"
 	"net/url"
 	"time"
 
+	"devpkg.work/choykit/pkg/codec"
 	"devpkg.work/choykit/pkg/fatchoy"
 	"devpkg.work/choykit/pkg/log"
 	"devpkg.work/choykit/pkg/qnet"
@@ -19,9 +19,9 @@ import (
 // websocket server
 type WsServer struct {
 	*http.Server
-	url      string              // Websocket URL地址
-	upgrader *websocket.Upgrader //
-	encoder  fatchoy.ProtocolCodec
+	url      string                // Websocket URL地址
+	upgrader *websocket.Upgrader   //
+	encoder  fatchoy.ProtocolCodec //
 }
 
 func (s *WsServer) Start() {
@@ -41,13 +41,12 @@ func (g *Service) createWSServer(rawurl string) error {
 			Addr:              u.Host,
 			Handler:           mux,
 			ReadTimeout:       100 * time.Second,
-			ReadHeaderTimeout: 30 * time.Second,
-			WriteTimeout:      30 * time.Second,
+			ReadHeaderTimeout: 10 * time.Second,
+			WriteTimeout:      10 * time.Second,
 			IdleTimeout:       60 * time.Second,
-			MaxHeaderBytes:    4096,
 		},
 		upgrader: &websocket.Upgrader{
-			HandshakeTimeout: 10 * time.Second,
+			HandshakeTimeout: 5 * time.Second,
 		},
 	}
 	server.encoder = codec.NewServerProtocolCodec()
