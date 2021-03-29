@@ -87,7 +87,7 @@ func (t *HashTrie) Reset() {
 	t.size = 0
 }
 
-// 单词数量
+// 单词表数量
 func (t *HashTrie) WordsCount() int {
 	return t.size
 }
@@ -96,7 +96,7 @@ func (t *HashTrie) String() string {
 	return t.root.String()
 }
 
-// 添加单词表
+// 添加到单词表
 func (t *HashTrie) AddWord(word string) {
 	if word == "" {
 		return
@@ -128,7 +128,7 @@ func (t *HashTrie) getTailCharNode(word []rune) *trieNode {
 	return node
 }
 
-// 字典是否包含`word`
+// 单词表是否包含`word`
 func (t *HashTrie) contains(word string) bool {
 	var node = t.getTailCharNode([]rune(word))
 	if node != nil {
@@ -156,7 +156,7 @@ func (t *HashTrie) remove(node *trieNode, word []rune, depth int) bool {
 	return false
 }
 
-// 从字典中删除一个单词
+// 从单词表中删除一个单词
 func (t *HashTrie) Remove(word string) bool {
 	if t.contains(word) {
 		t.remove(&t.root, []rune(word), 0)
@@ -166,7 +166,7 @@ func (t *HashTrie) Remove(word string) bool {
 	return false
 }
 
-// 从`pos`开始查找单词`word`是否包含词汇表，成功返回找到的位置，否则返回-1
+// 从`pos`开始查找单词`word`是否包含有单词表中的单词，成功返回找到的位置，否则返回-1
 func (t *HashTrie) starts(word []rune, pos int) int {
 	var node = &t.root
 	for pos >= 0 && pos < len(word) {
@@ -215,7 +215,7 @@ func (t *HashTrie) Contains(word string) bool {
 	return i >= 0 && n > 0
 }
 
-// 将敏感字符替换为`char`
+// 将敏感字符替换为星号
 func (t *HashTrie) Filter(word string) string {
 	if word == "" {
 		return ""
