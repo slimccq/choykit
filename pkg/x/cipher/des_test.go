@@ -12,11 +12,11 @@ import (
 	"testing"
 )
 
-func TestAESCrypt(t *testing.T) {
+func TestDESCrypt(t *testing.T) {
 	iv := randBytes(16)
-	key := randBytes(32)
-	encryptor := NewAESCFB(key, iv)
-	descriptor := NewAESCFB(key, iv)
+	key := randBytes(24)
+	encryptor := NewTripleDES(key, iv)
+	descriptor := NewTripleDES(key, iv)
 	for i := 0; i < 100; i++ {
 		payload := randBytes(100 + rand.Int()%1000)
 		encrypted := encryptor.Encrypt(cloneBytes(payload))

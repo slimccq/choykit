@@ -7,30 +7,37 @@ package cipher
 import (
 	"encoding/binary"
 	"golang.org/x/crypto/salsa20"
+	"log"
 )
 
 // https://en.wikipedia.org/wiki/Salsa20
-type Salsa20 struct {
+type salsa20Crypt struct {
 	key   [32]byte
 	nonce uint64
 }
 
-func NewSalsa20(nonce uint64, key []byte) *Salsa20 {
-	s := &Salsa20{
-		nonce: nonce,
+func NewSalsa20(key, nonce []byte) *salsa20Crypt {
+	if len(nonce) != 8 {
+		log.Panicf("unexpected nonce size: %d != 8", len(nonce))
+	}
+	if len(key) != 32 {
+		log.Panicf("unexpected key size: %d != 32", len(nonce))
+	}
+	s := &salsa20Crypt{
+		nonce: binary.BigEndian.Uint64(nonce),
 	}
 	copy(s.key[:], key)
 	return s
 }
 
-func (s *Salsa20) Encrypt(data []byte) ([]byte, error) {
+func (s *salsa20Crypt) Encrypt(data []byte) []byte {
 	var nonce [8]byte
 	binary.BigEndian.PutUint64(nonce[:], s.nonce)
 	s.nonce++
 	salsa20.XORKeyStream(data, data, nonce[:], &s.key)
-	return data, nil
+	return data
 }
 
-func (s *Salsa20) Decrypt(data []byte) ([]byte, error) {
+func (s *salsa20Crypt) Decrypt(data []byte) []byte {
 	return s.Encrypt(data)
 }

@@ -7,6 +7,7 @@ package cipher
 import (
 	"bytes"
 	"crypto/md5"
+	"encoding/binary"
 	"fmt"
 	"math/rand"
 	"testing"
@@ -14,13 +15,14 @@ import (
 
 func TestSalsa20_Decrypt(t *testing.T) {
 	key := randBytes(32)
-	nonce := uint64(1000)
-	encryptor := NewSalsa20(nonce, key)
-	decryptor := NewSalsa20(nonce, key)
+	var nonce [8]byte
+	binary.BigEndian.PutUint64(nonce[:], 1000)
+	encryptor := NewSalsa20(key, nonce[:])
+	descriptor := NewSalsa20(key, nonce[:])
 	for i := 0; i < 100; i++ {
 		payload := randBytes(100 + rand.Int()%1000)
-		encrypted, _ := encryptor.Encrypt(cloneBytes(payload))
-		decrypted, _ := decryptor.Decrypt(encrypted)
+		encrypted := encryptor.Encrypt(cloneBytes(payload))
+		decrypted := descriptor.Decrypt(encrypted)
 		if !bytes.Equal(payload, decrypted) {
 			checksum1 := fmt.Sprintf("%x", md5.Sum(payload))
 			checksum2 := fmt.Sprintf("%x", md5.Sum(decrypted))
