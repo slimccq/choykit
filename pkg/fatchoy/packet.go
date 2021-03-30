@@ -31,11 +31,11 @@ var (
 
 // 应用层消息
 type Packet struct {
-	Command  uint32          `json:"cmd"`            // 指令ID
+	Command  uint32          `json:"cmd"`            // 消息ID
 	Seq      uint16          `json:"seq"`            // 序列号
 	Flag     uint16          `json:"flg,omitempty"`  // 标记位
 	Node     NodeID          `json:"node,omitempty"` // 目标节点
-	Body     interface{}     `json:"body,omitempty"` // 消息内容，integer/bytes/string/pb.Message
+	Body     interface{}     `json:"body,omitempty"` // 消息内容，number/string/bytes/pb.Message
 	Endpoint MessageEndpoint `json:"-"`              // 关联的endpoint
 }
 
