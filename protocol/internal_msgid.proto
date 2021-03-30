@@ -8,38 +8,19 @@ package protocol;
 import "gogoproto/gogo.proto";
 option (gogoproto.goproto_enum_prefix_all) = false;
 
-// CM是Client Message的缩写，表示Client发送给Server的消息
-// SM是Server Message的缩写，表示Server发送给Client的消息
-
 // 内部消息协议
 enum InternalMsgType {
   // 内部通信协议 [100 - 1000)
   MSG_INTERNAL_RESERVED              = 0;
-  MSG_CM_INTERNAL_REGISTER           = 104; // 向srv注册自己
-  MSG_SM_INTERNAL_REGISTER           = 105; //
-  MSG_CM_INTERNAL_INTRODUCE          = 106; // 引入其它服务
-  MSG_SM_INTERNAL_INTRODUCE          = 107; //
-  MSG_CM_INTERNAL_SUBSCRIBE          = 123; // 订阅消息处理
-  MSG_SM_INTERNAL_SUBSCRIBE          = 124; //
-  MSG_CM_INTERNAL_KEEP_ALIVE         = 101; // 心跳连接
-  MSG_SM_INTERNAL_KEEP_ALIVE         = 102; //
+  MSG_INTERNAL_REGISTER              = 104; // 向srv注册自己
+  MSG_INTERNAL_REGISTER_STATUS       = 105; //
+  MSG_INTERNAL_INTRODUCE             = 106; // 引入其它服务
+  MSG_INTERNAL_INTRODUCE_STATUS      = 107; //
+  MSG_INTERNAL_SUBSCRIBE             = 123; // 订阅消息处理
+  MSG_INTERNAL_SUBSCRIBE_STATUS      = 124; //
+  MSG_INTERNAL_KEEP_ALIVE            = 101; // 心跳连接
+  MSG_INTERNAL_KEEP_ALIVE_STATUS     = 102; //
   MSG_INTERNAL_INSTANCE_STATE_NOTIFY = 103; // 服务状态通知
-
-  // backend协议【1000-100_000)
-  MSG_CM_FORWARD_CLIENT_PACKET = 1001; // 转发client消息
-  MSG_SM_FORWARD_CLIENT_PACKET = 1002; //
-  MSG_CLIENT_LOST_NOTIFY       = 1003; // client下线通知
-  MSG_CM_KICK_CLIENT           = 1011; // 踢掉client
-  MSG_SM_KICK_CLIENT           = 1012; //
-
-  // client协议【100_000，10_000_000】
-  MSG_CLIENT_START_ID          = 100000;
-  MSG_CM_CLIENT_PING           = 100001; // ping
-  MSG_SM_CLIENT_PONG           = 100002; // pong
-  MSG_CLIENT_DISCONNECT_NOTIFY = 100003; // 断线通知（服务器踢下线)
-  MSG_CM_CLIENT_HANDSHAKE      = 100004; // 握手
-  MSG_SM_CLIENT_HANDSHAKE      = 100005; //
-  MSG_CM_LOGIN                 = 100010; // client登录
-  MSG_SM_LOGIN                 = 100011;
-  MSG_CLIENT_END_ID            = 10000000;
+  MSG_INTERNAL_ROUTE_FORWARD         = 201; // 转发
+  MSG_INTERNAL_ROUTE_MULTICAST       = 202; // 多播
 }

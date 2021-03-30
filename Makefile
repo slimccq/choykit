@@ -1,3 +1,6 @@
+# Copyright 2020-present ichenq@outlook.com All rights reserved.
+# Distributed under the terms and conditions of the BSD License.
+# See accompanying files LICENSE.
 
 GO ?= go
 
@@ -17,7 +20,7 @@ all: build
 build: $(ALL_PB_GO_SRC)
 	export GOBIN=$(GOBIN)
 	go clean
-	go install -v $(GO_MODULE)/cmd/choyd
+	go build -v $(GO_MODULE)/pkg/cluster
 
 $(ALL_PB_GO_SRC): $(ALL_PB_SRC)
 	clang-format -i $(ALL_PB_SRC)

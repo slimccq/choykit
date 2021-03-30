@@ -10,9 +10,10 @@ import (
 	"devpkg.work/choykit/pkg/protocol"
 )
 
+// 消息处理
 func (s *Backend) handleMessage(pkt *fatchoy.Packet) error {
 	switch protocol.InternalMsgType(pkt.Command) {
-	case protocol.MSG_SM_INTERNAL_KEEP_ALIVE:
+	case protocol.MSG_INTERNAL_KEEP_ALIVE_STATUS:
 		return s.handlePong(pkt)
 
 	case protocol.MSG_INTERNAL_INSTANCE_STATE_NOTIFY:
