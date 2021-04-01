@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"devpkg.work/choykit/pkg/x/fsutil"
 	"golang.org/x/crypto/ssh/terminal"
@@ -25,7 +26,13 @@ func WriteFileLog(filename, format string, a ...interface{}) error {
 }
 
 func AppFileErrorLog(format string, a ...interface{}) error {
-	_, appname := filepath.Split(os.Args[0])
+	appname := filepath.Base(os.Args[0])
+	if i := strings.LastIndex(appname, "."); i > 0 {
+		appname = appname[:i]
+	}
+	if i := strings.LastIndex(appname, "_"); i > 0 {
+		appname = appname[i+1:]
+	}
 	var filename = fmt.Sprintf("%s_error.log", appname)
 	return WriteFileLog(filename, format, a...)
 }

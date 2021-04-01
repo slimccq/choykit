@@ -176,7 +176,7 @@ func ParseSepKeyValues(text string, sep1, sep2 string) map[string]string {
 }
 
 // 解析字符串的值到value
-func ParseStringToValue(s string, v reflect.Value) {
+func ParseStringToValue(s string, v reflect.Value) bool {
 	switch v.Kind() {
 	case reflect.Int8:
 		v.SetInt(int64(ParseI8(s)))
@@ -210,8 +210,9 @@ func ParseStringToValue(s string, v reflect.Value) {
 		v.SetString(s)
 
 	default:
-		log.Panicf("ParseStringToValue: cannot parse [%s] to type %d ", s, v.Kind())
+		return false
 	}
+	return true
 }
 
 // 解析字符串为数值、布尔

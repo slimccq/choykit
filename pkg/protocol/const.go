@@ -7,7 +7,7 @@ package protocol
 const (
 	InstanceAuto = 0          // 自动分配实例
 	InstanceAll  = 0xFF       // 选取所有实例
-	DistrictAll  = 0x0FFF     // 所有区服
+
 	SessionAll   = 0xFFFFFFFF // 广播给所有session
 	ServiceAll   = 0xFF       // 所有服务
 )
@@ -30,9 +30,4 @@ const (
 	ErrServiceBusy           = 206 // 服务正忙
 	ErrDBException           = 207 // 数据库异常
 	ErrSessionNotFound       = 208 // 未找到会话
-)
-
-// 服务类型
-const (
-	SERVICE_GATEWAY = 0x01	// 网关服务
 )

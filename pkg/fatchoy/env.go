@@ -87,7 +87,7 @@ func NewEnviron() *Environ {
 // 加载环境变量
 func LoadEnviron() *Environ {
 	env := NewEnviron()
-	rv := reflect.ValueOf(env).Elem()
+	rv := reflect.ValueOf(&env.Environ).Elem()
 	rType := rv.Type()
 	for i := 0; i < rv.NumField(); i++ {
 		var name = strutil.ToSnakeCase(rType.Field(i).Name) // 'APP_ID' ==> 'AppId'
@@ -96,12 +96,14 @@ func LoadEnviron() *Environ {
 		if value == "" {
 			continue // 值为空的时候不覆盖
 		}
-		strutil.ParseStringToValue(value, rv.Field(i))
+		if !strutil.ParseStringToValue(value, rv.Field(i)) {
+			env.Add(envKey, value)
+		}
 	}
 	// 加载网络接口地址
 	for _, iftext := range strings.Split(dotenv.Get(NET_INTERFACES), ",") {
-		eth := ParseNetInterface(iftext)
-		env.NetInterfaces = append(env.NetInterfaces, eth)
+		addr := ParseNetInterface(iftext)
+		env.NetInterfaces = append(env.NetInterfaces, addr)
 	}
 	return env
 }
@@ -124,7 +126,7 @@ func (i NetInterface) AdvertiseInterface() string {
 // 解析地址格式，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
 func ParseNetInterface(text string) *protocol.InterfaceAddr {
 	addr := &protocol.InterfaceAddr{}
-	i := strings.Index(text, "@")
+	i := strings.Index(text, "/")
 	if i > 0 {
 		addr.AdvertiseAddr = text[:i]
 		text = text[i+1:]

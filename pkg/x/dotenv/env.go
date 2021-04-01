@@ -13,6 +13,10 @@ import (
 // 环境变量
 type Env map[string]string
 
+func (e Env) Add(key, value string) {
+	e[key] = value
+}
+
 func (e Env) Get(key string) string {
 	val, found := e[key]
 	if !found {
