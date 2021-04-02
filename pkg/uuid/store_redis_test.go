@@ -14,54 +14,65 @@ import (
 
 var (
 	redisAddr = "localhost:6379"
-	redisKey  = "uuid:counter"
-	rkeys     = make(map[int64]bool)
-	rguard    sync.Mutex
 )
 
-func TestRedisStoreExample(t *testing.T) {
-	var store = NewRedisStore(redisAddr, redisKey)
+func createRedisStore(key string, t *testing.T) IDGenerator {
+	var store = NewRedisStore(redisAddr, key)
 	if err := store.Init(); err != nil {
 		t.Fatalf("%v", err)
 	}
+	return store
+}
+
+func TestRedisStoreExample(t *testing.T) {
+	var store = NewRedisStore(redisAddr, "uuid/cnt1")
+	if err := store.Init(); err != nil {
+		t.Fatalf("%v", err)
+	}
+	defer store.Close()
+	var (
+		count = 100000
+		ids   []int64
+		rkeys = make(map[int64]bool)
+	)
 	var start = time.Now()
-	var count = 10000
-	var ids []int64
 	for i := 0; i < count; i++ {
 		id := store.MustNext()
+		if _, found := rkeys[id]; found {
+			t.Fatalf("duplicate id %d", id)
+		}
+		rkeys[id] = true
 		ids = append(ids, id)
 	}
 	var elapsed = time.Now().Sub(start).Seconds()
-	t.Logf("QPS %.2f", float64(count)/elapsed)
-	// Output: QPS 9393.92
+	t.Logf("QPS %.2f/s", float64(count)/elapsed)
+	// Output:
+	//  QPS 30526.92/s
 }
 
-// N个并发worker，测试生成id的一致性
-func TestRedisStoreConcurrent(t *testing.T) {
-	var wg sync.WaitGroup
-	for i := 0; i < 20; i++ {
+// N个并发worker，每个worker单独连接, 测试生成id的一致性
+func TestRedisStoreDistributed(t *testing.T) {
+	var (
+		wg      sync.WaitGroup
+		guard   sync.Mutex
+		gcnt    = 20
+		eachMax = 100000
+		m       = make(map[int64]int, 10000)
+	)
+	var start = time.Now()
+	for i := 0; i <= gcnt; i++ {
+		ctx := newWorkerContext(&wg, &guard, m, eachMax)
+		ctx.idGenCreator = func() IDGenerator {
+			return createRedisStore("uuid:cnt3", t)
+		}
 		wg.Add(1)
-		go etcdWorker(t, i, &wg)
+		go runIDWorker(i, ctx, t)
 	}
 	wg.Wait()
-}
-
-func redisWorker(t *testing.T, i int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	var store = NewRedisStore(redisAddr, redisKey)
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
+	var elapsed = time.Now().Sub(start).Seconds()
+	if !t.Failed() {
+		t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
 	}
-	var count = 1000
-	for i := 0; i < count; i++ {
-		id := store.MustNext()
-		eguard.Lock()
-		if _, found := ekeys[id]; found {
-			eguard.Unlock()
-			t.Fatalf("key %d exist", id)
-			return
-		}
-		ekeys[id] = true
-		eguard.Unlock()
-	}
+	// Output:
+	//  QPS 75249.02/s
 }

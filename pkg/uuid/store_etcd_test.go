@@ -12,54 +12,63 @@ import (
 
 var (
 	etcdAddr = "127.0.0.1:2379"
-	etcdKey  = "/uuid/ctr"
-	ekeys    = make(map[int64]bool)
-	eguard   sync.Mutex
 )
 
 func TestEtcdStoreExample(t *testing.T) {
-	var store = NewEtcdStore(etcdAddr, etcdKey)
+	var store = NewEtcdStore(etcdAddr, "/uuid/ctr001")
 	if err := store.Init(); err != nil {
 		t.Fatalf("%v", err)
 	}
+	var (
+		count = 10000
+		ids   []int64
+		m     = make(map[int64]bool)
+	)
 	var start = time.Now()
-	var count = 100
-	var ids []int64
 	for i := 0; i < count; i++ {
 		id := store.MustNext()
+		if _, found := m[id]; found {
+			t.Fatalf("duplicate id %d", id)
+		}
 		ids = append(ids, id)
 	}
 	var elapsed = time.Now().Sub(start).Seconds()
-	t.Logf("QPS %.2f", float64(count)/elapsed)
-	// Output: QPS 1147.06
+	t.Logf("QPS %.2f/s", float64(count)/elapsed)
+	// Output:
+	//    QPS 2619.06/s
 }
 
-// N个并发worker，测试生成id的一致性
-func TestEtcdStoreConcurrent(t *testing.T) {
-	var wg sync.WaitGroup
-	for i := 0; i < 20; i++ {
-		wg.Add(1)
-		go etcdWorker(t, i, &wg)
-	}
-	wg.Wait()
-}
-
-func etcdWorker(t *testing.T, i int, wg *sync.WaitGroup) {
-	defer wg.Done()
-	var store = NewEtcdStore(etcdAddr, etcdKey)
+func createEtcdStore(key string, t *testing.T) IDGenerator {
+	var store = NewEtcdStore(etcdAddr, key)
 	if err := store.Init(); err != nil {
 		t.Fatalf("%v", err)
 	}
-	var count = 1000
-	for i := 0; i < count; i++ {
-		id := store.MustNext()
-		eguard.Lock()
-		if _, found := ekeys[id]; found {
-			eguard.Unlock()
-			t.Fatalf("key %d exist", id)
-			return
+	return store
+}
+
+// N个并发worker，每个worker单独连接, 测试生成id的一致性
+func TestEtcdStoreDistributed(t *testing.T) {
+	var (
+		wg      sync.WaitGroup
+		guard   sync.Mutex
+		gcnt    = 1
+		eachMax = 1000
+		m       = make(map[int64]int, 10000)
+	)
+	var start = time.Now()
+	for i := 1; i <= gcnt; i++ {
+		ctx := newWorkerContext(&wg, &guard, m, eachMax)
+		ctx.idGenCreator = func() IDGenerator {
+			return createEtcdStore("uuid:ctr003", t)
 		}
-		ekeys[id] = true
-		eguard.Unlock()
+		wg.Add(1)
+		go runIDWorker(i, ctx, t)
 	}
+	wg.Wait()
+	var elapsed = time.Now().Sub(start).Seconds()
+	if !t.Failed() {
+		t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
+	}
+	// Output:
+	//  QPS 2552.59/s
 }

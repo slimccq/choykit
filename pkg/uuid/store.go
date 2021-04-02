@@ -9,5 +9,5 @@ type Storage interface {
 	Init() error
 	Next() (int64, error)
 	MustNext() int64
-	Close()
+	Close() error
 }
