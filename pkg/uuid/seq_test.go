@@ -66,6 +66,9 @@ func TestSeqIDEtcdConcurrent(t *testing.T) {
 		go runIDWorker(i, ctx, t)
 	}
 	wg.Wait()
+	if n := len(m); n != gcnt*eachMax {
+		t.Fatalf("duplicate id found, %d != %d", n, gcnt*eachMax)
+	}
 	var elapsed = time.Now().Sub(start).Seconds()
 	if !t.Failed() {
 		t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
@@ -94,6 +97,9 @@ func TestSeqIDEtcdDistributed(t *testing.T) {
 		go runIDWorker(i, ctx, t)
 	}
 	wg.Wait()
+	if n := len(m); n != gcnt*eachMax {
+		t.Fatalf("duplicate id found, %d != %d", n, gcnt*eachMax)
+	}
 	var elapsed = time.Now().Sub(start).Seconds()
 	if !t.Failed() {
 		t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
@@ -158,6 +164,9 @@ func TestSeqIDRedisConcurrent(t *testing.T) {
 		go runIDWorker(i, ctx, t)
 	}
 	wg.Wait()
+	if n := len(m); n != gcnt*eachMax {
+		t.Fatalf("duplicate id found, %d != %d", n, gcnt*eachMax)
+	}
 	var elapsed = time.Now().Sub(start).Seconds()
 	if !t.Failed() {
 		t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
@@ -186,6 +195,9 @@ func TestSeqIDRedisDistributed(t *testing.T) {
 		go runIDWorker(i, ctx, t)
 	}
 	wg.Wait()
+	if n := len(m); n != gcnt*eachMax {
+		t.Fatalf("duplicate id found, %d != %d", n, gcnt*eachMax)
+	}
 	var elapsed = time.Now().Sub(start).Seconds()
 	t.Logf("QPS %.2f/s", float64(gcnt*eachMax)/elapsed)
 	// Output:
