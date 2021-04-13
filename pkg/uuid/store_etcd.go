@@ -7,9 +7,7 @@ package uuid
 import (
 	"context"
 	"errors"
-	"log"
 	"strconv"
-	"strings"
 	"time"
 
 	"go.etcd.io/etcd/clientv3"
@@ -21,39 +19,18 @@ var (
 
 // 使用etcd的key的版本号自增实现
 type EtcdStore struct {
-	addrList []string // etcd地址
-	key      string   //
-	cli      *clientv3.Client
+	key string //
+	cli *clientv3.Client
 }
 
-func NewEtcdStore(addr, key string) Storage {
+func NewEtcdStore(cli *clientv3.Client, key string) Storage {
 	return &EtcdStore{
-		addrList: strings.Split(addr, ","),
-		key:      key,
+		key: key,
+		cli: cli,
 	}
-}
-
-func (s *EtcdStore) Init() error {
-	return s.createClient()
 }
 
 func (s *EtcdStore) Close() error {
-	if s.cli != nil {
-		s.cli.Close()
-		s.cli = nil
-	}
-	return nil
-}
-
-func (s *EtcdStore) createClient() error {
-	client, err := clientv3.New(clientv3.Config{
-		Endpoints:   s.addrList,
-		DialTimeout: time.Second * TimeoutSec,
-	})
-	if err != nil {
-		return err
-	}
-	s.cli = client
 	return nil
 }
 
@@ -68,7 +45,7 @@ func (s *EtcdStore) putKey() (*clientv3.PutResponse, error) {
 	return resp, nil
 }
 
-func (s *EtcdStore) Next() (int64, error) {
+func (s *EtcdStore) Incr() (int64, error) {
 	resp, err := s.putKey()
 	if err != nil {
 		return 0, err
@@ -78,13 +55,4 @@ func (s *EtcdStore) Next() (int64, error) {
 	}
 	rev := resp.PrevKv.Version
 	return rev + 1, nil
-}
-
-func (s *EtcdStore) MustNext() int64 {
-	if counter, err := s.Next(); err != nil {
-		log.Panicf("EtcdStore.Next: %v", err)
-		return 0
-	} else {
-		return counter
-	}
 }

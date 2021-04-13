@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/gomodule/redigo/redis"
-	"github.com/pkg/errors"
 )
 
 const (
@@ -26,17 +25,14 @@ type RedisStore struct {
 }
 
 func NewRedisStore(addr, key string) Storage {
-	return &RedisStore{
+	store := &RedisStore{
 		addr: addr,
 		key:  key,
 	}
-}
-
-func (s *RedisStore) Init() error {
-	if err := s.createConn(TimeoutSec); err != nil {
-		return errors.WithMessage(err, "create redis connection")
+	if err := store.createConn(TimeoutSec); err != nil {
+		log.Panicf("%v", err)
 	}
-	return nil
+	return store
 }
 
 func (s *RedisStore) Close() error {
@@ -68,7 +64,7 @@ func (s *RedisStore) createConn(timeout int32) error {
 	return nil
 }
 
-func (s *RedisStore) Next() (int64, error) {
+func (s *RedisStore) Incr() (int64, error) {
 	counter, err := s.doIncr(MaxRetry)
 	if err != nil {
 		return 0, err
@@ -100,13 +96,4 @@ func (s *RedisStore) tryReconnect(err *net.OpError) error {
 		return nil
 	}
 	return err
-}
-
-func (s *RedisStore) MustNext() int64 {
-	if counter, err := s.Next(); err != nil {
-		log.Panicf("RedisStore.Next: %v", err)
-		return 0
-	} else {
-		return counter
-	}
 }

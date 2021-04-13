@@ -11,10 +11,8 @@ import (
 )
 
 func TestSeqIDEtcdSimple(t *testing.T) {
-	var store = NewEtcdStore(etcdAddr, "/uuid/ctr101")
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
+	cli := createEtcdClient()
+	var store = NewEtcdStore(cli, "/uuid/ctr101")
 	var seq = NewSequenceID(store, 2000)
 	if err := seq.Init(); err != nil {
 		t.Fatalf("Init: %v", err)
@@ -36,10 +34,8 @@ func TestSeqIDEtcdSimple(t *testing.T) {
 }
 
 func createEtcdIDGen(key string, t *testing.T) IDGenerator {
-	var store = NewEtcdStore(etcdAddr, key)
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
+	cli := createEtcdClient()
+	var store = NewEtcdStore(cli, key)
 	var seq = NewSequenceID(store, 2000)
 	if err := seq.Init(); err != nil {
 		t.Fatalf("Init: %v", err)
@@ -110,9 +106,6 @@ func TestSeqIDEtcdDistributed(t *testing.T) {
 
 func TestSeqIDRedis(t *testing.T) {
 	var store = NewRedisStore(redisAddr, "uuid:ctr101")
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
 	var seq = NewSequenceID(store, 2000)
 	if err := seq.Init(); err != nil {
 		t.Fatalf("Init: %v", err)
@@ -135,9 +128,6 @@ func TestSeqIDRedis(t *testing.T) {
 
 func createRedisIDGen(key string, t *testing.T) IDGenerator {
 	var store = NewRedisStore(redisAddr, key)
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
 	var seq = NewSequenceID(store, 2000)
 	if err := seq.Init(); err != nil {
 		t.Fatalf("Init: %v", err)

@@ -22,7 +22,7 @@ type SequenceID struct {
 	guard   sync.Mutex //
 	store   Storage    // 存储组件
 	step    int64      // 号段区间
-	counter int64      //  当前号段
+	counter int64      // 当前号段
 	lastID  int64      // 上次生成的ID
 }
 
@@ -44,7 +44,7 @@ func (s *SequenceID) Init() error {
 }
 
 func (s *SequenceID) reload() error {
-	counter, err := s.store.Next()
+	counter, err := s.store.Incr()
 	if err != nil {
 		return err
 	}

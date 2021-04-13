@@ -5,6 +5,8 @@
 package uuid
 
 import (
+	"go.etcd.io/etcd/clientv3"
+	"log"
 	"sync"
 	"testing"
 	"time"
@@ -14,11 +16,21 @@ var (
 	etcdAddr = "127.0.0.1:2379"
 )
 
-func TestEtcdStoreExample(t *testing.T) {
-	var store = NewEtcdStore(etcdAddr, "/uuid/ctr001")
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
+func createEtcdClient() *clientv3.Client {
+	client, err := clientv3.New(clientv3.Config{
+		Endpoints:   []string{etcdAddr},
+		DialTimeout: time.Second * TimeoutSec,
+	})
+	if err != nil {
+		log.Panicf("cannot connect etcd: %v", err)
 	}
+	return client
+}
+
+func TestEtcdStoreExample(t *testing.T) {
+	cli := createEtcdClient()
+	var store = NewEtcdStore(cli, "/uuid/ctr001")
+
 	var (
 		count = 10000
 		ids   []int64
@@ -26,7 +38,10 @@ func TestEtcdStoreExample(t *testing.T) {
 	)
 	var start = time.Now()
 	for i := 0; i < count; i++ {
-		id := store.MustNext()
+		id, err := store.Incr()
+		if err != nil {
+			t.Fatalf("cannot incr %v", err)
+		}
 		if _, found := m[id]; found {
 			t.Fatalf("duplicate id %d", id)
 		}
@@ -39,10 +54,8 @@ func TestEtcdStoreExample(t *testing.T) {
 }
 
 func createEtcdStore(key string, t *testing.T) IDGenerator {
-	var store = NewEtcdStore(etcdAddr, key)
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
+	cli := createEtcdClient()
+	var store = NewEtcdStore(cli, key)
 	return store
 }
 

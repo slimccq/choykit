@@ -18,17 +18,11 @@ var (
 
 func createRedisStore(key string, t *testing.T) IDGenerator {
 	var store = NewRedisStore(redisAddr, key)
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
 	return store
 }
 
 func TestRedisStoreExample(t *testing.T) {
 	var store = NewRedisStore(redisAddr, "uuid/cnt1")
-	if err := store.Init(); err != nil {
-		t.Fatalf("%v", err)
-	}
 	defer store.Close()
 	var (
 		count = 100000
@@ -37,7 +31,10 @@ func TestRedisStoreExample(t *testing.T) {
 	)
 	var start = time.Now()
 	for i := 0; i < count; i++ {
-		id := store.MustNext()
+		id, err := store.Incr()
+		if err != nil {
+			t.Fatalf("incr failure: %v", err)
+		}
 		if _, found := rkeys[id]; found {
 			t.Fatalf("duplicate id %d", id)
 		}
