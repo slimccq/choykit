@@ -49,7 +49,7 @@ func TestTimerHeap(t *testing.T) {
 	}
 
 	var now = time.Now()
-	for i := int32(1); i <= 100; i++ {
+	for i := int64(1); i <= 100; i++ {
 		var delay = rand.Int() % 1000
 		var expire = now.Add(time.Millisecond * time.Duration(delay))
 		item := &TimerNode{
@@ -63,7 +63,7 @@ func TestTimerHeap(t *testing.T) {
 	heap.Init(&pq)
 	verifyHeap(t, pq, 0)
 
-	for i := int32(101); i <= 200; i++ {
+	for i := int64(101); i <= 200; i++ {
 		var delay = rand.Int() % 1000
 		var expire = now.Add(time.Millisecond + time.Duration(delay))
 		item := &TimerNode{

@@ -123,7 +123,7 @@ func (i NetInterface) AdvertiseInterface() string {
 	return fmt.Sprintf("%s:%d", i.AdvertiseAddr, i.Port)
 }
 
-// 解析地址格式，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
+// 解析地址格式，对外地址/bind地址:端口，如example.com/0.0.0.0:9527
 func ParseNetInterface(text string) *protocol.InterfaceAddr {
 	addr := &protocol.InterfaceAddr{}
 	i := strings.Index(text, "/")

@@ -10,21 +10,11 @@ import (
 
 // 分布式UUID
 var (
-	seqIDGen      *SequenceID // 发号器算法
-	uniqueGen     *SnowFlake  // 雪花算法
-	useRedisStore = false
+	seqIDGen  *SequenceID // 发号器算法
+	uniqueGen *SnowFlake  // 雪花算法
 )
 
-func Init(workerId uint16, addr, key string) {
-	var store Storage
-	if useRedisStore {
-		store = NewRedisStore(addr, key)
-	} else {
-		store = NewEtcdStore(addr, key)
-	}
-	if err := store.Init(); err != nil {
-		log.Fatalf("Storage.Init: %v", err)
-	}
+func Init(workerId uint16, store Storage) {
 	var seq = NewSequenceID(store, DefaultSeqStep)
 	if err := seq.Init(); err != nil {
 		log.Fatalf("SequenceID.Init: %v", err)

@@ -9,12 +9,12 @@ import (
 )
 
 type TimerNode struct {
+	id       int64  // 定时器ID
 	ExpireTs int64  // 超时时间
 	R        Runner // 超时后执行的runner
 	Index    int32  // 数组索引
-	id       int32  // 定时器ID
 	interval int32  // 间隔（毫秒）
-	repeat   int16  // 重复执行次数，负数表示一直执行
+	repeat   int32  // 重复执行次数，负数表示一直执行
 }
 
 type TimerHeap []*TimerNode

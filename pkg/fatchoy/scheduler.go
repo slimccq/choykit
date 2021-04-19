@@ -14,8 +14,8 @@ import (
 )
 
 const (
-	TimerPrecision    = 10  // 精度为10ms
-	TimerChanCapacity = 128 //
+	TimerPrecision    = 10   // 精度为10ms
+	TimerChanCapacity = 1000 //
 )
 
 type Scheduler struct {
@@ -24,17 +24,17 @@ type Scheduler struct {
 	ticker *time.Ticker         // 系统定时器ticker
 	guard  sync.Mutex           // heap guard
 	timers TimerHeap            // 定时器heap
-	nextId int32                // time id生成
-	refs   map[int32]*TimerNode // 对timer进行O(1)查找
+	nextId int64                // time id生成
+	refs   map[int64]*TimerNode // 对timer进行O(1)查找
 	C      chan *TimerNode      // 到期的定时器
 }
 
 func (s *Scheduler) Init() error {
-	s.nextId = 1000 // magic number
+	s.nextId = 1
 	s.done = make(chan struct{})
 	s.ticker = time.NewTicker(TimerPrecision * time.Millisecond)
-	s.timers = make(TimerHeap, 0, 16)
-	s.refs = make(map[int32]*TimerNode, 16)
+	s.timers = make(TimerHeap, 0, 64)
+	s.refs = make(map[int64]*TimerNode, 64)
 	s.C = make(chan *TimerNode, TimerChanCapacity)
 	return nil
 }
@@ -66,10 +66,15 @@ func (s *Scheduler) serve() {
 		case t := <-s.ticker.C:
 			s.guard.Lock()
 			var now = t.UnixNano() / 1e6 // ns to ms
+			var maxId = s.nextId
 			for s.timers.Len() > 0 {
 				var node = s.timers.Peek()
 				if now < node.ExpireTs {
 					break // no timer expired
+				}
+				// make sure we don't process timer created by timer events
+				if node.id > maxId {
+					continue
 				}
 				if node.repeat < 0 || node.repeat > 1 {
 					if node.repeat > 1 { // is infinite
@@ -101,24 +106,14 @@ func (s *Scheduler) Go() {
 	go s.serve()
 }
 
-func (s *Scheduler) counter() int32 {
-	for i := math.MaxUint16; i > 0; i-- {
-		if s.nextId < 0 {
-			s.nextId = 0
-		}
-		s.nextId++
-		if _, found := s.refs[s.nextId]; found {
-			continue
-		}
-		break
-	}
-	return s.nextId
-}
-
-func (s *Scheduler) schedule(interval int32, repeat int16, r Runner) int32 {
+func (s *Scheduler) schedule(interval, repeat int32, r Runner) int64 {
 	s.guard.Lock()
 	var now = currentMs()
-	var id = s.counter()
+
+	// 假设ID一直自增不会溢出
+	var id = s.nextId
+	s.nextId++
+
 	var node = &TimerNode{
 		ExpireTs: now + int64(interval),
 		interval: interval,
@@ -133,7 +128,7 @@ func (s *Scheduler) schedule(interval int32, repeat int16, r Runner) int32 {
 }
 
 // 创建一个定时器，在`interval`毫秒后运行`r`
-func (s *Scheduler) RunAfter(interval int32, r Runner) int32 {
+func (s *Scheduler) RunAfter(interval int32, r Runner) int64 {
 	if interval < 0 {
 		interval = 0
 	}
@@ -145,7 +140,7 @@ func (s *Scheduler) RunAfter(interval int32, r Runner) int32 {
 }
 
 // 创建一个定时器，每隔`interval`毫秒运行一次`r`
-func (s *Scheduler) RunEvery(interval int32, r Runner) int32 {
+func (s *Scheduler) RunEvery(interval int32, r Runner) int64 {
 	if interval <= 0 {
 		interval = 100
 	}
@@ -156,7 +151,7 @@ func (s *Scheduler) RunEvery(interval int32, r Runner) int32 {
 	return s.schedule(interval, -1, r)
 }
 
-func (s *Scheduler) Cancel(id int32) bool {
+func (s *Scheduler) Cancel(id int64) bool {
 	s.guard.Lock()
 	defer s.guard.Unlock()
 	if timer, found := s.refs[id]; found {
