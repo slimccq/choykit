@@ -18,7 +18,6 @@ type RpcHandler func(*RpcContext) error
 
 // RPC上下文
 type RpcContext struct {
-	node     fatchoy.NodeID   // 目标节点
 	command  int32            // RPC请求消息ID
 	reply    int32            // RPC相应消息ID
 	errno    uint32           // 错误码
@@ -28,9 +27,8 @@ type RpcContext struct {
 	done     chan *RpcContext // Strobes when RPC is completed
 }
 
-func NewRpcContext(node fatchoy.NodeID, request, reply int32, body interface{}, handler RpcHandler) *RpcContext {
+func NewRpcContext(request, reply int32, body interface{}, handler RpcHandler) *RpcContext {
 	return &RpcContext{
-		node:    node,
 		command: request,
 		reply:   reply,
 		body:    body,
@@ -40,10 +38,6 @@ func NewRpcContext(node fatchoy.NodeID, request, reply int32, body interface{}, 
 
 func (r *RpcContext) Body() interface{} {
 	return r.body
-}
-
-func (r *RpcContext) NodeID() fatchoy.NodeID {
-	return r.node
 }
 
 func (r *RpcContext) Errno() uint32 {
@@ -92,9 +86,9 @@ type RpcFactory struct {
 	sync.Mutex
 	done     chan struct{}           //
 	wg       sync.WaitGroup          //
-	pending  map[uint16]*RpcContext  // 待响应的RPC
+	pending  map[uint32]*RpcContext  // 待响应的RPC
 	registry map[int32]bool          // 注册的响应消息
-	seq      uint16                  // 序列号生成
+	seq      uint32                  // 序列号生成
 	ttl      time.Duration           // 默认超时
 	handler  fatchoy.PacketHandler   // RPC回调
 	ctx      *fatchoy.ServiceContext // Context对象
@@ -102,7 +96,7 @@ type RpcFactory struct {
 
 func (r *RpcFactory) Init(ctx *fatchoy.ServiceContext) error {
 	r.done = make(chan struct{})
-	r.pending = make(map[uint16]*RpcContext)
+	r.pending = make(map[uint32]*RpcContext)
 	r.registry = make(map[int32]bool)
 	r.ttl = time.Duration(ctx.Env().GetInt(fatchoy.NET_RPC_TTL)) * time.Second
 	r.ctx = ctx
@@ -123,25 +117,25 @@ func (r *RpcFactory) Shutdown() {
 }
 
 // 异步RPC
-func (r *RpcFactory) CallAsync(node fatchoy.NodeID, request, reply int32, body proto.Message, cb RpcHandler) *RpcContext {
+func (r *RpcFactory) CallAsync(request, reply int32, body proto.Message, cb RpcHandler) *RpcContext {
 	if request == reply {
 		log.Panicf("request[%d] should not equal to reply", request)
 	}
 	r.Lock()
 	defer r.Unlock()
-	var rpc = NewRpcContext(node, request, reply, body, cb)
+	var rpc = NewRpcContext(request, reply, body, cb)
 	r.makeCall(rpc)
 	return rpc
 }
 
 // 同步RPC
-func (r *RpcFactory) Call(node fatchoy.NodeID, request, reply int32, body proto.Message) *RpcContext {
+func (r *RpcFactory) Call(request, reply int32, body proto.Message) *RpcContext {
 	if request == reply {
 		log.Panicf("request[%d] should not equal to reply", request)
 	}
 	r.Lock()
 	defer r.Unlock()
-	var rpc = NewRpcContext(node, request, reply, body, nil)
+	var rpc = NewRpcContext(request, reply, body, nil)
 	rpc.done = make(chan *RpcContext, 1)
 	rpc = <-r.makeCall(rpc).done
 	return rpc
@@ -151,14 +145,14 @@ func (r *RpcFactory) makeCall(ctx *RpcContext) *RpcContext {
 	r.registry[ctx.reply] = true
 	var seq = r.counter()
 	ctx.deadline = fatchoy.Now().Add(r.ttl)
-	var pkt = fatchoy.NewPacket(ctx.node, uint32(ctx.command), fatchoy.PacketFlagRpc, seq, ctx.body)
+	var pkt = fatchoy.NewPacket(uint32(ctx.command), seq, fatchoy.PacketFlagRpc, ctx.body)
 	r.ctx.SendMessage(pkt)
 	r.pending[seq] = ctx
 	return ctx
 }
 
 // 生成RPC序列号
-func (r *RpcFactory) counter() uint16 {
+func (r *RpcFactory) counter() uint32 {
 	var seq = r.seq
 	r.seq++ // we assume this id won't exhaust
 	return seq

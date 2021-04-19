@@ -16,18 +16,18 @@ import (
 )
 
 const (
-	ServerCodecVersion    = 1  // 协议版本
-	ServerCodecHeaderSize = 20 // 消息头大小
+	ServerCodecVersion    = 2  // 协议版本
+	ServerCodecHeaderSize = 18 // 消息头大小
 )
 
 var MaxAllowedServerCodecPayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
 
 // wire format of codec header
-//       ---------------------------------------
-// field | len | flag | seq | cmd | node | crc |
-//       ---------------------------------------
-// bytes |  4  |  2   |  2  |  4  |   4  |  4  |
-//       ---------------------------------------
+//       --------------------------------
+// field | len | flag | seq | cmd | crc |
+//       --------------------------------
+// bytes |  4  |  2   |  4  |  4  |  4  |
+//       --------------------------------
 
 // 编码器
 type serverProtocolCodec struct {
@@ -57,9 +57,8 @@ func (c *serverProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
 	var headbuf [ServerCodecHeaderSize]byte
 	binary.LittleEndian.PutUint32(headbuf[0:], n)
 	binary.LittleEndian.PutUint16(headbuf[4:], pkt.Flag)
-	binary.LittleEndian.PutUint16(headbuf[6:], pkt.Seq)
-	binary.LittleEndian.PutUint32(headbuf[8:], pkt.Command)
-	binary.LittleEndian.PutUint32(headbuf[12:], uint32(pkt.Node))
+	binary.LittleEndian.PutUint32(headbuf[6:], pkt.Seq)
+	binary.LittleEndian.PutUint32(headbuf[10:], pkt.Command)
 	hash.Write(headbuf[:ServerCodecHeaderSize-4])
 	if n > 0 {
 		hash.Write(payload)
@@ -81,10 +80,9 @@ func (c *serverProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, 
 
 	bodyLen := int(binary.LittleEndian.Uint32(headbuf[0:]))
 	pkt.Flag = binary.LittleEndian.Uint16(headbuf[4:])
-	pkt.Seq = binary.LittleEndian.Uint16(headbuf[6:])
-	pkt.Command = binary.LittleEndian.Uint32(headbuf[8:])
-	pkt.Node = fatchoy.NodeID(binary.LittleEndian.Uint32(headbuf[12:]))
-	checksum := binary.LittleEndian.Uint32(headbuf[16:])
+	pkt.Seq = binary.LittleEndian.Uint32(headbuf[6:])
+	pkt.Command = binary.LittleEndian.Uint32(headbuf[10:])
+	checksum := binary.LittleEndian.Uint32(headbuf[14:])
 
 	if bodyLen > MaxAllowedServerCodecPayloadSize {
 		return 0, errors.Errorf("packet %d payload size overflow %d/%d",

@@ -17,7 +17,6 @@ import (
 func newTestV2Packet(bodyLen int) *fatchoy.Packet {
 	var packet = fatchoy.MakePacket()
 	packet.Flag = 0x02
-	packet.Node = 0x0501
 	packet.Command = 1234
 	packet.Seq = 2012
 	if bodyLen > 0 {
@@ -42,7 +41,7 @@ func testServerCodec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgSent *f
 
 func TestV2CodecSimpleEncode(t *testing.T) {
 	var cdec = NewServerProtocolCodec()
-	var sizeList = []int{0, 404, 1012, 2014, 4018, 8012, 40487, 1024 * 31, MaxAllowedV2PayloadSize - 100} //
+	var sizeList = []int{0, 404, 1012, 2014, 4018, 8012, 40487, 1024 * 31, MaxAllowedServerCodecPayloadSize - 100} //
 	for _, n := range sizeList {
 		var pkt = newTestV2Packet(n)
 		testServerCodec(t, cdec, n, pkt)

@@ -46,9 +46,9 @@ message SubscribeAck {}
 
 // 转发消息
 message ForwardMsg {
-  uint32 node    = 1; //
-  uint32 msg_id  = 3; // 转发消息ID
-  bytes msg_data = 4; // 转发消息内容
+  uint32 node    = 1; // 目标节点
+  uint32 msg_id  = 3; // 消息ID
+  bytes msg_data = 4; // 消息内容
 }
 
 // 组播消息
@@ -56,4 +56,19 @@ message MulticastMsg {
   repeated uint32 nodes = 1; // 指定节点ID
   uint32 msg_id         = 2; // 转发消息ID
   bytes msg_data        = 3; // 转发消息内容
+}
+
+// RPC请求
+message RpcRequest {
+  uint32 id      = 1; // unique request id
+  uint32 msg_id  = 2; // rpc消息ID
+  bytes msg_data = 3; // rpc消息内容
+}
+
+// RPC响应
+message RpcResponse {
+  uint32 id      = 1; // same id as the request it is responding to.
+  uint32 error   = 2; // 错误码
+  uint32 msg_id  = 4; // rpc消息ID
+  bytes msg_data = 5; // rpc消息内容
 }

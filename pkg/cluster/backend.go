@@ -49,7 +49,6 @@ func (s *Backend) Init(ctx *fatchoy.ServiceContext) error {
 	s.dependency = dependency
 
 	s.discovery = NewEtcdDiscovery(env, s)
-	ctx.Router().AddPolicy(fatchoy.NewBasicRoutePolicy(s.endpoints))
 	s.AddMessageHandler(true, s.handleMessage)
 	return nil
 }

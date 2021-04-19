@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	PacketFlagError      = 0x0100
-	PacketFlagRpc        = 0x0400
-	PacketFlagJSONText   = 0x0800
-	PacketFlagCompressed = 0x0001
-	PacketFlagEncrypted  = 0x0002
+	PacketFlagError      = 0x10
+	PacketFlagRpc        = 0x20
+	PacketFlagJSONText   = 0x80
+	PacketFlagCompressed = 0x01
+	PacketFlagEncrypted  = 0x02
 )
 
 type PacketHandler func(*Packet) error
@@ -32,9 +32,8 @@ var (
 // 应用层消息
 type Packet struct {
 	Command  uint32          `json:"cmd"`            // 消息ID
-	Seq      uint16          `json:"seq"`            // 序列号
+	Seq      uint32          `json:"seq"`            // 序列号
 	Flag     uint16          `json:"flg,omitempty"`  // 标记位
-	Node     NodeID          `json:"node,omitempty"` // 目标节点
 	Body     interface{}     `json:"body,omitempty"` // 消息内容，number/string/bytes/pb.Message
 	Endpoint MessageEndpoint `json:"-"`              // 关联的endpoint
 }
@@ -43,9 +42,8 @@ func MakePacket() *Packet {
 	return &Packet{}
 }
 
-func NewPacket(node NodeID, command uint32, flag, seq uint16, body interface{}) *Packet {
+func NewPacket(command, seq uint32, flag uint16, body interface{}) *Packet {
 	var pkt = &Packet{}
-	pkt.Node = node
 	pkt.Command = command
 	pkt.Flag = flag
 	pkt.Seq = seq
@@ -57,14 +55,12 @@ func (m *Packet) Reset() {
 	m.Command = 0
 	m.Seq = 0
 	m.Flag = 0
-	m.Node = 0
 	m.Body = nil
 	m.Endpoint = nil
 }
 
 func (m *Packet) Clone() *Packet {
 	var pkt = &Packet{}
-	pkt.Node = m.Node
 	pkt.Command = m.Command
 	pkt.Flag = m.Flag
 	pkt.Seq = m.Seq
@@ -130,16 +126,20 @@ func (m *Packet) Reply(ack proto.Message) error {
 }
 
 func (m *Packet) ReplyAny(command uint32, data interface{}) error {
-	var pkt = NewPacket(m.Endpoint.NodeID(), command, m.Flag, m.Seq, data)
+	var pkt = NewPacket(command, m.Seq, m.Flag, data)
 	return m.Endpoint.SendPacket(pkt)
 }
 
 // 返回一个错误码消息
 func (m *Packet) Refuse(command int32, errno uint32) error {
-	var pkt = NewPacket(m.Endpoint.NodeID(), uint32(command), m.Flag|PacketFlagError, m.Seq, uint32(errno))
+	var pkt = NewPacket(uint32(command), m.Seq, m.Flag|PacketFlagError, errno)
 	return m.Endpoint.SendPacket(pkt)
 }
 
 func (m Packet) String() string {
-	return fmt.Sprintf("%v c:%d seq:%d 0x%x %T", m.Node, m.Command, m.Seq, m.Flag, m.Body)
+	var nodeID NodeID
+	if m.Endpoint != nil {
+		nodeID = m.Endpoint.NodeID()
+	}
+	return fmt.Sprintf("%v c:%d seq:%d 0x%x %T", nodeID, m.Command, m.Seq, m.Flag, m.Body)
 }

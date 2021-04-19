@@ -16,8 +16,8 @@ import (
 )
 
 const (
-	ClientCodecVersion    = 1  // 协议版本
-	ClientCodecHeaderSize = 14 // 消息头大小
+	ClientCodecVersion    = 2  // 协议版本
+	ClientCodecHeaderSize = 16 // 消息头大小
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 //       --------------------------------
 // field | len | flag | seq | cmd | crc |
 //       --------------------------------
-// bytes |  2  |  2   |  2  |  4  |  4  |
+// bytes |  2  |  2   |  4  |  4  |  4  |
 //       --------------------------------
 
 type clientProtocolCodec struct {
@@ -59,8 +59,8 @@ func (c *clientProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
 	var headbuf [ClientCodecHeaderSize]byte
 	binary.LittleEndian.PutUint16(headbuf[0:], n)
 	binary.LittleEndian.PutUint16(headbuf[2:], pkt.Flag)
-	binary.LittleEndian.PutUint16(headbuf[4:], pkt.Seq)
-	binary.LittleEndian.PutUint32(headbuf[6:], pkt.Command)
+	binary.LittleEndian.PutUint32(headbuf[4:], pkt.Seq)
+	binary.LittleEndian.PutUint32(headbuf[8:], pkt.Command)
 	hash.Write(headbuf[:ClientCodecHeaderSize-4])
 	if n > 0 {
 		hash.Write(payload)
@@ -81,9 +81,9 @@ func (c *clientProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, 
 	}
 	bodyLen := int(binary.LittleEndian.Uint16(headbuf[0:]))
 	pkt.Flag = binary.LittleEndian.Uint16(headbuf[2:])
-	pkt.Seq = binary.LittleEndian.Uint16(headbuf[4:])
-	pkt.Command = binary.LittleEndian.Uint32(headbuf[6:])
-	checksum := binary.LittleEndian.Uint32(headbuf[10:])
+	pkt.Seq = binary.LittleEndian.Uint32(headbuf[4:])
+	pkt.Command = binary.LittleEndian.Uint32(headbuf[8:])
+	checksum := binary.LittleEndian.Uint32(headbuf[12:])
 
 	if bodyLen > MaxAllowedV1RecvBytes {
 		return 0, errors.Errorf("packet %d payload size overflow %d/%d",

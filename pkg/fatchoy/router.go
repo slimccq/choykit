@@ -6,8 +6,6 @@ package fatchoy
 
 import (
 	"sync"
-
-	"devpkg.work/choykit/pkg/protocol"
 )
 
 // 路由策略
@@ -152,15 +150,12 @@ func (r *Router) IsLoopBack(pkt *Packet) bool {
 	if pkt.Endpoint == nil { // endpoint为nil则是本地消息
 		return true
 	}
-	if pkt.Node == r.node {
-		return true
-	}
 	for _, policy := range r.policies {
 		if policy.IsLoopBack(r, pkt) {
 			return true
 		}
 	}
-	return false
+	return true // last choice
 }
 
 func (r *Router) Route(pkt *Packet) error {
@@ -173,64 +168,4 @@ func (r *Router) Route(pkt *Packet) error {
 		}
 	}
 	return ErrDestinationNotReachable
-}
-
-type BasicRoutePolicy struct {
-	endpoints *EndpointMap
-}
-
-func NewBasicRoutePolicy(endpoints *EndpointMap) RoutePolicy {
-	return &BasicRoutePolicy{
-		endpoints: endpoints,
-	}
-}
-
-func (r *BasicRoutePolicy) IsLoopBack(router *Router, pkt *Packet) bool {
-	return pkt.Node == 0
-}
-
-// 路由查询
-func (r *BasicRoutePolicy) Lookup(router *Router, pkt *Packet) Endpoint {
-	var dest = router.GetEntry(pkt.Node)
-	if endpoint := r.endpoints.Get(dest); endpoint != nil {
-		pkt.Node = pkt.Endpoint.NodeID()
-		pkt.Endpoint = endpoint
-		return endpoint
-	}
-	return nil
-}
-
-// 广播
-func (r *BasicRoutePolicy) Multicast(router *Router, pkt *Packet) bool {
-	var dest = pkt.Node
-	switch {
-	case dest.Service() == protocol.ServiceAll: // 广播所有服务，限定区服
-		var from = pkt.Endpoint.NodeID()
-		for _, entry := range router.EntryList() {
-			if dest.Service() == entry.src.Service()  {
-				if endpoint := r.endpoints.Get(entry.dest); endpoint != nil {
-					var copy = pkt.Clone()
-					copy.Node = from
-					pkt.Endpoint = endpoint
-					endpoint.SendPacket(copy)
-				}
-			}
-		}
-		return true
-
-	case dest.Instance() == protocol.InstanceAll: // 广播服务下的所有实例，限定区服
-		var from = pkt.Endpoint.NodeID()
-		for _, entry := range router.EntryList() {
-			if dest.Instance() == entry.dest.Instance() {
-				if endpoint := r.endpoints.Get(entry.dest); endpoint != nil {
-					var copy = pkt.Clone()
-					copy.Node = from
-					pkt.Endpoint = endpoint
-					endpoint.SendPacket(copy)
-				}
-			}
-		}
-		return true
-	}
-	return false
 }
