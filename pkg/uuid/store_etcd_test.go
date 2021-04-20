@@ -53,7 +53,7 @@ func TestEtcdStoreExample(t *testing.T) {
 	//    QPS 2619.06/s
 }
 
-func createEtcdStore(key string, t *testing.T) IDGenerator {
+func createEtcdStore(key string, t *testing.T) Storage {
 	cli := createEtcdClient()
 	var store = NewEtcdStore(cli, key)
 	return store
@@ -72,7 +72,8 @@ func TestEtcdStoreDistributed(t *testing.T) {
 	for i := 1; i <= gcnt; i++ {
 		ctx := newWorkerContext(&wg, &guard, m, eachMax)
 		ctx.idGenCreator = func() IDGenerator {
-			return createEtcdStore("uuid:ctr003", t)
+			store := createEtcdStore("uuid:ctr003", t)
+			return NewStorageGen(store)
 		}
 		wg.Add(1)
 		go runIDWorker(i, ctx, t)

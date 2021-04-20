@@ -101,9 +101,12 @@ func LoadEnviron() *Environ {
 		}
 	}
 	// 加载网络接口地址
-	for _, iftext := range strings.Split(dotenv.Get(NET_INTERFACES), ",") {
-		addr := ParseNetInterface(iftext)
-		env.NetInterfaces = append(env.NetInterfaces, addr)
+	ifaceAddr := dotenv.Get(NET_INTERFACES)
+	if ifaceAddr != "" {
+		for _, iftext := range strings.Split(ifaceAddr, ",") {
+			addr := ParseNetInterface(iftext)
+			env.NetInterfaces = append(env.NetInterfaces, addr)
+		}
 	}
 	return env
 }

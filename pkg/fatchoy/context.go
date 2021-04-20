@@ -28,11 +28,19 @@ type ServiceContext struct {
 }
 
 func NewServiceContext(env *Environ) *ServiceContext {
+	insize := env.GetInt(RUNTIME_CONTEXT_INBOUND_SIZE)
+	if insize <= 0 {
+		insize = 1000
+	}
+	outsize := env.GetInt(RUNTIME_CONTEXT_OUTBOUND_SIZE)
+	if outsize <= 0 {
+		outsize = 1000
+	}
 	return &ServiceContext{
 		env:      env,
 		done:     make(chan struct{}),
-		inbound:  make(chan *Packet, env.GetInt(RUNTIME_CONTEXT_INBOUND_SIZE)),
-		outbound: make(chan *Packet, env.GetInt(RUNTIME_CONTEXT_OUTBOUND_SIZE)),
+		inbound:  make(chan *Packet, insize),
+		outbound: make(chan *Packet, outsize),
 	}
 }
 

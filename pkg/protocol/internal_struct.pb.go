@@ -5,7 +5,6 @@ package protocol
 
 import (
 	fmt "fmt"
-	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/golang/protobuf/proto"
 	io "io"
 	math "math"
@@ -27,8 +26,8 @@ const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 type NodeState int32
 
 const (
-	StateDown NodeState = 0
-	StateUp   NodeState = 1
+	NodeState_StateDown NodeState = 0
+	NodeState_StateUp   NodeState = 1
 )
 
 var NodeState_name = map[int32]string{
@@ -51,22 +50,25 @@ func (NodeState) EnumDescriptor() ([]byte, []int) {
 
 // 通用环境变量
 type Environ struct {
-	AppEnv            string           `protobuf:"bytes,1,opt,name=app_env,json=appEnv,proto3" json:"app_env,omitempty"`
-	AppGameId         string           `protobuf:"bytes,2,opt,name=app_game_id,json=appGameId,proto3" json:"app_game_id,omitempty"`
-	AppChannelId      string           `protobuf:"bytes,3,opt,name=app_channel_id,json=appChannelId,proto3" json:"app_channel_id,omitempty"`
-	AppServerId       string           `protobuf:"bytes,4,opt,name=app_server_id,json=appServerId,proto3" json:"app_server_id,omitempty"`
-	AppServerName     string           `protobuf:"bytes,5,opt,name=app_server_name,json=appServerName,proto3" json:"app_server_name,omitempty"`
-	AppAccessKey      string           `protobuf:"bytes,6,opt,name=app_access_key,json=appAccessKey,proto3" json:"app_access_key,omitempty"`
-	AppLogLevel       string           `protobuf:"bytes,7,opt,name=app_log_level,json=appLogLevel,proto3" json:"app_log_level,omitempty"`
-	AppPprofAddr      string           `protobuf:"bytes,19,opt,name=app_pprof_addr,json=appPprofAddr,proto3" json:"app_pprof_addr,omitempty"`
-	AppWorkingDir     string           `protobuf:"bytes,20,opt,name=app_working_dir,json=appWorkingDir,proto3" json:"app_working_dir,omitempty"`
-	ServiceType       string           `protobuf:"bytes,10,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
-	ServiceIndex      int32            `protobuf:"varint,11,opt,name=service_index,json=serviceIndex,proto3" json:"service_index,omitempty"`
-	ServiceDependency string           `protobuf:"bytes,12,opt,name=service_dependency,json=serviceDependency,proto3" json:"service_dependency,omitempty"`
-	EtcdAddr          string           `protobuf:"bytes,13,opt,name=etcd_addr,json=etcdAddr,proto3" json:"etcd_addr,omitempty"`
-	EtcdKeyspace      string           `protobuf:"bytes,14,opt,name=etcd_keyspace,json=etcdKeyspace,proto3" json:"etcd_keyspace,omitempty"`
-	EtcdLeaseTtl      int32            `protobuf:"varint,15,opt,name=etcd_lease_ttl,json=etcdLeaseTtl,proto3" json:"etcd_lease_ttl,omitempty"`
-	NetInterfaces     []*InterfaceAddr `protobuf:"bytes,22,rep,name=net_interfaces,json=netInterfaces,proto3" json:"net_interfaces,omitempty"`
+	AppEnv               string           `protobuf:"bytes,1,opt,name=app_env,json=appEnv,proto3" json:"app_env,omitempty"`
+	AppGameId            string           `protobuf:"bytes,2,opt,name=app_game_id,json=appGameId,proto3" json:"app_game_id,omitempty"`
+	AppChannelId         string           `protobuf:"bytes,3,opt,name=app_channel_id,json=appChannelId,proto3" json:"app_channel_id,omitempty"`
+	AppServerId          string           `protobuf:"bytes,4,opt,name=app_server_id,json=appServerId,proto3" json:"app_server_id,omitempty"`
+	AppServerName        string           `protobuf:"bytes,5,opt,name=app_server_name,json=appServerName,proto3" json:"app_server_name,omitempty"`
+	AppAccessKey         string           `protobuf:"bytes,6,opt,name=app_access_key,json=appAccessKey,proto3" json:"app_access_key,omitempty"`
+	AppLogLevel          string           `protobuf:"bytes,7,opt,name=app_log_level,json=appLogLevel,proto3" json:"app_log_level,omitempty"`
+	AppPprofAddr         string           `protobuf:"bytes,10,opt,name=app_pprof_addr,json=appPprofAddr,proto3" json:"app_pprof_addr,omitempty"`
+	AppWorkingDir        string           `protobuf:"bytes,11,opt,name=app_working_dir,json=appWorkingDir,proto3" json:"app_working_dir,omitempty"`
+	ServiceType          string           `protobuf:"bytes,12,opt,name=service_type,json=serviceType,proto3" json:"service_type,omitempty"`
+	ServiceIndex         int32            `protobuf:"varint,13,opt,name=service_index,json=serviceIndex,proto3" json:"service_index,omitempty"`
+	ServiceDependency    string           `protobuf:"bytes,14,opt,name=service_dependency,json=serviceDependency,proto3" json:"service_dependency,omitempty"`
+	EtcdAddr             string           `protobuf:"bytes,15,opt,name=etcd_addr,json=etcdAddr,proto3" json:"etcd_addr,omitempty"`
+	EtcdKeyspace         string           `protobuf:"bytes,16,opt,name=etcd_keyspace,json=etcdKeyspace,proto3" json:"etcd_keyspace,omitempty"`
+	EtcdLeaseTtl         int32            `protobuf:"varint,17,opt,name=etcd_lease_ttl,json=etcdLeaseTtl,proto3" json:"etcd_lease_ttl,omitempty"`
+	NetInterfaces        []*InterfaceAddr `protobuf:"bytes,20,rep,name=net_interfaces,json=netInterfaces,proto3" json:"net_interfaces,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}         `json:"-"`
+	XXX_unrecognized     []byte           `json:"-"`
+	XXX_sizecache        int32            `json:"-"`
 }
 
 func (m *Environ) Reset()         { *m = Environ{} }
@@ -216,9 +218,12 @@ func (m *Environ) GetNetInterfaces() []*InterfaceAddr {
 
 // 地址接口，对外地址@bind地址:端口，如example.com@0.0.0.0:9527
 type InterfaceAddr struct {
-	BindAddr      string `protobuf:"bytes,1,opt,name=bind_addr,json=bindAddr,proto3" json:"bind_addr,omitempty"`
-	AdvertiseAddr string `protobuf:"bytes,2,opt,name=advertise_addr,json=advertiseAddr,proto3" json:"advertise_addr,omitempty"`
-	Port          int32  `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+	BindAddr             string   `protobuf:"bytes,1,opt,name=bind_addr,json=bindAddr,proto3" json:"bind_addr,omitempty"`
+	AdvertiseAddr        string   `protobuf:"bytes,2,opt,name=advertise_addr,json=advertiseAddr,proto3" json:"advertise_addr,omitempty"`
+	Port                 int32    `protobuf:"varint,3,opt,name=port,proto3" json:"port,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *InterfaceAddr) Reset()         { *m = InterfaceAddr{} }
@@ -277,8 +282,11 @@ func (m *InterfaceAddr) GetPort() int32 {
 
 // 节点信息
 type NodeInfo struct {
-	Node      uint32 `protobuf:"varint,1,opt,name=node,proto3" json:"node,omitempty"`
-	Interface string `protobuf:"bytes,2,opt,name=interface,proto3" json:"interface,omitempty"`
+	Node                 uint32   `protobuf:"varint,1,opt,name=node,proto3" json:"node,omitempty"`
+	Interface            string   `protobuf:"bytes,2,opt,name=interface,proto3" json:"interface,omitempty"`
+	XXX_NoUnkeyedLiteral struct{} `json:"-"`
+	XXX_unrecognized     []byte   `json:"-"`
+	XXX_sizecache        int32    `json:"-"`
 }
 
 func (m *NodeInfo) Reset()         { *m = NodeInfo{} }
@@ -338,43 +346,41 @@ func init() {
 func init() { proto.RegisterFile("internal_struct.proto", fileDescriptor_cfb596b5e210fda8) }
 
 var fileDescriptor_cfb596b5e210fda8 = []byte{
-	// 568 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x92, 0x4f, 0x6f, 0xd3, 0x30,
-	0x18, 0xc6, 0x93, 0xfd, 0x6b, 0xe3, 0x36, 0xdd, 0x30, 0x83, 0x59, 0x80, 0xa2, 0xd2, 0x0d, 0xa8,
-	0x90, 0x28, 0x12, 0x5c, 0x11, 0xd2, 0xa0, 0x13, 0x8a, 0x56, 0x4d, 0xa8, 0x1b, 0xe2, 0x18, 0x79,
-	0xf1, 0xdb, 0x10, 0x35, 0xb5, 0x2d, 0xc7, 0x64, 0xe4, 0x5b, 0x70, 0xe4, 0xe3, 0x70, 0xe4, 0xd8,
-	0x23, 0x47, 0x68, 0x8f, 0x7c, 0x09, 0x64, 0xa7, 0x89, 0xe0, 0x94, 0x37, 0xbf, 0xe7, 0xf1, 0xfb,
-	0x3e, 0xb6, 0x5e, 0x74, 0x27, 0xe5, 0x1a, 0x14, 0xa7, 0x59, 0x94, 0x6b, 0xf5, 0x39, 0xd6, 0x23,
-	0xa9, 0x84, 0x16, 0xb8, 0x6d, 0x3f, 0xb1, 0xc8, 0xee, 0x1d, 0x26, 0x22, 0x11, 0xf6, 0xef, 0xb9,
-	0xa9, 0x2a, 0x7d, 0xf0, 0x67, 0x07, 0xb5, 0xce, 0x78, 0x91, 0x2a, 0xc1, 0xf1, 0x11, 0x6a, 0x51,
-	0x29, 0x23, 0xe0, 0x05, 0x71, 0xfb, 0xee, 0xd0, 0x9b, 0xee, 0x51, 0x29, 0xcf, 0x78, 0x81, 0x03,
-	0xd4, 0x31, 0x42, 0x42, 0x17, 0x10, 0xa5, 0x8c, 0x6c, 0x59, 0xd1, 0xa3, 0x52, 0xbe, 0xa3, 0x0b,
-	0x08, 0x19, 0x3e, 0x41, 0x3d, 0xa3, 0xc7, 0x9f, 0x28, 0xe7, 0x90, 0x19, 0xcb, 0xb6, 0xb5, 0x74,
-	0xa9, 0x94, 0x6f, 0x2b, 0x18, 0x32, 0x3c, 0x40, 0xbe, 0x71, 0xe5, 0xa0, 0x0a, 0x50, 0xc6, 0xb4,
-	0x63, 0x4d, 0xa6, 0xf5, 0xa5, 0x65, 0x21, 0xc3, 0x8f, 0xd1, 0xfe, 0x3f, 0x1e, 0x4e, 0x17, 0x40,
-	0x76, 0xad, 0xcb, 0x6f, 0x5c, 0x17, 0x74, 0x01, 0xf5, 0x44, 0x1a, 0xc7, 0x90, 0xe7, 0xd1, 0x1c,
-	0x4a, 0xb2, 0xd7, 0x4c, 0x3c, 0xb5, 0xf0, 0x1c, 0xca, 0x7a, 0x62, 0x26, 0x92, 0x28, 0x83, 0x02,
-	0x32, 0xd2, 0x6a, 0x26, 0x4e, 0x44, 0x32, 0x31, 0xa8, 0xee, 0x24, 0xa5, 0x12, 0xb3, 0x88, 0x32,
-	0xa6, 0xc8, 0xed, 0xa6, 0xd3, 0x7b, 0x03, 0x4f, 0x19, 0x53, 0x75, 0xae, 0x1b, 0xa1, 0xe6, 0x29,
-	0x4f, 0x22, 0x96, 0x2a, 0x72, 0xd8, 0xe4, 0xfa, 0x58, 0xd1, 0x71, 0xaa, 0xf0, 0x43, 0xd4, 0x35,
-	0xd9, 0xd3, 0x18, 0x22, 0x5d, 0x4a, 0x20, 0xa8, 0x1a, 0xb8, 0x61, 0x57, 0xa5, 0x04, 0x7c, 0x8c,
-	0xfc, 0xda, 0x92, 0x72, 0x06, 0x5f, 0x48, 0xa7, 0xef, 0x0e, 0x77, 0xa7, 0xf5, 0xb9, 0xd0, 0x30,
-	0xfc, 0x0c, 0xe1, 0xda, 0xc4, 0x40, 0x02, 0x67, 0xc0, 0xe3, 0x92, 0x74, 0x6d, 0xb7, 0x5b, 0x1b,
-	0x65, 0xdc, 0x08, 0xf8, 0x3e, 0xf2, 0x40, 0xc7, 0xac, 0xca, 0xef, 0x5b, 0x57, 0xdb, 0x00, 0x9b,
-	0xfd, 0x18, 0xf9, 0x56, 0x9c, 0x43, 0x99, 0x4b, 0x1a, 0x03, 0xe9, 0x55, 0x17, 0x34, 0xf0, 0x7c,
-	0xc3, 0xcc, 0x33, 0x58, 0x53, 0x06, 0x34, 0x87, 0x48, 0xeb, 0x8c, 0xec, 0x57, 0xb1, 0x0c, 0x9d,
-	0x18, 0x78, 0xa5, 0x33, 0xfc, 0x1a, 0xf5, 0x38, 0xe8, 0xc8, 0xae, 0xda, 0x8c, 0xc6, 0x90, 0x93,
-	0xbb, 0xfd, 0xed, 0x61, 0xe7, 0xc5, 0xd1, 0xa8, 0x5e, 0xb3, 0x51, 0x58, 0x6b, 0x66, 0xf6, 0xd4,
-	0xe7, 0xa0, 0x1b, 0x92, 0x0f, 0x12, 0xe4, 0xff, 0xa7, 0x9b, 0xe0, 0xd7, 0x29, 0xdf, 0x04, 0xaf,
-	0x96, 0xae, 0x6d, 0x80, 0x15, 0x1f, 0xa1, 0x1e, 0x65, 0x05, 0x28, 0x9d, 0xe6, 0x50, 0x39, 0xb6,
-	0x36, 0x6f, 0x5e, 0x53, 0x6b, 0xc3, 0x68, 0x47, 0x0a, 0xa5, 0xed, 0xce, 0xed, 0x4e, 0x6d, 0x3d,
-	0x78, 0x85, 0xda, 0x17, 0x82, 0x41, 0xc8, 0x67, 0xc2, 0xe8, 0x5c, 0x30, 0xb0, 0xed, 0xfd, 0xa9,
-	0xad, 0xf1, 0x03, 0xe4, 0x35, 0x97, 0xa8, 0xf7, 0xb9, 0x01, 0x4f, 0x9f, 0x20, 0xcf, 0x9c, 0xbe,
-	0xd4, 0x54, 0x03, 0xf6, 0x91, 0x67, 0x8b, 0xb1, 0xb8, 0xe1, 0x07, 0x0e, 0xee, 0xa0, 0x96, 0xfd,
-	0xfd, 0x20, 0x0f, 0xdc, 0x37, 0x27, 0xcb, 0xdf, 0x81, 0xf3, 0x63, 0x15, 0xb8, 0xcb, 0x55, 0xe0,
-	0xfe, 0x5a, 0x05, 0xee, 0xd7, 0x75, 0xe0, 0x7c, 0x5b, 0x07, 0xce, 0xf7, 0x75, 0xe0, 0x2e, 0xd7,
-	0x81, 0xf3, 0x73, 0x1d, 0x38, 0xd7, 0x7b, 0xf6, 0x71, 0x5e, 0xfe, 0x0d, 0x00, 0x00, 0xff, 0xff,
-	0x73, 0x2b, 0xcd, 0x10, 0xa3, 0x03, 0x00, 0x00,
+	// 537 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x54, 0x92, 0x5d, 0x6f, 0xd3, 0x3e,
+	0x14, 0xc6, 0x97, 0x6d, 0x7d, 0x89, 0xdb, 0x74, 0x9d, 0xf5, 0xff, 0x6b, 0x96, 0x40, 0x55, 0xe9,
+	0x78, 0xa9, 0x90, 0xe8, 0x05, 0xdc, 0x22, 0xa4, 0x41, 0x27, 0x14, 0xad, 0x9a, 0x50, 0x37, 0xc4,
+	0x65, 0xe4, 0xc5, 0xa7, 0x25, 0x6a, 0x6a, 0x5b, 0x8e, 0xc9, 0xc8, 0x37, 0xe1, 0x23, 0x71, 0xc9,
+	0x47, 0x40, 0xe5, 0x92, 0x2f, 0x81, 0x7c, 0x52, 0x47, 0x70, 0x15, 0xe7, 0xf7, 0x3c, 0x3e, 0xe7,
+	0xf1, 0xd1, 0x21, 0xff, 0x67, 0xd2, 0x82, 0x91, 0x3c, 0x4f, 0x0a, 0x6b, 0xbe, 0xa4, 0x76, 0xa6,
+	0x8d, 0xb2, 0x8a, 0x76, 0xf1, 0x93, 0xaa, 0x7c, 0xf2, 0xfb, 0x98, 0x74, 0x2e, 0x65, 0x99, 0x19,
+	0x25, 0xe9, 0x19, 0xe9, 0x70, 0xad, 0x13, 0x90, 0x25, 0x0b, 0xc6, 0xc1, 0x34, 0x5c, 0xb6, 0xb9,
+	0xd6, 0x97, 0xb2, 0xa4, 0x23, 0xd2, 0x73, 0xc2, 0x9a, 0x6f, 0x21, 0xc9, 0x04, 0x3b, 0x44, 0x31,
+	0xe4, 0x5a, 0xbf, 0xe7, 0x5b, 0x88, 0x05, 0x7d, 0x4c, 0x06, 0x4e, 0x4f, 0x3f, 0x73, 0x29, 0x21,
+	0x77, 0x96, 0x23, 0xb4, 0xf4, 0xb9, 0xd6, 0xef, 0x6a, 0x18, 0x0b, 0x3a, 0x21, 0x91, 0x73, 0x15,
+	0x60, 0x4a, 0x30, 0xce, 0x74, 0x8c, 0x26, 0x57, 0xfa, 0x06, 0x59, 0x2c, 0xe8, 0x53, 0x72, 0xf2,
+	0x97, 0x47, 0xf2, 0x2d, 0xb0, 0x16, 0xba, 0xa2, 0xc6, 0x75, 0xcd, 0xb7, 0xe0, 0x3b, 0xf2, 0x34,
+	0x85, 0xa2, 0x48, 0x36, 0x50, 0xb1, 0x76, 0xd3, 0xf1, 0x02, 0xe1, 0x15, 0x54, 0xbe, 0x63, 0xae,
+	0xd6, 0x49, 0x0e, 0x25, 0xe4, 0xac, 0xd3, 0x74, 0x5c, 0xa8, 0xf5, 0xc2, 0x21, 0x5f, 0x49, 0x6b,
+	0xa3, 0x56, 0x09, 0x17, 0xc2, 0x30, 0xd2, 0x54, 0xfa, 0xe0, 0xe0, 0x85, 0x10, 0xc6, 0xe7, 0xba,
+	0x57, 0x66, 0x93, 0xc9, 0x75, 0x22, 0x32, 0xc3, 0x7a, 0x4d, 0xae, 0x4f, 0x35, 0x9d, 0x67, 0x86,
+	0x3e, 0x22, 0x7d, 0x97, 0x3d, 0x4b, 0x21, 0xb1, 0x95, 0x06, 0xd6, 0xaf, 0x1b, 0xee, 0xd9, 0x6d,
+	0xa5, 0x81, 0x9e, 0x93, 0xc8, 0x5b, 0x32, 0x29, 0xe0, 0x2b, 0x8b, 0xc6, 0xc1, 0xb4, 0xb5, 0xf4,
+	0xf7, 0x62, 0xc7, 0xe8, 0x0b, 0x42, 0xbd, 0x49, 0x80, 0x06, 0x29, 0x40, 0xa6, 0x15, 0x1b, 0x60,
+	0xb5, 0xd3, 0xbd, 0x32, 0x6f, 0x04, 0xfa, 0x80, 0x84, 0x60, 0x53, 0x51, 0xe7, 0x3f, 0x41, 0x57,
+	0xd7, 0x01, 0xcc, 0x7e, 0x4e, 0x22, 0x14, 0x37, 0x50, 0x15, 0x9a, 0xa7, 0xc0, 0x86, 0xf5, 0x03,
+	0x1d, 0xbc, 0xda, 0x33, 0x37, 0x06, 0x34, 0xe5, 0xc0, 0x0b, 0x48, 0xac, 0xcd, 0xd9, 0x69, 0x1d,
+	0xcb, 0xd1, 0x85, 0x83, 0xb7, 0x36, 0xa7, 0x6f, 0xc8, 0x40, 0x82, 0x4d, 0x70, 0xa9, 0x56, 0x3c,
+	0x85, 0x82, 0xfd, 0x37, 0x3e, 0x9a, 0xf6, 0x5e, 0x9e, 0xcd, 0xfc, 0x42, 0xcd, 0x62, 0xaf, 0xb9,
+	0xde, 0xcb, 0x48, 0x82, 0x6d, 0x48, 0x31, 0x59, 0x93, 0xe8, 0x1f, 0xdd, 0x05, 0xbf, 0xcb, 0xe4,
+	0x3e, 0x78, 0xbd, 0x74, 0x5d, 0x07, 0x50, 0x7c, 0x42, 0x06, 0x5c, 0x94, 0x60, 0x6c, 0x56, 0x40,
+	0xed, 0x38, 0xdc, 0xcf, 0xdc, 0x53, 0xb4, 0x51, 0x72, 0xac, 0x95, 0xb1, 0xb8, 0x73, 0xad, 0x25,
+	0x9e, 0x27, 0xaf, 0x49, 0xf7, 0x5a, 0x09, 0x88, 0xe5, 0x4a, 0x39, 0x5d, 0x2a, 0x01, 0x58, 0x3e,
+	0x5a, 0xe2, 0x99, 0x3e, 0x24, 0x61, 0xf3, 0x08, 0xbf, 0xcf, 0x0d, 0x78, 0xfe, 0x8c, 0x84, 0xee,
+	0xf6, 0x8d, 0xe5, 0x16, 0x68, 0x44, 0x42, 0x3c, 0xcc, 0xd5, 0xbd, 0x1c, 0x1e, 0xd0, 0x1e, 0xe9,
+	0xe0, 0xef, 0x47, 0x3d, 0x0c, 0xde, 0x0e, 0xbf, 0xef, 0x46, 0xc1, 0x8f, 0xdd, 0x28, 0xf8, 0xb9,
+	0x1b, 0x05, 0xdf, 0x7e, 0x8d, 0x0e, 0xee, 0xda, 0x38, 0x88, 0x57, 0x7f, 0x02, 0x00, 0x00, 0xff,
+	0xff, 0x17, 0x4c, 0x21, 0x2b, 0x79, 0x03, 0x00, 0x00,
 }
 
 func (m *Environ) Marshal() (dAtA []byte, err error) {
@@ -397,6 +403,10 @@ func (m *Environ) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if len(m.NetInterfaces) > 0 {
 		for iNdEx := len(m.NetInterfaces) - 1; iNdEx >= 0; iNdEx-- {
 			{
@@ -410,62 +420,62 @@ func (m *Environ) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i--
 			dAtA[i] = 0x1
 			i--
-			dAtA[i] = 0xb2
+			dAtA[i] = 0xa2
 		}
-	}
-	if len(m.AppWorkingDir) > 0 {
-		i -= len(m.AppWorkingDir)
-		copy(dAtA[i:], m.AppWorkingDir)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppWorkingDir)))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0xa2
-	}
-	if len(m.AppPprofAddr) > 0 {
-		i -= len(m.AppPprofAddr)
-		copy(dAtA[i:], m.AppPprofAddr)
-		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppPprofAddr)))
-		i--
-		dAtA[i] = 0x1
-		i--
-		dAtA[i] = 0x9a
 	}
 	if m.EtcdLeaseTtl != 0 {
 		i = encodeVarintInternalStruct(dAtA, i, uint64(m.EtcdLeaseTtl))
 		i--
-		dAtA[i] = 0x78
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x88
 	}
 	if len(m.EtcdKeyspace) > 0 {
 		i -= len(m.EtcdKeyspace)
 		copy(dAtA[i:], m.EtcdKeyspace)
 		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.EtcdKeyspace)))
 		i--
-		dAtA[i] = 0x72
+		dAtA[i] = 0x1
+		i--
+		dAtA[i] = 0x82
 	}
 	if len(m.EtcdAddr) > 0 {
 		i -= len(m.EtcdAddr)
 		copy(dAtA[i:], m.EtcdAddr)
 		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.EtcdAddr)))
 		i--
-		dAtA[i] = 0x6a
+		dAtA[i] = 0x7a
 	}
 	if len(m.ServiceDependency) > 0 {
 		i -= len(m.ServiceDependency)
 		copy(dAtA[i:], m.ServiceDependency)
 		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.ServiceDependency)))
 		i--
-		dAtA[i] = 0x62
+		dAtA[i] = 0x72
 	}
 	if m.ServiceIndex != 0 {
 		i = encodeVarintInternalStruct(dAtA, i, uint64(m.ServiceIndex))
 		i--
-		dAtA[i] = 0x58
+		dAtA[i] = 0x68
 	}
 	if len(m.ServiceType) > 0 {
 		i -= len(m.ServiceType)
 		copy(dAtA[i:], m.ServiceType)
 		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.ServiceType)))
+		i--
+		dAtA[i] = 0x62
+	}
+	if len(m.AppWorkingDir) > 0 {
+		i -= len(m.AppWorkingDir)
+		copy(dAtA[i:], m.AppWorkingDir)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppWorkingDir)))
+		i--
+		dAtA[i] = 0x5a
+	}
+	if len(m.AppPprofAddr) > 0 {
+		i -= len(m.AppPprofAddr)
+		copy(dAtA[i:], m.AppPprofAddr)
+		i = encodeVarintInternalStruct(dAtA, i, uint64(len(m.AppPprofAddr)))
 		i--
 		dAtA[i] = 0x52
 	}
@@ -541,6 +551,10 @@ func (m *InterfaceAddr) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if m.Port != 0 {
 		i = encodeVarintInternalStruct(dAtA, i, uint64(m.Port))
 		i--
@@ -583,6 +597,10 @@ func (m *NodeInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if m.XXX_unrecognized != nil {
+		i -= len(m.XXX_unrecognized)
+		copy(dAtA[i:], m.XXX_unrecognized)
+	}
 	if len(m.Interface) > 0 {
 		i -= len(m.Interface)
 		copy(dAtA[i:], m.Interface)
@@ -643,6 +661,14 @@ func (m *Environ) Size() (n int) {
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
 	}
+	l = len(m.AppPprofAddr)
+	if l > 0 {
+		n += 1 + l + sovInternalStruct(uint64(l))
+	}
+	l = len(m.AppWorkingDir)
+	if l > 0 {
+		n += 1 + l + sovInternalStruct(uint64(l))
+	}
 	l = len(m.ServiceType)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
@@ -660,24 +686,19 @@ func (m *Environ) Size() (n int) {
 	}
 	l = len(m.EtcdKeyspace)
 	if l > 0 {
-		n += 1 + l + sovInternalStruct(uint64(l))
+		n += 2 + l + sovInternalStruct(uint64(l))
 	}
 	if m.EtcdLeaseTtl != 0 {
-		n += 1 + sovInternalStruct(uint64(m.EtcdLeaseTtl))
-	}
-	l = len(m.AppPprofAddr)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
-	}
-	l = len(m.AppWorkingDir)
-	if l > 0 {
-		n += 2 + l + sovInternalStruct(uint64(l))
+		n += 2 + sovInternalStruct(uint64(m.EtcdLeaseTtl))
 	}
 	if len(m.NetInterfaces) > 0 {
 		for _, e := range m.NetInterfaces {
 			l = e.Size()
 			n += 2 + l + sovInternalStruct(uint64(l))
 		}
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -699,6 +720,9 @@ func (m *InterfaceAddr) Size() (n int) {
 	if m.Port != 0 {
 		n += 1 + sovInternalStruct(uint64(m.Port))
 	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
+	}
 	return n
 }
 
@@ -714,6 +738,9 @@ func (m *NodeInfo) Size() (n int) {
 	l = len(m.Interface)
 	if l > 0 {
 		n += 1 + l + sovInternalStruct(uint64(l))
+	}
+	if m.XXX_unrecognized != nil {
+		n += len(m.XXX_unrecognized)
 	}
 	return n
 }
@@ -979,172 +1006,6 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			iNdEx = postIndex
 		case 10:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServiceType", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ServiceType = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 11:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServiceIndex", wireType)
-			}
-			m.ServiceIndex = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.ServiceIndex |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 12:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field ServiceDependency", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.ServiceDependency = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 13:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EtcdAddr", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EtcdAddr = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 14:
-			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EtcdKeyspace", wireType)
-			}
-			var stringLen uint64
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				stringLen |= uint64(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-			intStringLen := int(stringLen)
-			if intStringLen < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			postIndex := iNdEx + intStringLen
-			if postIndex < 0 {
-				return ErrInvalidLengthInternalStruct
-			}
-			if postIndex > l {
-				return io.ErrUnexpectedEOF
-			}
-			m.EtcdKeyspace = string(dAtA[iNdEx:postIndex])
-			iNdEx = postIndex
-		case 15:
-			if wireType != 0 {
-				return fmt.Errorf("proto: wrong wireType = %d for field EtcdLeaseTtl", wireType)
-			}
-			m.EtcdLeaseTtl = 0
-			for shift := uint(0); ; shift += 7 {
-				if shift >= 64 {
-					return ErrIntOverflowInternalStruct
-				}
-				if iNdEx >= l {
-					return io.ErrUnexpectedEOF
-				}
-				b := dAtA[iNdEx]
-				iNdEx++
-				m.EtcdLeaseTtl |= int32(b&0x7F) << shift
-				if b < 0x80 {
-					break
-				}
-			}
-		case 19:
-			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AppPprofAddr", wireType)
 			}
 			var stringLen uint64
@@ -1175,7 +1036,7 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			}
 			m.AppPprofAddr = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 20:
+		case 11:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field AppWorkingDir", wireType)
 			}
@@ -1207,7 +1068,173 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			}
 			m.AppWorkingDir = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		case 22:
+		case 12:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceType", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServiceType = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 13:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceIndex", wireType)
+			}
+			m.ServiceIndex = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.ServiceIndex |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 14:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ServiceDependency", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ServiceDependency = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 15:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EtcdAddr", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EtcdAddr = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 16:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EtcdKeyspace", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthInternalStruct
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.EtcdKeyspace = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 17:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EtcdLeaseTtl", wireType)
+			}
+			m.EtcdLeaseTtl = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowInternalStruct
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EtcdLeaseTtl |= int32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 20:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field NetInterfaces", wireType)
 			}
@@ -1256,6 +1283,7 @@ func (m *Environ) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -1392,6 +1420,7 @@ func (m *InterfaceAddr) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}
@@ -1496,6 +1525,7 @@ func (m *NodeInfo) Unmarshal(dAtA []byte) error {
 			if (iNdEx + skippy) > l {
 				return io.ErrUnexpectedEOF
 			}
+			m.XXX_unrecognized = append(m.XXX_unrecognized, dAtA[iNdEx:iNdEx+skippy]...)
 			iNdEx += skippy
 		}
 	}

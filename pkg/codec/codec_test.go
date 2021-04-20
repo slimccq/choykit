@@ -14,7 +14,7 @@ import (
 )
 
 func isEqualPacket(t *testing.T, a, b *fatchoy.Packet) bool {
-	if a.Command != b.Command || (a.Seq != b.Seq) || (a.Flag != b.Flag) || (a.Node != b.Node) {
+	if a.Command != b.Command || (a.Seq != b.Seq) || (a.Flag != b.Flag) {
 		return false
 	}
 	data1, _ := a.EncodeBody()

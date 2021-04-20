@@ -16,7 +16,7 @@ var (
 	redisAddr = "localhost:6379"
 )
 
-func createRedisStore(key string, t *testing.T) IDGenerator {
+func createRedisStore(key string, t *testing.T) Storage {
 	var store = NewRedisStore(redisAddr, key)
 	return store
 }
@@ -60,7 +60,8 @@ func TestRedisStoreDistributed(t *testing.T) {
 	for i := 0; i <= gcnt; i++ {
 		ctx := newWorkerContext(&wg, &guard, m, eachMax)
 		ctx.idGenCreator = func() IDGenerator {
-			return createRedisStore("uuid:cnt3", t)
+			store := createRedisStore("uuid:cnt3", t)
+			return NewStorageGen(store)
 		}
 		wg.Add(1)
 		go runIDWorker(i, ctx, t)

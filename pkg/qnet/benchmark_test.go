@@ -68,7 +68,6 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 	for i := 0; i < msgCount; i++ {
 		var pkt = fatchoy.MakePacket()
 		pkt.Command = uint32(i)
-		pkt.Node = fatchoy.NodeID(i)
 		pkt.Body = "ping"
 		buf.Reset()
 		if err := encoder.Marshal(&buf, pkt); err != nil {

@@ -5,13 +5,6 @@
 syntax = "proto3";
 package protocol;
 
-import "gogoproto/gogo.proto";
-option (gogoproto.goproto_unrecognized_all) = false;
-option (gogoproto.goproto_unkeyed_all)      = false;
-option (gogoproto.goproto_sizecache_all)    = false;
-option (gogoproto.goproto_enum_prefix_all)  = false;
-option (gogoproto.goproto_registration)     = true;
-
 // 基本概念
 //   游戏: 最顶级的单位
 //   大世界: 一个游戏下可以有一个或多个大世界，比如常见的分全球版大世界和TW-BETA版大世界
@@ -27,15 +20,15 @@ message Environ {
   string app_server_name                = 5;  // 服务器名称
   string app_access_key                 = 6;  // 访问密钥串
   string app_log_level                  = 7;  // 日志级别
-  string app_pprof_addr                 = 19; // pprof监听地址
-  string app_working_dir                = 20; // 工作目录
-  string service_type                   = 10; // 服务类型
-  int32 service_index                   = 11; // 服务编号
-  string service_dependency             = 12; // 服务依赖
-  string etcd_addr                      = 13; // etcd地址
-  string etcd_keyspace                  = 14; // etcd的key空间
-  int32 etcd_lease_ttl                  = 15; // etcd的lease时间
-  repeated InterfaceAddr net_interfaces = 22; // 开启网络接口地址
+  string app_pprof_addr                 = 10; // pprof监听地址
+  string app_working_dir                = 11; // 工作目录
+  string service_type                   = 12; // 服务类型
+  int32 service_index                   = 13; // 服务编号
+  string service_dependency             = 14; // 服务依赖
+  string etcd_addr                      = 15; // etcd地址
+  string etcd_keyspace                  = 16; // etcd的key空间
+  int32 etcd_lease_ttl                  = 17; // etcd的lease时间
+  repeated InterfaceAddr net_interfaces = 20; // 开启网络接口地址
 }
 
 // 地址接口，对外地址@bind地址:端口，如example.com@0.0.0.0:9527

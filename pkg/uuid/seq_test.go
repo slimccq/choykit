@@ -212,6 +212,20 @@ func newWorkerContext(wg *sync.WaitGroup, guard *sync.Mutex, dict map[int64]int,
 	}
 }
 
+type StorageGen struct {
+	store Storage
+}
+
+func NewStorageGen(store Storage) IDGenerator {
+	return &StorageGen{
+		store: store,
+	}
+}
+
+func (s *StorageGen) Next() (int64, error) {
+	return s.store.Incr()
+}
+
 type IDGenerator interface {
 	Next() (int64, error)
 }
