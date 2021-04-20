@@ -78,7 +78,7 @@ func (m *Packet) Errno() uint32 {
 
 func (m *Packet) SetErrno(ec uint32) {
 	m.Flag |= PacketFlagError
-	m.Body = uint32(ec)
+	m.Body = ec
 }
 
 func (m *Packet) EncodeBody() ([]byte, error) {

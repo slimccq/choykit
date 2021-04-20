@@ -8,7 +8,6 @@ import "testing"
 
 func TestServiceContext(t *testing.T) {
 	env := LoadEnviron()
-	opt := NewOptions()
-	ctx := NewServiceContext(opt, env)
+	ctx := NewServiceContext(env)
 	ctx.Go()
 }

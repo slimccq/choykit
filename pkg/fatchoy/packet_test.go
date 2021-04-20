@@ -7,6 +7,13 @@ package fatchoy
 import "testing"
 
 func TestNewPacket(t *testing.T) {
-	pkt := NewPacket(1234, 1001,  1, 12, "hello")
-	t.Logf("%v", pkt)
+	pkt := NewPacket(1234, 1001,   0x1, "hello")
+	t.Logf("new: %v", pkt)
+	clone := pkt.Clone()
+	pkt.Reset()
+	t.Logf("reset: %v", pkt)
+	t.Logf("clone: %v", clone)
+
+	clone.SetErrno(1002)
+	t.Logf("clone: %v", clone)
 }

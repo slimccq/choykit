@@ -80,7 +80,7 @@ func (n NodeID) String() string {
 // 没有重复Node的集合
 type NodeIDSet []NodeID
 
-func (s NodeIDSet) Add(node NodeID) NodeIDSet {
+func (s NodeIDSet) Insert(node NodeID) NodeIDSet {
 	for _, n := range s {
 		if n == node {
 			return s

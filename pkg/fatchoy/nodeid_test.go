@@ -56,7 +56,7 @@ func TestNodeIDSet(t *testing.T) {
 	var set NodeIDSet
 	for i := 1; i <= 5; i++ {
 		nid := NodeID(0x10000 + i)
-		set = set.Add(nid)
+		set = set.Insert(nid)
 		if set.Has(nid) < 0 {
 			t.Fatalf("node %v check fail", nid)
 		}
