@@ -9,6 +9,7 @@ package qnet
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -19,7 +20,7 @@ import (
 //不断发送ping接收pong
 func startRawClient(t *testing.T, id int, address string, msgCount int) {
 	//t.Logf("client %d start connect %s", id, address)
-	conn, err := DialTCP(address)
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		t.Fatalf("Dial %s: %v", address, err)
 	}
@@ -28,17 +29,17 @@ func startRawClient(t *testing.T, id int, address string, msgCount int) {
 	var pkt = fatchoy.MakePacket()
 	for i := 1; i <= msgCount; i++ {
 		pkt.Command = uint32(i)
-		pkt.Seq = uint16(i)
+		pkt.Seq = uint32(i)
 		pkt.Body = "ping"
 		var buf bytes.Buffer
-		if err := encoder.Marshal(&buf, pkt); err != nil {
+		if _, err := encoder.Marshal(&buf, nil, pkt); err != nil {
 			t.Fatalf("Encode: %v", err)
 		}
 		if _, err := conn.Write(buf.Bytes()); err != nil {
 			t.Fatalf("Write: %v", err)
 		}
 		var resp fatchoy.Packet
-		if _, err := encoder.Unmarshal(conn, &resp); err != nil {
+		if _, err := encoder.Unmarshal(conn, nil, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}
 		if resp.Seq != pkt.Seq {

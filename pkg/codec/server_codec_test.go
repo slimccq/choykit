@@ -27,11 +27,11 @@ func newTestV2Packet(bodyLen int) *fatchoy.Packet {
 
 func testServerCodec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgSent *fatchoy.Packet) {
 	var encoded bytes.Buffer
-	if err := c.Marshal(&encoded, msgSent); err != nil {
+	if _, err := c.Marshal(&encoded, nil, msgSent); err != nil {
 		t.Fatalf("Encode with size %d: %v", size, err)
 	}
 	var msgRecv fatchoy.Packet
-	if _, err := c.Unmarshal(&encoded, &msgRecv); err != nil {
+	if _, err := c.Unmarshal(&encoded, nil, &msgRecv); err != nil {
 		t.Fatalf("Decode with size %d: %v", size, err)
 	}
 	if !isEqualPacket(t, msgSent, &msgRecv) {
@@ -41,7 +41,7 @@ func testServerCodec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgSent *f
 
 func TestV2CodecSimpleEncode(t *testing.T) {
 	var cdec = NewServerProtocolCodec()
-	var sizeList = []int{0, 404, 1012, 2014, 4018, 8012, 40487, 1024 * 31, MaxAllowedServerCodecPayloadSize - 100} //
+	var sizeList = []int{0, 404, 1012, 2014, 4018, 8012, 40487, 1024 * 31, MaxAllowedV2CodecPayloadSize - 100} //
 	for _, n := range sizeList {
 		var pkt = newTestV2Packet(n)
 		testServerCodec(t, cdec, n, pkt)
@@ -57,11 +57,11 @@ func BenchmarkV2ProtocolMarshal(b *testing.B) {
 	b.StartTimer()
 
 	var buf bytes.Buffer
-	if err := cdec.Marshal(&buf, msg); err != nil {
+	if _, err := cdec.Marshal(&buf, nil, msg); err != nil {
 		b.Logf("Encode: %v", err)
 	}
 	var msg2 fatchoy.Packet
-	if _, err := cdec.Unmarshal(&buf, &msg2); err != nil {
+	if _, err := cdec.Unmarshal(&buf, nil, &msg2); err != nil {
 		b.Logf("Decode: %v", err)
 	}
 }

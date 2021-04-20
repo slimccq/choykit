@@ -26,7 +26,7 @@ func init() {
 	fatchoy.StartClock()
 }
 
-func handleConn(conn *net.TCPConn, encoder fatchoy.ProtocolCodec) {
+func handleConn(conn net.Conn, encoder fatchoy.ProtocolCodec) {
 	var count = 0
 	//file, _ := conn.File()
 	tconn := NewTcpConn(0, conn, encoder, nil, nil, 1000, nil)
@@ -35,7 +35,7 @@ func handleConn(conn *net.TCPConn, encoder fatchoy.ProtocolCodec) {
 	for {
 		conn.SetReadDeadline(time.Now().Add(time.Minute))
 		var pkt = fatchoy.MakePacket()
-		if _, err := encoder.Unmarshal(conn, pkt); err != nil {
+		if _, err := encoder.Unmarshal(conn, nil, pkt); err != nil {
 			fmt.Printf("Decode: %v\n", err)
 			break
 		}
@@ -53,9 +53,9 @@ func handleConn(conn *net.TCPConn, encoder fatchoy.ProtocolCodec) {
 	fmt.Printf("sent %d packets, %s\n", stats.Get(StatPacketsSent), strutil.PrettyBytes(stats.Get(StatBytesSent)))
 }
 
-func startMyServer(t *testing.T, ln *net.TCPListener, encoder fatchoy.ProtocolCodec) {
+func startMyServer(t *testing.T, ln net.Listener, encoder fatchoy.ProtocolCodec) {
 	for {
-		conn, err := ln.AcceptTCP()
+		conn, err := ln.Accept()
 		if err != nil {
 			//t.Logf("Listener: Accept %v", err)
 			return
@@ -85,7 +85,7 @@ func TestExampleTcpConn(t *testing.T) {
 
 	var testTcpAddress = "localhost:10002"
 
-	ln, err := ListenTCP(testTcpAddress)
+	ln, err := net.Listen("tcp", testTcpAddress)
 	if err != nil {
 		t.Fatalf("Listen %v", err)
 	}
@@ -93,7 +93,7 @@ func TestExampleTcpConn(t *testing.T) {
 
 	go startMyServer(t, ln, codec.ServerProtocolCodec)
 
-	conn, err := DialTCP(testTcpAddress)
+	conn, err := net.Dial("tcp", testTcpAddress)
 	if err != nil {
 		t.Fatalf("Dial: %v", err)
 	}

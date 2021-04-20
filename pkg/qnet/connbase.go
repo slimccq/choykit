@@ -5,6 +5,7 @@
 package qnet
 
 import (
+	"devpkg.work/choykit/pkg/x/cipher"
 	"sync"
 	"sync/atomic"
 
@@ -21,6 +22,8 @@ type ConnBase struct {
 	userdata interface{}             // user data
 	ctx      *fatchoy.ServiceContext // current service context object
 	encoder  fatchoy.ProtocolCodec   // message encoding/decoding
+	encrypt  cipher.BlockCryptor     // message encryption
+	decrypt  cipher.BlockCryptor     // message decryption
 	inbound  chan<- *fatchoy.Packet  // inbound message queue
 	outbound chan *fatchoy.Packet    // outbound message queue
 	stats    *fatchoy.Stats          // message stats
@@ -77,6 +80,11 @@ func (c *ConnBase) SetContext(v *fatchoy.ServiceContext) {
 	c.ctx = v
 }
 
+func (c *ConnBase) SetEncrypt(encrypt cipher.BlockCryptor, decrypt cipher.BlockCryptor) {
+	c.encrypt = encrypt
+	c.decrypt = decrypt
+}
+
 func (c *ConnBase) SetUserData(ud interface{}) {
 	c.userdata = ud
 }
@@ -84,4 +92,3 @@ func (c *ConnBase) SetUserData(ud interface{}) {
 func (c *ConnBase) UserData() interface{} {
 	return c.userdata
 }
-

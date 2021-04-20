@@ -5,6 +5,7 @@
 package fatchoy
 
 import (
+	"devpkg.work/choykit/pkg/x/cipher"
 	"io"
 )
 
@@ -14,10 +15,13 @@ type ProtocolCodec interface {
 	ProtocolDecoder
 }
 
+// 协议编码实现
 type ProtocolEncoder interface {
-	Marshal(w io.Writer, pkt *Packet) error
+	// 把packet写入`w`，使用encrypt加密，返回写入字节和错误
+	Marshal(w io.Writer, encrypt cipher.BlockCryptor, pkt *Packet) (int, error)
 }
 
 type ProtocolDecoder interface {
-	Unmarshal(r io.Reader, pkt *Packet) (int, error)
+	// 从`r`中解码packet，使用decrypt解密，返回读取字节和错误
+	Unmarshal(r io.Reader, decrypt cipher.BlockCryptor, pkt *Packet) (int, error)
 }

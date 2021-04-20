@@ -19,7 +19,7 @@ import (
 )
 
 const (
-	WSCONN_MAX_PAYLOAD = 16 * 1024 // 16k
+	WSCONN_MAX_PAYLOAD = 16 * 1024 // 消息最大大小
 )
 
 var (
@@ -107,55 +107,26 @@ func (c *WsConn) finally(err error) {
 	c.conn = nil
 }
 
-func (c *WsConn) sendPacket(pkt *fatchoy.Packet, allowBatch bool) error {
+func (c *WsConn) sendPacket(pkt *fatchoy.Packet) error {
 	if (pkt.Flag | fatchoy.PacketFlagJSONText) > 0 {
-		return c.sendJSONTextMessage(pkt, allowBatch)
+		return c.sendJSONText(pkt)
 	} else {
-		return c.sendBinaryMessage(pkt, allowBatch)
+		return c.sendBinary(pkt)
 	}
 }
 
-func (c *WsConn) sendJSONTextMessage(pkt *fatchoy.Packet, allowBatch bool) error {
-	if !allowBatch {
-		data, err := json.Marshal(pkt)
-		if err != nil {
-			log.Errorf("WsConn: JSON marshal message %d, %v", pkt.Command, err)
-			return err
-		}
-		if err = c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
-			log.Errorf("WsConn: send text message %d, %v", pkt.Command, err)
-			return err
-		}
-		c.stats.Add(StatPacketsSent, int64(1))
-		c.stats.Add(StatBytesSent, int64(len(data)))
-		return nil
-	}
-	w, err := c.conn.NextWriter(websocket.TextMessage)
+func (c *WsConn) sendJSONText(pkt *fatchoy.Packet) error {
+	data, err := json.Marshal(pkt)
 	if err != nil {
-		log.Errorf("WsConn: NextWriter for %d, %v", pkt.Command, err)
+		log.Errorf("WsConn: JSON marshal message %d, %v", pkt.Command, err)
 		return err
 	}
-	var count = 1
-	nbytes, err := batchAppendMessage(w, pkt)
-	if err != nil {
+	if err = c.conn.WriteMessage(websocket.TextMessage, data); err != nil {
+		log.Errorf("WsConn: write text message %d, %v", pkt.Command, err)
 		return err
 	}
-	for n := len(c.outbound); n > 0; n-- {
-		pkt := <-c.outbound
-		if sz, err := batchAppendMessage(w, pkt); err != nil {
-			break
-		} else {
-			nbytes += sz
-		}
-		count++
-	}
-	if err := w.Close(); err != nil {
-		log.Errorf("WsConn: send text message %d, %v", pkt.Command, err)
-		return err
-	}
-	c.stats.Add(StatPacketsSent, int64(count))
-	c.stats.Add(StatBytesSent, int64(nbytes))
-
+	c.stats.Add(StatPacketsSent, int64(1))
+	c.stats.Add(StatBytesSent, int64(len(data)))
 	return nil
 }
 
@@ -173,29 +144,35 @@ func batchAppendMessage(w io.Writer, pkt *fatchoy.Packet) (int, error) {
 	return len(data), nil
 }
 
-func (c *WsConn) sendBinaryMessage(pkt *fatchoy.Packet, allowBatch bool) error {
-	var count = 1
-	if allowBatch {
-		count = len(c.outbound) // 发送队列里的所有消息
-	}
+func (c *WsConn) writePacket(pkt *fatchoy.Packet) error {
 	var buf bytes.Buffer
-	for i := 0; i < count; i++ {
-		select {
-		case pkt := <-c.outbound:
-			if err := c.encoder.Marshal(&buf, pkt); err != nil {
-				log.Errorf("WsConn: encode message %d, %v", pkt.Command, err)
-				return err
-			}
-		default:
-			break
-		}
+	n, err := c.encoder.Marshal(&buf, c.encrypt, pkt)
+	if err != nil {
+		log.Errorf("encode message %v: %v", pkt.Command, err)
+		return err
 	}
 	if err := c.conn.WriteMessage(websocket.BinaryMessage, buf.Bytes()); err != nil {
 		log.Errorf("WsConn: send message %d, %v", pkt.Command, err)
 		return err
 	}
-	c.stats.Add(StatPacketsSent, int64(count))
-	c.stats.Add(StatBytesSent, int64(buf.Len()))
+	c.stats.Add(StatPacketsSent, 1)
+	c.stats.Add(StatBytesSent, int64(n))
+	return nil
+}
+
+func (c *WsConn) sendBinary(pkt *fatchoy.Packet) error {
+	var buf bytes.Buffer
+	n, err := c.encoder.Marshal(&buf, c.encrypt, pkt)
+	if err != nil {
+		log.Errorf("encode message %v: %v", pkt.Command, err)
+		return err
+	}
+	if err := c.conn.WriteMessage(websocket.BinaryMessage, buf.Bytes()); err != nil {
+		log.Errorf("WsConn: send message %d, %v", pkt.Command, err)
+		return err
+	}
+	c.stats.Add(StatPacketsSent, 1)
+	c.stats.Add(StatBytesSent, int64(n))
 	return nil
 }
 
@@ -209,7 +186,7 @@ func (c *WsConn) writePump() {
 			if !ok {
 				return
 			}
-			c.sendPacket(pkt, true)
+			c.sendPacket(pkt)
 
 		case <-c.done:
 			return
@@ -220,7 +197,7 @@ func (c *WsConn) writePump() {
 func (c *WsConn) readLoop() {
 	for {
 		var pkt = fatchoy.MakePacket()
-		if err := c.ReadPacket(pkt); err != nil {
+		if err := c.readPacket(pkt); err != nil {
 			log.Errorf("read message: %v", err)
 			break
 		}
@@ -236,7 +213,7 @@ func (c *WsConn) readLoop() {
 	}
 }
 
-func (c *WsConn) ReadPacket(pkt *fatchoy.Packet) error {
+func (c *WsConn) readPacket(pkt *fatchoy.Packet) error {
 	c.conn.SetReadDeadline(fatchoy.Now().Add(WSConnReadTimeout))
 	msgType, data, err := c.conn.ReadMessage()
 	if err != nil {
@@ -252,7 +229,7 @@ func (c *WsConn) ReadPacket(pkt *fatchoy.Packet) error {
 		return json.Unmarshal(data, pkt)
 
 	case websocket.BinaryMessage:
-		_, err = c.encoder.Unmarshal(bytes.NewReader(data), pkt)
+		_, err = c.encoder.Unmarshal(bytes.NewReader(data), c.decrypt, pkt)
 		return err
 
 	case websocket.PingMessage, websocket.PongMessage:

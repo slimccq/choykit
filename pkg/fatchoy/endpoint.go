@@ -5,6 +5,7 @@
 package fatchoy
 
 import (
+	"devpkg.work/choykit/pkg/x/cipher"
 	"net"
 	"sync"
 )
@@ -35,6 +36,8 @@ type Endpoint interface {
 	Encoder() ProtocolCodec
 
 	Go(write, read bool)
+
+	SetEncrypt(cipher.BlockCryptor, cipher.BlockCryptor)
 
 	SetUserData(interface{})
 	UserData() interface{}

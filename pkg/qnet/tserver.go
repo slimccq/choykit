@@ -43,7 +43,7 @@ func (s *TcpServer) ErrorChan() chan error {
 }
 
 func (s *TcpServer) Listen(addr string) error {
-	ln, err := ListenTCP(addr)
+	ln, err := net.Listen("tcp", addr)
 	if err != nil {
 		return err
 	}
@@ -62,10 +62,10 @@ func (s *TcpServer) checkIfExit() bool {
 	}
 }
 
-func (s *TcpServer) serve(ln *net.TCPListener) {
+func (s *TcpServer) serve(ln net.Listener) {
 	defer s.wg.Done()
 	for {
-		conn, err := ln.AcceptTCP()
+		conn, err := ln.Accept()
 		if err != nil {
 			log.Errorf("accept error: %v", err)
 			// check if we should exit
@@ -84,7 +84,7 @@ func (s *TcpServer) serve(ln *net.TCPListener) {
 	}
 }
 
-func (s *TcpServer) accept(conn *net.TCPConn) {
+func (s *TcpServer) accept(conn net.Conn) {
 	var endpoint = NewTcpConn(0, conn, s.encoder, s.errors, s.inbound, s.outsize, nil)
 	s.backlog <- endpoint // this may block current goroutine
 }

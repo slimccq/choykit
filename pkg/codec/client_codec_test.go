@@ -14,6 +14,21 @@ import (
 	"devpkg.work/choykit/pkg/x/strutil"
 )
 
+func isEqualPacket(t *testing.T, a, b *fatchoy.Packet) bool {
+	if a.Command != b.Command || (a.Seq != b.Seq) || (a.Flag != b.Flag) {
+		return false
+	}
+	data1, _ := a.EncodeBody()
+	data2, _ := b.EncodeBody()
+	if len(data1) > 0 && len(data2) > 0 {
+		if !bytes.Equal(data1, data2) {
+			t.Fatalf("packet not equal, %v != %v", a, b)
+			return false
+		}
+	}
+	return true
+}
+
 func newTestV1Packet(bodyLen int) *fatchoy.Packet {
 	var packet = fatchoy.MakePacket()
 	packet.Flag = 0x0
@@ -27,11 +42,11 @@ func newTestV1Packet(bodyLen int) *fatchoy.Packet {
 
 func testV1Codec(t *testing.T, c fatchoy.ProtocolCodec, size int, msgToSend *fatchoy.Packet) {
 	var encoded bytes.Buffer
-	if err := c.Marshal(&encoded, msgToSend); err != nil {
+	if _, err := c.Marshal(&encoded, nil, msgToSend); err != nil {
 		t.Fatalf("Encode failure: size %d, %v", size, err)
 	}
 	var msgToRecv fatchoy.Packet
-	if _, err := c.Unmarshal(&encoded, &msgToRecv); err != nil {
+	if _, err := c.Unmarshal(&encoded, nil, &msgToRecv); err != nil {
 		t.Fatalf("Decode failure: size: %d, %v", size, err)
 	}
 	if !isEqualPacket(t, msgToSend, &msgToRecv) {
@@ -56,11 +71,11 @@ func BenchmarkV1ProtocolMarshal(b *testing.B) {
 	var msg = newTestV1Packet(int(size))
 	b.StartTimer()
 	var buf bytes.Buffer
-	if err := cdec.Marshal(&buf, msg); err != nil {
+	if _, err := cdec.Marshal(&buf, nil, msg); err != nil {
 		b.Logf("Encode: %v", err)
 	}
 	var msg2 fatchoy.Packet
-	if _, err := cdec.Unmarshal(&buf, &msg2); err != nil {
+	if _, err := cdec.Unmarshal(&buf, nil, &msg2); err != nil {
 		b.Logf("Decode: %v", err)
 	}
 }

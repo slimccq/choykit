@@ -5,13 +5,12 @@
 package codec
 
 import (
+	"devpkg.work/choykit/pkg/x/cipher"
 	"encoding/binary"
 	"hash/crc32"
 	"io"
 
 	"devpkg.work/choykit/pkg/fatchoy"
-	"devpkg.work/choykit/pkg/log"
-	"devpkg.work/choykit/pkg/protocol"
 	"github.com/pkg/errors"
 )
 
@@ -20,7 +19,7 @@ const (
 	ServerCodecHeaderSize = 18 // 消息头大小
 )
 
-var MaxAllowedServerCodecPayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
+var MaxAllowedV2CodecPayloadSize = 8 * 1024 * 1024 // 最大包体大小(8M)
 
 // wire format of codec header
 //       --------------------------------
@@ -39,23 +38,25 @@ func NewServerProtocolCodec() fatchoy.ProtocolCodec {
 	return &serverProtocolCodec{}
 }
 
-// 把消息内容写入w，对消息的压缩和加密请在上层处理
-func (c *serverProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
+// 把消息内容写入w，并按需对body加密，消息压缩请在上层处理
+func (c *serverProtocolCodec) Marshal(w io.Writer, encryptor cipher.BlockCryptor,pkt *fatchoy.Packet) (int, error) {
 	payload, err := pkt.EncodeBody()
 	if err != nil {
-		return err
+		return 0, err
 	}
-	if n := len(payload); n >= MaxAllowedServerCodecPayloadSize {
-		pkt.Flag |= fatchoy.PacketFlagError
-		var data [10]byte
-		payload = fatchoy.EncodeNumber(protocol.ErrDataCodecFailure, data[:])
-		log.Errorf("message %d too large payload %d/%d", pkt.Command, n, MaxAllowedServerCodecPayloadSize)
+	if len(payload) > 0 && encryptor != nil {
+		payload = encryptor.Encrypt(payload)
+		pkt.Flag |= fatchoy.PacketFlagEncrypted
+	}
+	var maxN = MaxAllowedV2CodecPayloadSize
+	if n := len(payload); n >= maxN {
+		return 0, errors.Errorf("message %d too large payload %d/%d", pkt.Command, n, maxN)
 	}
 
-	n := uint32(len(payload))
+	n := len(payload)
 	hash := crc32.NewIEEE()
 	var headbuf [ServerCodecHeaderSize]byte
-	binary.LittleEndian.PutUint32(headbuf[0:], n)
+	binary.LittleEndian.PutUint32(headbuf[0:], uint32(n))
 	binary.LittleEndian.PutUint16(headbuf[4:], pkt.Flag)
 	binary.LittleEndian.PutUint32(headbuf[6:], pkt.Seq)
 	binary.LittleEndian.PutUint32(headbuf[10:], pkt.Command)
@@ -64,15 +65,16 @@ func (c *serverProtocolCodec) Marshal(w io.Writer, pkt *fatchoy.Packet) error {
 		hash.Write(payload)
 	}
 	binary.LittleEndian.PutUint32(headbuf[ServerCodecHeaderSize-4:], hash.Sum32())
-	w.Write(headbuf[0:])
-	if n > 0 {
-		w.Write(payload)
+	nbytes, err := w.Write(headbuf[0:])
+	if err == nil && n > 0  {
+		n, err = w.Write(payload)
+		nbytes += n
 	}
-	return nil
+	return nbytes, err
 }
 
-// 从r中读取消息内容，只检查包体大小和校验码，压缩和解密请在之后处理
-func (c *serverProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, error) {
+// 从r中读取消息内容，检查包体大小和校验码，和解密，解压缩请在之后处理
+func (c *serverProtocolCodec) Unmarshal(r io.Reader, decryptor cipher.BlockCryptor,pkt *fatchoy.Packet) (int, error) {
 	var headbuf [ServerCodecHeaderSize]byte
 	if _, err := io.ReadFull(r, headbuf[:]); err != nil {
 		return 0, err
@@ -84,25 +86,33 @@ func (c *serverProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, 
 	pkt.Command = binary.LittleEndian.Uint32(headbuf[10:])
 	checksum := binary.LittleEndian.Uint32(headbuf[14:])
 
-	if bodyLen > MaxAllowedServerCodecPayloadSize {
+	if bodyLen > MaxAllowedV2CodecPayloadSize {
 		return 0, errors.Errorf("packet %d payload size overflow %d/%d",
-			pkt.Command, bodyLen, MaxAllowedServerCodecPayloadSize)
+			pkt.Command, bodyLen, MaxAllowedV2CodecPayloadSize)
 	}
 
-	var bytesRead = ServerCodecHeaderSize
+	var nbytes = ServerCodecHeaderSize
 	if bodyLen == 0 {
 		if crc := crc32.ChecksumIEEE(headbuf[:ServerCodecHeaderSize-4]); crc != checksum {
 			return 0, errors.Errorf("message %d header checksum mismatch %x != %x",
 				pkt.Command, checksum, crc)
 		}
-		return bytesRead, nil
+		return nbytes, nil
 	}
 
 	var payload = make([]byte, bodyLen)
 	if _, err := io.ReadFull(r, payload); err != nil {
 		return 0, err
 	}
-	bytesRead += bodyLen
+	nbytes += bodyLen
+
+	if pkt.Flag&fatchoy.PacketFlagEncrypted > 0 {
+		if decryptor == nil {
+			return 0, errors.Errorf("cannot decrypt message %d of size %d", pkt.Command, bodyLen)
+		}
+		payload = decryptor.Decrypt(payload)
+	}
+
 	hash := crc32.NewIEEE()
 	hash.Write(headbuf[:ServerCodecHeaderSize-4])
 	hash.Write(payload)
@@ -111,5 +121,5 @@ func (c *serverProtocolCodec) Unmarshal(r io.Reader, pkt *fatchoy.Packet) (int, 
 			pkt.Command, bodyLen, checksum, crc)
 	}
 	pkt.Body = payload
-	return bytesRead, nil
+	return nbytes, nil
 }

@@ -6,7 +6,6 @@ package qnet
 
 import (
 	"bufio"
-	"bytes"
 	"io"
 	"net"
 	"sync/atomic"
@@ -24,8 +23,9 @@ var (
 // TCP connection
 type TcpConn struct {
 	ConnBase
-	conn   net.Conn  // TCP connection object
-	reader io.Reader // bufio reader
+	conn   net.Conn      // TCP connection object
+	reader *bufio.Reader // buffered reader
+	writer *bufio.Writer // buffered writer
 }
 
 func NewTcpConn(node fatchoy.NodeID, conn net.Conn, encoder fatchoy.ProtocolCodec, errChan chan error,
@@ -33,6 +33,7 @@ func NewTcpConn(node fatchoy.NodeID, conn net.Conn, encoder fatchoy.ProtocolCode
 	tconn := &TcpConn{
 		conn:   conn,
 		reader: bufio.NewReader(conn),
+		writer: bufio.NewWriter(conn),
 	}
 	tconn.ConnBase.init(node, encoder, incoming, outsize, errChan, stats)
 	tconn.addr = conn.RemoteAddr().String()
@@ -119,7 +120,6 @@ func (t *TcpConn) finally(err error) {
 }
 
 func (t *TcpConn) flush() {
-	var buf bytes.Buffer
 	n := len(t.outbound)
 	for i := 0; i < n; i++ {
 		select {
@@ -127,21 +127,26 @@ func (t *TcpConn) flush() {
 			if !ok {
 				break
 			}
-			if err := t.encoder.Marshal(&buf, pkt); err != nil {
-				log.Errorf("TcpConn: encode message %d: %v", pkt.Command, err)
-				return
-			}
+			t.writePacket(pkt)
 		default:
 			break
 		}
 	}
-	nbytes, err := t.conn.Write(buf.Bytes())
+}
+
+func (t *TcpConn) writePacket(pkt *fatchoy.Packet) error {
+	n, err := t.encoder.Marshal(t.writer, t.encrypt, pkt)
 	if err != nil {
-		log.Errorf("TcpConn: node %v write message: %v", t.node, err)
-		return
+		log.Errorf("encode message %v: %v", pkt.Command, err)
+		return err
 	}
-	t.stats.Add(StatPacketsSent, int64(n))
-	t.stats.Add(StatBytesSent, int64(nbytes))
+	if err := t.writer.Flush(); err != nil {
+		log.Errorf("write message %v: %v", pkt.Command, err)
+		return err
+	}
+	t.stats.Add(StatPacketsSent, 1)
+	t.stats.Add(StatBytesSent, int64(n))
+	return nil
 }
 
 func (t *TcpConn) writePump() {
@@ -158,18 +163,7 @@ func (t *TcpConn) writePump() {
 			if !ok {
 				return
 			}
-			var buf bytes.Buffer
-			var err error
-			if err = t.encoder.Marshal(&buf, pkt); err != nil {
-				log.Errorf("encode message %v: %v", pkt.Command, err)
-				continue
-			}
-			if n, err := t.conn.Write(buf.Bytes()); err != nil {
-				log.Errorf("write message %d to node %v: %v", pkt.Command, t.node, err)
-			} else {
-				t.stats.Add(StatPacketsSent, 1)
-				t.stats.Add(StatBytesSent, int64(n))
-			}
+			t.writePacket(pkt)
 
 		case <-t.done:
 			return
@@ -181,7 +175,7 @@ func (t *TcpConn) readPacket() (*fatchoy.Packet, error) {
 	deadline := fatchoy.Now().Add(time.Duration(TConnReadTimeout) * time.Second)
 	t.conn.SetReadDeadline(deadline)
 	var pkt = fatchoy.MakePacket()
-	nbytes, err := t.encoder.Unmarshal(t.reader, pkt)
+	nbytes, err := t.encoder.Unmarshal(t.reader, t.decrypt, pkt)
 	if err != nil {
 		if err != io.EOF {
 			log.Errorf("read message from node %v: %v", t.node, err)

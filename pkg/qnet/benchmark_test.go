@@ -9,6 +9,7 @@ package qnet
 import (
 	"bytes"
 	"fmt"
+	"net"
 	"testing"
 	"time"
 
@@ -58,7 +59,7 @@ func startQPSServer(t *testing.T, address string, ctor, done chan struct{}) {
 }
 
 func startQPSClient(t *testing.T, address string, msgCount int, respChan chan int) {
-	conn, err := DialTCP(address)
+	conn, err := net.Dial("tcp", address)
 	if err != nil {
 		t.Fatalf("Dial %s: %v", address, err)
 	}
@@ -70,7 +71,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 		pkt.Command = uint32(i)
 		pkt.Body = "ping"
 		buf.Reset()
-		if err := encoder.Marshal(&buf, pkt); err != nil {
+		if _, err := encoder.Marshal(&buf, nil, pkt); err != nil {
 			t.Fatalf("Encode: %v", err)
 		}
 		if _, err := conn.Write(buf.Bytes()); err != nil {
@@ -79,7 +80,7 @@ func startQPSClient(t *testing.T, address string, msgCount int, respChan chan in
 	}
 	for i := 0; i < msgCount; i++ {
 		var resp fatchoy.Packet
-		if _, err := encoder.Unmarshal(conn, &resp); err != nil {
+		if _, err := encoder.Unmarshal(conn, nil, &resp); err != nil {
 			t.Fatalf("Decode: %v", err)
 		}
 		respChan <- 1
