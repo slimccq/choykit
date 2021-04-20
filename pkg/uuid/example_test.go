@@ -40,8 +40,8 @@ func TestExampleParseHex(t *testing.T) {
 
 func TestExampleUUID(t *testing.T) {
 	rand.Seed(int64(os.Getpid()))
-	var key = fmt.Sprintf("/uuid/%d", rand.Int()%100)
-	Init(1234, "127.0.0.1:2379", key)
+	var store = NewRedisStore("127.0.0.1:6379", "uuid")
+	Init(1234, store)
 	for i := 0; i < 5; i++ {
 		var uid = NextID()
 		var uuid = NextUUID()

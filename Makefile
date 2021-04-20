@@ -9,18 +9,14 @@ PB_GO_SRC_DIR = pkg/protocol
 ALL_PB_SRC = $(wildcard $(PB_SRC_DIR:%=%/*.proto))
 ALL_PB_GO_SRC = $(wildcard $(PB_GO_SRC_DIR:%=%/*.pb.go))
 
-GOBIN = $(shell pwd)/bin
-GO_MODULE = devpkg.work/choykit
+THIS_MOD = devpkg.work/choykit
 GO_PKG_LIST := $(shell go list ./pkg/...)
 
-.PHONY: clean all genpb
+export GOBIN = $(shell pwd)/bin
 
-all: build
+.PHONY: clean build
 
-build: $(ALL_PB_GO_SRC)
-	export GOBIN=$(GOBIN)
-	go clean
-	go build -v $(GO_MODULE)/pkg/cluster
+all: test
 
 $(ALL_PB_GO_SRC): $(ALL_PB_SRC)
 	clang-format -i $(ALL_PB_SRC)
@@ -32,10 +28,7 @@ genpb:
 	protoc --proto_path=$(PB_SRC_DIR) --gofast_out=$(PB_GO_SRC_DIR) $(ALL_PB_SRC)
 
 test:
-	docker-compose up -d
 	go test -v $(GO_PKG_LIST)
-	docker-compose down
-	# $(foreach pkg, $(GO_PKG_LIST), go test -v $(pkg))
 
 clean:
 	go clean
