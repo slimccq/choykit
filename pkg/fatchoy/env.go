@@ -136,13 +136,15 @@ func ParseNetInterface(text string) *protocol.InterfaceAddr {
 	}
 	host, port, err := net.SplitHostPort(text)
 	if err != nil {
-		log.Panicf("parse address %s: %v", text, err)
+		log.Printf("parse address %s: %v", text, err)
+		return nil
 	}
 	n, _ := strconv.Atoi(port)
 	addr.Port = int32(n)
 	addr.BindAddr = host
 	if addr.BindAddr == "" {
-		log.Panicf("invalid address: %s", addr)
+		log.Printf("invalid address: %s", addr)
+		return nil
 	}
 	if addr.AdvertiseAddr == "" {
 		addr.AdvertiseAddr = addr.BindAddr

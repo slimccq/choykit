@@ -37,15 +37,3 @@ message InterfaceAddr {
   string advertise_addr = 2; // 对外地址
   int32 port            = 3; // 端口
 }
-
-// 节点状态
-enum NodeState {
-  StateDown = 0; // 下线
-  StateUp   = 1; // 上线
-}
-
-// 节点信息
-message NodeInfo {
-  uint32 node      = 1;
-  string interface = 2;
-}

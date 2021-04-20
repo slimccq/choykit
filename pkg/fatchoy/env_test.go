@@ -21,7 +21,7 @@ func TestParseNetInterface(t *testing.T) {
 		expectedBindAddr string
 		expectedPort     int32
 	}{
-		{"", "", "", 0},
+		{"example.com/127.0.0.1:9527", "example.com", "127.0.0.1", 9527},
 	}
 	for _, tc := range tests {
 		addr := ParseNetInterface(tc.input)
